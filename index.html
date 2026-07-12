@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>どこでもナウル</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ocean: { 950: '#061525', 900: '#0a2744', 800: '#0f3a5f', 700: '#155a8a', 500: '#1d8fbf', 300: '#7ec8e3' },
+            gold:  { 400: '#f5c542', 500: '#e8b020', 600: '#c9940a' },
+            sand:  { 50: '#f7f3ea', 100: '#efe6d4' }
+          },
+          fontFamily: {
+            display: ['"Segoe UI"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+      background: #061525;
+      overflow: hidden;
+    }
+    #map { position: absolute; inset: 0; z-index: 0; }
+    /* Leaflet dark chrome */
+    .leaflet-control-zoom a {
+      background: rgba(255, 255, 255, 0.95) !important;
+      color: #0a2744 !important;
+      border-color: rgba(10, 39, 68, 0.15) !important;
+      width: 34px !important;
+      height: 34px !important;
+      line-height: 34px !important;
+      font-size: 16px !important;
+    }
+    .leaflet-control-zoom a:hover { background: #f7f3ea !important; }
+    .leaflet-control-attribution {
+      background: rgba(255, 255, 255, 0.85) !important;
+      color: #555 !important;
+      font-size: 10px !important;
+    }
+    .leaflet-control-attribution a { color: #155a8a !important; }
+    .basemap-select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(15, 58, 95, 0.9) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5c542' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 0.6rem center;
+      background-size: 10px;
+      border: 1px solid rgba(245, 197, 66, 0.35);
+      color: #efe6d4;
+      border-radius: 0.6rem;
+      padding: 0.45rem 1.75rem 0.45rem 0.65rem;
+      font-size: 11px;
+      cursor: pointer;
+      outline: none;
+    }
+    .basemap-select:focus {
+      border-color: #f5c542;
+      box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.2);
+    }
+    .basemap-select option {
+      background: #0a2744;
+      color: #efe6d4;
+    }
+    .swatch-group {
+      margin-bottom: 0.55rem;
+    }
+    .swatch-group-label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 10px;
+      color: #7ec8e3;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+    .swatch-group-label .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #f5c542;
+    }
+    .color-swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,0.22);
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.12s, box-shadow 0.12s;
+      position: relative;
+      flex: 0 0 auto;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 11px;
+      color: #efe6d4;
+      cursor: pointer;
+      user-select: none;
+    }
+    .check-row input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: #e8b020;
+      cursor: pointer;
+    }
+    .color-swatch:hover { transform: scale(1.08); }
+    .color-swatch.active {
+      box-shadow: 0 0 0 2px #061525, 0 0 0 4px #f5c542;
+      border-color: #f5c542;
+    }
+    .color-swatch.transparent-swatch {
+      background:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+      background-color: #fff;
+    }
+    .color-swatch.transparent-swatch::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 2px solid #334;
+      border-radius: 999px;
+      background: transparent;
+    }
+    .color-swatch.original-swatch {
+      background: linear-gradient(135deg, #8ec31f 55%, #231814 55%);
+    }
+    .color-swatch.semi-swatch {
+      background:
+        linear-gradient(135deg, rgba(142,195,31,0.45) 55%, rgba(35,24,21,0.45) 55%),
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%);
+      background-size: auto, 8px 8px, 8px 8px;
+      background-position: 0 0, 0 0, 0 4px;
+    }
+    /* Leaflet の位置 transform を壊さないこと */
+    .leaflet-image-layer {
+      pointer-events: none !important;
+    }
+
+    .panel {
+      background: linear-gradient(155deg, rgba(10, 39, 68, 0.94), rgba(6, 21, 37, 0.92));
+      border: 1px solid rgba(245, 197, 66, 0.28);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .chip {
+      border: 1px solid rgba(126, 200, 227, 0.25);
+      background: rgba(15, 58, 95, 0.85);
+      color: #efe6d4;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: #f5c542; color: #fff; background: rgba(21, 90, 138, 0.95); }
+    .chip.active {
+      background: linear-gradient(135deg, #e8b020, #c9940a);
+      border-color: #f5c542;
+      color: #061525;
+      font-weight: 700;
+    }
+    .chip.loc {
+      background: rgba(29, 143, 191, 0.25);
+      border-color: rgba(126, 200, 227, 0.45);
+    }
+    .chip.custom {
+      border-style: dashed;
+      padding-right: 0.35rem;
+    }
+    .chip .spot-x {
+      margin-left: 0.25rem;
+      opacity: 0.7;
+      font-size: 10px;
+      line-height: 1;
+      border: none;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      padding: 0 0.15rem;
+    }
+    .chip .spot-x:hover { opacity: 1; color: #f5c542; }
+    .coord-input {
+      width: 5.6rem;
+      max-width: min(5.6rem, 38vw);
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(126, 200, 227, 0.3);
+      color: #efe6d4;
+      border-radius: 0.45rem;
+      padding: 0.3rem 0.4rem;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      outline: none;
+    }
+    .coord-input:focus { border-color: #f5c542; }
+    .coord-go {
+      background: linear-gradient(135deg, #e8b020, #c9940a);
+      color: #061525;
+      border: none;
+      border-radius: 0.45rem;
+      padding: 0.3rem 0.55rem;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .coord-go:hover { filter: brightness(1.08); }
+    .side-dock {
+      position: absolute;
+      left: 0.75rem;
+      bottom: max(6.5rem, calc(env(safe-area-inset-bottom) + 5.5rem));
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .dock-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(245, 197, 66, 0.35);
+      background: linear-gradient(155deg, rgba(10, 39, 68, 0.94), rgba(6, 21, 37, 0.92));
+      color: #f5c542;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s, filter 0.12s;
+      line-height: 1.05;
+      text-align: center;
+      padding: 2px;
+    }
+    .dock-btn:hover { transform: scale(1.06); filter: brightness(1.08); }
+    .dock-btn.sns { font-size: 10px; letter-spacing: -0.02em; }
+    .pop-card {
+      position: absolute;
+      z-index: 2100;
+      width: min(260px, calc(100vw - 1.5rem));
+      max-width: calc(100vw - 1.5rem);
+      box-sizing: border-box;
+      background: linear-gradient(155deg, rgba(10, 39, 68, 0.98), rgba(6, 21, 37, 0.96));
+      border: 1px solid rgba(245, 197, 66, 0.35);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+      padding: 0.85rem;
+      color: #efe6d4;
+    }
+    .pop-card.hidden { display: none; }
+    .pop-card h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f5c542;
+      margin: 0 0 0.6rem;
+    }
+    .pop-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 11px;
+    }
+    .pop-row input[type="color"] {
+      width: 36px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+    .pop-row input[type="range"] { flex: 1; }
+    .pop-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.55rem;
+    }
+    .pop-actions button {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid rgba(126,200,227,0.3);
+      background: rgba(15,58,95,0.9);
+      color: #efe6d4;
+      font-size: 11px;
+      padding: 0.4rem;
+      cursor: pointer;
+    }
+    .pop-actions button.primary {
+      background: linear-gradient(135deg, #e8b020, #c9940a);
+      color: #061525;
+      border-color: #f5c542;
+      font-weight: 700;
+    }
+    .swatch-user {
+      background: conic-gradient(from 0deg, #f5c542, #ef4444, #3b82f6, #22c55e, #f5c542);
+    }
+    .swatch-user::after {
+      content: '⚙';
+      position: absolute;
+      right: -2px;
+      bottom: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #061525;
+      color: #f5c542;
+      font-size: 9px;
+      line-height: 14px;
+      text-align: center;
+      border: 1px solid rgba(245,197,66,0.5);
+    }
+    .reticle-star {
+      width: 28px; height: 28px;
+      filter: drop-shadow(0 0 4px rgba(245, 197, 66, 0.8));
+    }
+    .scale-bar-track {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .scale-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #1d8fbf, #f5c542);
+      transition: width 0.12s linear;
+      min-width: 2%;
+      max-width: 100%;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #f5c542;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.25);
+    }
+    .city-scroll {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .city-scroll::-webkit-scrollbar { display: none; }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    #toast {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    #notice-modal.hidden-modal { display: none; }
+    #notice-modal.fade-out { opacity: 0; }
+    aside.panel,
+    .ui-main-panel {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(245, 197, 66, 0.35) transparent;
+      box-sizing: border-box;
+      max-width: min(300px, calc(100vw - 1.5rem));
+      overflow-x: hidden;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .ui-main-panel *,
+    #bottom-bar *,
+    #app-ui * {
+      box-sizing: border-box;
+    }
+    #coord-display {
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #bottom-bar {
+      box-sizing: border-box;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    #bottom-bar > .panel {
+      max-width: min(56rem, calc(100vw - 1.5rem));
+      margin-left: auto;
+      margin-right: auto;
+      overflow: hidden;
+    }
+    #city-bar {
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    /* ===== モバイルメニュー（PCでは非表示） ===== */
+    #mobile-toggle {
+      display: none;
+    }
+    /* PC: ラッパーはレイアウトに干渉しない */
+    #app-ui {
+      display: contents;
+    }
+    @media (max-width: 767.98px) {
+      #app-ui {
+        display: block;
+      }
+      #mobile-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: max(0.65rem, env(safe-area-inset-top));
+        left: 0.65rem;
+        z-index: 1200;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid rgba(245, 197, 66, 0.4);
+        background: linear-gradient(155deg, rgba(10, 39, 68, 0.96), rgba(6, 21, 37, 0.94));
+        color: #f5c542;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        transition: transform 0.2s ease;
+        padding: 0;
+      }
+      #mobile-toggle .chev {
+        display: block;
+        transition: transform 0.25s ease;
+      }
+      body.m-open #mobile-toggle .chev {
+        transform: rotate(180deg);
+      }
+
+      /* 展開シート：初期は隠す（横はみ出し防止） */
+      #app-ui {
+        position: absolute;
+        top: max(3.6rem, calc(env(safe-area-inset-top) + 3.1rem));
+        left: max(0.55rem, env(safe-area-inset-left));
+        right: max(0.55rem, env(safe-area-inset-right));
+        width: auto;
+        max-width: calc(100vw - 1.1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        z-index: 1150;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        overflow-x: hidden;
+        pointer-events: none;
+        transition: max-height 0.32s ease, opacity 0.22s ease;
+        border-radius: 1rem;
+        background: linear-gradient(155deg, rgba(10, 39, 68, 0.97), rgba(6, 21, 37, 0.95));
+        border: 1px solid rgba(245, 197, 66, 0.28);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        box-sizing: border-box;
+      }
+      body.m-open #app-ui {
+        max-height: min(78dvh, calc(100dvh - 5rem));
+        opacity: 1;
+        overflow-x: hidden;
+        overflow-y: auto;
+        pointer-events: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 子を縦積みの1パネルに */
+      #app-ui .ui-main-panel,
+      #app-ui #bottom-bar,
+      #app-ui #side-dock {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        padding: 0.75rem 0.85rem !important;
+        overflow-x: hidden !important;
+        min-width: 0 !important;
+      }
+      #app-ui .ui-main-panel {
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+      }
+      #app-ui #bottom-bar {
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+      }
+      #app-ui #bottom-bar > .panel {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-width: none !important;
+      }
+      #app-ui #side-dock {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 0.45rem !important;
+        justify-content: stretch;
+        padding-bottom: max(0.85rem, env(safe-area-inset-bottom)) !important;
+      }
+      #app-ui #side-dock .dock-btn {
+        flex: 1 1 calc(50% - 0.3rem);
+        min-width: 0;
+        max-width: 100%;
+        height: 40px;
+        font-size: 11px;
+        border-radius: 10px;
+      }
+      #app-ui .coord-input {
+        max-width: 5.2rem;
+        width: 5.2rem;
+      }
+      #app-ui #btn-add-spot {
+        max-width: 100%;
+        white-space: normal;
+        text-align: right;
+      }
+
+      /* 地図のズームは右下のまま、少し上に */
+      .leaflet-bottom.leaflet-right {
+        bottom: 0.5rem !important;
+        right: 0.5rem !important;
+      }
+      #toast {
+        bottom: 1.25rem !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading-overlay" class="fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-ocean-950">
+    <div class="relative mb-5">
+      <div class="w-12 h-12 rounded-full border-2 border-ocean-700 border-t-gold-400 animate-spin"></div>
+      <div class="absolute inset-0 flex items-center justify-center text-gold-400 text-lg">★</div>
+    </div>
+    <div class="text-sand-100 font-medium tracking-wide">ナウルの輪郭を準備中…</div>
+    <div class="text-ocean-300 text-xs mt-2">面積わずか約 21 km²</div>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Center reticle: Nauru-style star -->
+  <div id="reticle" class="absolute inset-0 pointer-events-none z-[1000] flex items-center justify-center">
+    <svg class="reticle-star opacity-80" viewBox="0 0 24 24" fill="#f5c542" aria-hidden="true">
+      <polygon points="12,1 14.2,8.2 21.8,8.2 15.6,12.6 17.8,20 12,15.4 6.2,20 8.4,12.6 2.2,8.2 9.8,8.2"/>
+      <circle cx="12" cy="12" r="1.4" fill="#061525"/>
+    </svg>
+  </div>
+
+  <!-- スマホ: 左上の開閉ボタン -->
+  <button type="button" id="mobile-toggle" aria-expanded="false" aria-controls="app-ui" title="メニュー">
+    <span class="chev" aria-hidden="true">▼</span>
+  </button>
+
+  <div id="app-ui">
+  <!-- 左パネル（PC: 常時表示 / スマホ: シート内） -->
+  <aside class="ui-main-panel absolute top-[max(0.75rem,env(safe-area-inset-top))] left-3 sm:left-4 z-[1000] w-[min(calc(100%-1.5rem),300px)] max-h-[min(72vh,calc(100dvh-7.5rem))] overflow-y-auto pointer-events-auto panel rounded-2xl p-3 sm:p-4">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-ocean-800 border border-gold-500/40 text-gold-400 text-sm shrink-0">★</span>
+      <div class="min-w-0">
+        <h1 class="text-sm sm:text-base font-bold text-sand-50 tracking-tight leading-tight truncate">どこでもナウル</h1>
+        <p class="text-[10px] sm:text-[11px] text-ocean-300 tracking-wide">実寸シルエット比較 · 21 km²</p>
+      </div>
+    </div>
+
+    <!-- 統合ステータス（座標 + 見た目倍率） -->
+    <div class="mb-3 rounded-xl bg-black/30 border border-white/10 px-2.5 py-2">
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <span class="text-[10px] text-ocean-300 tracking-wide">中心座標</span>
+        <span id="coord-display" class="font-mono text-[11px] sm:text-xs text-sand-50 tabular-nums">N 35.681°  E 139.767°</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] text-ocean-300 shrink-0" title="本来位置を100%としたメルカトル上の見た目面積比">見た目</span>
+        <div class="scale-bar-track flex-1">
+          <div id="scale-bar" class="scale-bar-fill" style="width: 50%"></div>
+        </div>
+        <span class="shrink-0 tabular-nums">
+          <span id="scale-display" class="text-sm font-bold text-gold-400">100.0</span><span class="text-[10px] text-sand-100/60">%</span>
+        </span>
+      </div>
+      <p class="text-[9px] text-ocean-300/80 mt-1 leading-snug">実寸は一定 · 高緯度ほど地図上では大きく見える</p>
+    </div>
+
+    <p class="hidden sm:block text-xs text-sand-100/80 leading-relaxed mb-3">
+      地図を動かすと、中央に<strong class="text-gold-400 font-semibold">ナウル共和国</strong>の実寸シルエットが乗ります。都市と比べて「どれくらい小さいか」を体感できます。
+    </p>
+    <div class="hidden sm:flex gap-2 text-[10px] text-ocean-300 mb-3">
+      <span class="px-2 py-1 rounded-md bg-ocean-800/80 border border-ocean-700">直径 ≈ 5–6 km</span>
+      <span class="px-2 py-1 rounded-md bg-ocean-800/80 border border-ocean-700">赤道直下 0.5°S</span>
+    </div>
+
+    <!-- Basemap picker -->
+    <div class="mb-2">
+      <label for="basemap-select" class="block text-[10px] text-ocean-300 mb-1 tracking-wide">地図の種類</label>
+      <select id="basemap-select" class="basemap-select" aria-label="地図の種類">
+        <option value="osm">標準（明るい）</option>
+        <option value="voyager">カラー地図</option>
+        <option value="topo">地形図</option>
+        <option value="satellite">衛星写真</option>
+        <option value="dark">ダーク</option>
+      </select>
+    </div>
+
+    <!-- 見た目（形＋色をスウォッチで一括選択） -->
+    <div class="mb-2">
+      <div class="text-[10px] text-ocean-300 mb-1.5 tracking-wide">見た目（形・色）</div>
+      <div id="swatch-panel"></div>
+      <p class="text-[9px] text-ocean-300 mt-1 leading-snug">色を押すとその形・色に切り替わります</p>
+      <p class="text-[9px] text-ocean-300/90 mt-1.5 leading-snug">
+        ナウルくん © ナウル共和国政府観光局
+      </p>
+      <div class="check-row">
+        <label for="chk-reticle">
+          <input type="checkbox" id="chk-reticle" checked>
+          <span>中央の星を表示</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Transform controls -->
+    <details class="group border-t border-white/10 pt-2">
+      <summary class="cursor-pointer list-none flex items-center justify-between text-[11px] text-ocean-300 hover:text-gold-400 transition-colors">
+        <span>シルエット操作</span>
+        <span class="text-gold-400 group-open:rotate-180 transition-transform">▾</span>
+      </summary>
+      <div class="mt-2 space-y-2">
+        <div class="flex gap-1.5">
+          <button type="button" id="btn-flip-x" class="chip flex-1 py-1.5 rounded-lg text-[11px]">左右反転</button>
+          <button type="button" id="btn-flip-y" class="chip flex-1 py-1.5 rounded-lg text-[11px]">上下反転</button>
+        </div>
+        <div class="flex items-center gap-2 px-1">
+          <span class="text-[10px] text-ocean-300 shrink-0">回転</span>
+          <input type="range" id="rotation-slider" min="-180" max="180" value="0" class="flex-1">
+          <span id="rotation-display" class="text-[11px] font-mono text-gold-400 w-8 text-right">0°</span>
+        </div>
+        <button type="button" id="btn-reset-transform" class="w-full text-[10px] text-ocean-300 hover:text-gold-400 py-1">向きをリセット</button>
+      </div>
+    </details>
+  </aside>
+
+  <!-- Bottom: city jump strip + lat/lng -->
+  <div id="bottom-bar" class="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-0 right-0 z-[1000] px-3 sm:px-4">
+    <div class="panel rounded-2xl px-2 py-2 sm:px-3 sm:py-2.5 max-w-4xl mx-auto">
+      <div class="flex items-center gap-2 mb-1.5 px-1 flex-wrap">
+        <span class="text-[10px] uppercase tracking-wider text-ocean-300 shrink-0">比較スポット</span>
+        <div class="flex items-center gap-1 flex-wrap">
+          <label class="text-[10px] text-ocean-300 shrink-0" for="input-lat">緯度</label>
+          <input id="input-lat" class="coord-input" type="text" inputmode="decimal" placeholder="35.681" autocomplete="off">
+          <label class="text-[10px] text-ocean-300 shrink-0" for="input-lng">経度</label>
+          <input id="input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
+          <button type="button" id="btn-goto-coord" class="coord-go">移動</button>
+        </div>
+        <button type="button" id="btn-add-spot" class="ml-auto text-[10px] sm:text-[11px] px-2 py-1 rounded-lg border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 transition-colors shrink-0">
+          ＋ この位置を追加 (0/2)
+        </button>
+      </div>
+      <div id="city-bar" class="city-scroll flex gap-1.5 sm:gap-2 overflow-x-auto pb-0.5">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- スクショ & SNS（PC: 左下 / スマホ: シート内に横並び） -->
+  <div class="side-dock" id="side-dock">
+    <button type="button" id="btn-screenshot" class="dock-btn" title="スクリーンショット">📷 保存</button>
+    <button type="button" id="btn-share-x" class="dock-btn sns" title="Xに投稿">𝕏</button>
+    <button type="button" id="btn-share-ig" class="dock-btn sns" title="Instagram">IG</button>
+    <button type="button" id="btn-share-line" class="dock-btn sns" title="LINEで送る">LINE</button>
+  </div>
+  </div><!-- /#app-ui -->
+
+  <!-- 境界ユーザー色の小さな設定ウィンドウ -->
+  <div id="user-color-pop" class="pop-card hidden" role="dialog" aria-label="境界の色設定">
+    <h3>境界のユーザー色</h3>
+    <div class="pop-row">
+      <span>塗り</span>
+      <input type="color" id="user-fill-color" value="#f5c542">
+    </div>
+    <div class="pop-row">
+      <span>線</span>
+      <input type="color" id="user-stroke-color" value="#c9940a">
+    </div>
+    <div class="pop-row">
+      <span>不透明度</span>
+      <input type="range" id="user-fill-opacity" min="0" max="100" value="45">
+      <span id="user-fill-opacity-label" class="w-8 text-right font-mono text-[10px] text-gold-400">45%</span>
+    </div>
+    <label class="pop-row" style="justify-content:flex-start;cursor:pointer;">
+      <input type="checkbox" id="user-outline-only" style="accent-color:#e8b020;">
+      <span>輪郭のみ（塗りなし）</span>
+    </label>
+    <div class="pop-actions">
+      <button type="button" id="user-color-cancel">閉じる</button>
+      <button type="button" id="user-color-apply" class="primary">適用</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="absolute bottom-28 left-1/2 z-[1100] bg-ocean-900/95 border border-gold-500/40 text-sand-50 px-5 py-2.5 rounded-full shadow-xl text-sm">
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- Notice modal -->
+  <div id="notice-modal" class="fixed inset-0 z-[3000] flex items-center justify-center bg-ocean-950/70 backdrop-blur-sm p-4 transition-opacity duration-300">
+    <div class="panel rounded-2xl max-w-md w-full p-5 sm:p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-gold-400 text-xl">★</span>
+        <h2 class="text-base sm:text-lg font-bold text-sand-50">つかう前に</h2>
+      </div>
+      <div class="text-sm text-sand-100/85 leading-relaxed space-y-3">
+        <p>
+          <strong class="text-gold-400">どこでもナウル</strong>は、ナウルの<strong class="text-gold-400">実寸シルエット</strong>を地図上の好きな場所に重ねて、大きさの感覚をつかむためのものです。
+        </p>
+        <p class="text-xs bg-black/25 border border-white/10 rounded-xl p-3 text-ocean-300">
+          メルカトル図法では高緯度ほど見た目が大きくなります。球体近似のため誤差があります。測量・面積計算には使えません。境界は geoBoundaries（OSM 系）に基づきます。
+        </p>
+        <div class="text-xs bg-black/25 border border-white/10 rounded-xl p-3 text-ocean-300 space-y-1">
+          <p class="font-semibold text-sand-50">ナウルくんについて</p>
+          <p class="leading-relaxed">
+            キャラクター「ナウルくん」 © <strong class="text-sand-50">ナウル共和国政府観光局</strong>
+          </p>
+        </div>
+        <div class="text-xs bg-black/25 border border-gold-500/25 rounded-xl p-3 text-sand-100/90 space-y-1.5">
+          <p class="font-semibold text-gold-400">X / Instagram / LINE への共有について</p>
+          <p class="text-ocean-300 leading-relaxed">
+            ブラウザの制限で、投稿画面への<strong class="text-sand-50">画像の自動添付・自動貼り付けはできません</strong>。次の流れになります。
+          </p>
+          <ol class="list-decimal list-inside space-y-0.5 text-ocean-300 leading-relaxed">
+            <li>画像を<strong class="text-sand-50">保存</strong>（ダウンロード）</li>
+            <li>画像を<strong class="text-sand-50">クリップボードにコピー</strong></li>
+            <li>各サービスの投稿画面を開く</li>
+            <li>投稿欄で <strong class="text-sand-50">Ctrl+V</strong> して画像を貼り付け</li>
+          </ol>
+        </div>
+      </div>
+      <button id="close-notice-btn" type="button" class="mt-5 w-full py-2.5 rounded-xl font-semibold text-ocean-950 bg-gradient-to-r from-gold-400 to-gold-600 hover:brightness-110 active:scale-[0.98] transition">
+        はじめる
+      </button>
+    </div>
+  </div>
+
+  <script>
+
+    const NAURU_RINGS = [[[166.909908,-0.537735],[166.909987,-0.537745],[166.910041,-0.537742],[166.910181,-0.538021],[166.910259,-0.538268],[166.91032,-0.53869],[166.910395,-0.539048],[166.910513,-0.539355],[166.910663,-0.539759],[166.910828,-0.540069],[166.910953,-0.540311],[166.911089,-0.540619],[166.911169,-0.540858],[166.911247,-0.541177],[166.911294,-0.541429],[166.91134,-0.541611],[166.911378,-0.541779],[166.911483,-0.542069],[166.911687,-0.542532],[166.911866,-0.542846],[166.912102,-0.543206],[166.912629,-0.54403],[166.912951,-0.544444],[166.913219,-0.544741],[166.913844,-0.545316],[166.914083,-0.545565],[166.914463,-0.546011],[166.914498,-0.546087],[166.914824,-0.546463],[166.914985,-0.54664],[166.915422,-0.547012],[166.915579,-0.547159],[166.91579,-0.547302],[166.915905,-0.547363],[166.915969,-0.547406],[166.916005,-0.547445],[166.916073,-0.547563],[166.916148,-0.547649],[166.916748,-0.548095],[166.918219,-0.549051],[166.91963,-0.54993],[166.921302,-0.550802],[166.922305,-0.551424],[166.923686,-0.552573],[166.925081,-0.553796],[166.925341,-0.553802],[166.926064,-0.554129],[166.926478,-0.554064],[166.926936,-0.553594],[166.927179,-0.553253],[166.927824,-0.553339],[166.929091,-0.553527],[166.930181,-0.553676],[166.930355,-0.553692],[166.93047,-0.553656],[166.93072,-0.553692],[166.930851,-0.553686],[166.931107,-0.553736],[166.93134,-0.553788],[166.931409,-0.553793],[166.931464,-0.553805],[166.931574,-0.553849],[166.931695,-0.553821],[166.931837,-0.553807],[166.931992,-0.553805],[166.932148,-0.553811],[166.932285,-0.553834],[166.932432,-0.55389],[166.932489,-0.553934],[166.932548,-0.553994],[166.932635,-0.554015],[166.932806,-0.554048],[166.932992,-0.554046],[166.933149,-0.553994],[166.933336,-0.553917],[166.933701,-0.553846],[166.934519,-0.553721],[166.935912,-0.55332],[166.937263,-0.552844],[166.93844,-0.552275],[166.939523,-0.551689],[166.941376,-0.550387],[166.942257,-0.549715],[166.942935,-0.549283],[166.945164,-0.548045],[166.945333,-0.548003],[166.945538,-0.548166],[166.945794,-0.548174],[166.946437,-0.54771],[166.949034,-0.546053],[166.949636,-0.545445],[166.950224,-0.544647],[166.950335,-0.544374],[166.950524,-0.543911],[166.950714,-0.543448],[166.950765,-0.543365],[166.950792,-0.543224],[166.950796,-0.542991],[166.950744,-0.542645],[166.950699,-0.542504],[166.950725,-0.54241],[166.950698,-0.542208],[166.950588,-0.541817],[166.950486,-0.541166],[166.950251,-0.539987],[166.950226,-0.538434],[166.950321,-0.537563],[166.950765,-0.537515],[166.950821,-0.53722],[166.950885,-0.536672],[166.950865,-0.536661],[166.95073,-0.537328],[166.950307,-0.537348],[166.95029,-0.536672],[166.950491,-0.536635],[166.950526,-0.536311],[166.950669,-0.536205],[166.95098,-0.536386],[166.951007,-0.536366],[166.950689,-0.536177],[166.950826,-0.535925],[166.950771,-0.535702],[166.950627,-0.535629],[166.95041,-0.535518],[166.951627,-0.531341],[166.952261,-0.529357],[166.953225,-0.52736],[166.954365,-0.525718],[166.954573,-0.525601],[166.955463,-0.525099],[166.956179,-0.524057],[166.956965,-0.523074],[166.957478,-0.522523],[166.958157,-0.521718],[166.958524,-0.521027],[166.958873,-0.520044],[166.958923,-0.519315],[166.958873,-0.518466],[166.958385,-0.515937],[166.957928,-0.514193],[166.957142,-0.512247],[166.956743,-0.511328],[166.956001,-0.510827],[166.955095,-0.50949],[166.954074,-0.508359],[166.953269,-0.507468],[166.952407,-0.506701],[166.950765,-0.505528],[166.949009,-0.504431],[166.94724,-0.503734],[166.945757,-0.50329],[166.944755,-0.503018],[166.943925,-0.502986],[166.942891,-0.503138],[166.940761,-0.503107],[166.938879,-0.502745],[166.937782,-0.502574],[166.936546,-0.50253],[166.934514,-0.502681],[166.933503,-0.503398],[166.931969,-0.504216],[166.931335,-0.505274],[166.929807,-0.506865],[166.926035,-0.510948],[166.923506,-0.513376],[166.92111,-0.515728],[166.919284,-0.517268],[166.917627,-0.518609],[166.917236,-0.518821],[166.915018,-0.520685],[166.912659,-0.522935],[166.911461,-0.524792],[166.910833,-0.526276],[166.910529,-0.527227],[166.91034,-0.528113],[166.91019,-0.528434],[166.909937,-0.528397],[166.909785,-0.528474],[166.909648,-0.528631],[166.909199,-0.528516],[166.909179,-0.52854],[166.90966,-0.528689],[166.909809,-0.528508],[166.909906,-0.528554],[166.910265,-0.528639],[166.910087,-0.529345],[166.909691,-0.529273],[166.909597,-0.52914],[166.909652,-0.528916],[166.90999,-0.529008],[166.91,-0.528964],[166.909614,-0.528844],[166.909561,-0.529148],[166.909669,-0.529309],[166.910016,-0.529426],[166.909585,-0.532291],[166.909769,-0.534555],[166.909813,-0.536114],[166.910134,-0.537212],[166.910108,-0.537377],[166.91007,-0.537528],[166.910031,-0.537608],[166.909848,-0.537553],[166.909719,-0.537557],[166.909547,-0.537528],[166.909486,-0.537492],[166.909361,-0.537509],[166.909186,-0.537615],[166.909189,-0.537684],[166.909116,-0.537622],[166.908444,-0.537693],[166.90846,-0.537887],[166.909114,-0.537816],[166.909192,-0.537738],[166.9092,-0.537881],[166.909454,-0.537947],[166.909537,-0.537938],[166.909611,-0.537875],[166.909715,-0.537836],[166.909908,-0.537735]]];
+    const NAURU_CENTER = { lat: -0.52833, lon: 166.933684 };
+
+
+    // 比較用スポット（日本の主要都市 + ナウル本体 + 現在地）
+    const BUILTIN_SPOTS = [
+      { id: 'nauru',   label: 'ナウル',   lat: NAURU_CENTER.lat, lng: NAURU_CENTER.lon, zoom: 13, kind: 'home' },
+      { id: 'sapporo', label: '札幌',     lat: 43.0618, lng: 141.3545, zoom: 12, kind: 'city' },
+      { id: 'tokyo',   label: '東京',     lat: 35.6812, lng: 139.7671, zoom: 12, kind: 'city' },
+      { id: 'nagoya',  label: '名古屋',   lat: 35.1709, lng: 136.8815, zoom: 12, kind: 'city' },
+      { id: 'osaka',   label: '大阪',     lat: 34.7024, lng: 135.4959, zoom: 12, kind: 'city' },
+      { id: 'hakata',  label: '博多',     lat: 33.5897, lng: 130.4207, zoom: 12, kind: 'city' },
+      { id: 'here',    label: '現在地',   lat: null,    lng: null,     zoom: 12, kind: 'loc'  },
+    ];
+    const MAX_CUSTOM_SPOTS = 2;
+    let customSpots = []; // { id, label, lat, lng, zoom, kind: 'custom' }
+
+    const BASEMAPS = {
+      osm: {
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        options: {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          maxZoom: 19
+        }
+      },
+      voyager: {
+        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        options: {
+          attribution: '&copy; OSM &copy; CARTO · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }
+      },
+      topo: {
+        url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+        options: {
+          attribution: '&copy; OpenStreetMap, SRTM | OpenTopoMap · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          maxZoom: 17
+        }
+      },
+      satellite: {
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        options: {
+          attribution: 'Tiles &copy; Esri · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          maxZoom: 19
+        }
+      },
+      dark: {
+        url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        options: {
+          attribution: '&copy; OSM &copy; CARTO · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }
+      }
+    };
+
+    // ナウル本体の実寸（境界 bbox から）
+    const NAURU_SIZE_M = { w: 5618, h: 5744 };
+    const KUN_IMAGE_SRC = 'nauru_kun_outline.png';
+
+    // 境界用の色（必要最低限）
+    const BOUNDARY_PALETTE = [
+      { key: 'gold',  label: 'ゴールド', hex: '#f5c542', rgb: [245, 197, 66] },
+      { key: 'nauru', label: '緑',       hex: '#8ec31f', rgb: [142, 195, 31] },
+      { key: 'blue',  label: '青',       hex: '#3b82f6', rgb: [59, 130, 246] },
+      { key: 'red',   label: '赤',       hex: '#ef4444', rgb: [239, 68, 68] },
+      { key: 'white', label: '白',       hex: '#f8fafc', rgb: [248, 250, 252] },
+      { key: 'black', label: '黒',       hex: '#1e293b', rgb: [30, 41, 59] }
+    ];
+
+    function solidStyle(p, { fillOpacity = 0.45, opacity = 1 } = {}) {
+      return {
+        stroke: p.hex,
+        fill: p.hex,
+        fillOpacity,
+        rgb: p.rgb,
+        opacity,
+        keepOriginal: false,
+        outlineOnly: false
+      };
+    }
+
+    // スウォッチ: 境界は色、ナウルくんは専用3種のみ
+    const SWATCHES = [];
+    BOUNDARY_PALETTE.forEach(p => {
+      SWATCHES.push({
+        id: 'b-' + p.key,
+        mode: 'boundary',
+        group: 'boundary',
+        label: '境界・' + p.label,
+        preview: p.hex,
+        special: null,
+        ...solidStyle(p)
+      });
+    });
+    SWATCHES.push({
+      id: 'b-outline',
+      mode: 'boundary',
+      group: 'boundary',
+      label: '境界・輪郭のみ',
+      preview: null,
+      special: 'outline',
+      stroke: '#f5c542',
+      fill: '#f5c542',
+      fillOpacity: 0,
+      rgb: [245, 197, 66],
+      outlineOnly: true,
+      opacity: 1,
+      keepOriginal: false
+    });
+    // 境界ユーザー色（localStorage で上書き）
+    SWATCHES.push({
+      id: 'b-user',
+      mode: 'boundary',
+      group: 'boundary',
+      label: '境界・ユーザー設定',
+      preview: null,
+      special: 'user',
+      stroke: '#c9940a',
+      fill: '#f5c542',
+      fillOpacity: 0.45,
+      rgb: [245, 197, 66],
+      outlineOnly: false,
+      opacity: 1,
+      keepOriginal: false
+    });
+
+    SWATCHES.push({
+      id: 'k-original',
+      mode: 'kun',
+      group: 'kun',
+      label: 'ナウルくん・元の塗り',
+      preview: null,
+      special: 'original',
+      stroke: '#6ea312',
+      fill: '#8ec31f',
+      fillOpacity: 0.5,
+      keepOriginal: true,
+      opacity: 1,
+      outlineOnly: false
+    });
+    SWATCHES.push({
+      id: 'k-semi',
+      mode: 'kun',
+      group: 'kun',
+      label: 'ナウルくん・半透明',
+      preview: null,
+      special: 'semi',
+      stroke: '#6ea312',
+      fill: '#8ec31f',
+      fillOpacity: 0.22,
+      keepOriginal: true,
+      opacity: 0.42,
+      outlineOnly: false
+    });
+    SWATCHES.push({
+      id: 'k-outline',
+      mode: 'kun',
+      group: 'kun',
+      label: 'ナウルくん・緑だけ透明（輪郭・目口）',
+      preview: null,
+      special: 'hollow',
+      stroke: '#231815',
+      fill: '#231815',
+      fillOpacity: 0,
+      rgb: [35, 24, 21],
+      bodyHollow: true,
+      outlineOnly: false,
+      opacity: 1,
+      keepOriginal: false
+    });
+
+    let SWATCH_BY_ID = Object.fromEntries(SWATCHES.map(s => [s.id, s]));
+    let lastScreenshotBlob = null;
+    let lastScreenshotUrl = null;
+
+    function hexToRgb(hex) {
+      const m = String(hex || '').replace('#', '').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (!m) return [245, 197, 66];
+      let h = m[1];
+      if (h.length === 3) h = h.split('').map(c => c + c).join('');
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    }
+
+    function loadUserBoundaryColor() {
+      try {
+        const raw = localStorage.getItem('nauru_user_boundary');
+        if (!raw) return;
+        const u = JSON.parse(raw);
+        const s = SWATCH_BY_ID['b-user'];
+        if (!s || !u) return;
+        if (u.fill) s.fill = u.fill;
+        if (u.stroke) s.stroke = u.stroke;
+        if (typeof u.fillOpacity === 'number') s.fillOpacity = u.fillOpacity;
+        if (typeof u.outlineOnly === 'boolean') s.outlineOnly = u.outlineOnly;
+        s.rgb = hexToRgb(s.fill);
+        s.preview = s.outlineOnly ? null : s.fill;
+      } catch (_) {}
+    }
+
+    function saveUserBoundaryColor() {
+      const s = SWATCH_BY_ID['b-user'];
+      if (!s) return;
+      try {
+        localStorage.setItem('nauru_user_boundary', JSON.stringify({
+          fill: s.fill,
+          stroke: s.stroke,
+          fillOpacity: s.fillOpacity,
+          outlineOnly: !!s.outlineOnly
+        }));
+      } catch (_) {}
+    }
+
+    function openUserColorPop(anchorBtn) {
+      const pop = document.getElementById('user-color-pop');
+      const s = SWATCH_BY_ID['b-user'];
+      if (!pop || !s) return;
+      document.getElementById('user-fill-color').value = s.fill || '#f5c542';
+      document.getElementById('user-stroke-color').value = s.stroke || '#c9940a';
+      const op = Math.round((s.fillOpacity != null ? s.fillOpacity : 0.45) * 100);
+      document.getElementById('user-fill-opacity').value = String(op);
+      document.getElementById('user-fill-opacity-label').textContent = op + '%';
+      document.getElementById('user-outline-only').checked = !!s.outlineOnly;
+
+      // 左パネル付近に配置
+      const aside = document.querySelector('aside.panel');
+      const rect = (anchorBtn || aside).getBoundingClientRect();
+      pop.classList.remove('hidden');
+      const popW = pop.offsetWidth || 260;
+      let left = rect.right + 8;
+      if (left + popW > window.innerWidth - 8) left = Math.max(8, rect.left);
+      let top = rect.top;
+      if (top + 280 > window.innerHeight) top = Math.max(8, window.innerHeight - 290);
+      pop.style.left = left + 'px';
+      pop.style.top = top + 'px';
+    }
+
+    function closeUserColorPop() {
+      const pop = document.getElementById('user-color-pop');
+      if (pop) pop.classList.add('hidden');
+    }
+
+    function applyUserColorFromPop() {
+      const s = SWATCH_BY_ID['b-user'];
+      if (!s) return;
+      const fill = document.getElementById('user-fill-color').value;
+      const stroke = document.getElementById('user-stroke-color').value;
+      const op = parseInt(document.getElementById('user-fill-opacity').value, 10) / 100;
+      const outlineOnly = document.getElementById('user-outline-only').checked;
+      s.fill = fill;
+      s.stroke = stroke;
+      s.fillOpacity = outlineOnly ? 0 : op;
+      s.outlineOnly = outlineOnly;
+      s.rgb = hexToRgb(fill);
+      s.preview = outlineOnly ? null : fill;
+      saveUserBoundaryColor();
+      activeSwatchId = 'b-user';
+      buildSwatchPanel();
+      updateSilhouette(true);
+      closeUserColorPop();
+      showToast('ユーザー色を適用しました');
+    }
+
+    let map = null;
+    let baseLayer = null;
+    let polygonLayer = null;
+    let imageLayer = null;
+    let geoData = NAURU_RINGS;
+    let center = { lat: 35.6812, lng: 139.7671 };
+    let scale = 100;
+    let toastTimeout = null;
+    let currentRotation = 0;
+    let currentFlipX = false;
+    let currentFlipY = false;
+    let isZooming = false;
+    let L_lon = NAURU_CENTER.lon;
+    let L_lat = NAURU_CENTER.lat;
+    let activeSpot = 'tokyo';
+    let currentBasemap = 'osm';
+    let activeSwatchId = 'k-original';
+    let kunSourceImage = null;
+    let kunBitmapUrl = null;
+    let kunBitmapKey = '';
+    let kunLoadPromise = null;
+    let kunContentAspect = 764 / 800; // 元画像 w/h
+    let kunCanvasScale = { w: 1, h: 1 }; // 回転余白込みの拡大率
+    let kunUpdateToken = 0;
+    let showReticle = true;
+
+    function getActiveSwatch() {
+      return SWATCH_BY_ID[activeSwatchId] || SWATCH_BY_ID['k-original'];
+    }
+
+    function setReticleVisible(on) {
+      showReticle = !!on;
+      const el = document.getElementById('reticle');
+      if (el) el.style.display = showReticle ? '' : 'none';
+      const chk = document.getElementById('chk-reticle');
+      if (chk) chk.checked = showReticle;
+      try { localStorage.setItem('nauru_reticle', showReticle ? '1' : '0'); } catch (_) {}
+    }
+
+    function getSilhouetteMode() {
+      return getActiveSwatch().mode;
+    }
+
+    function setBasemap(key) {
+      if (!map || !BASEMAPS[key]) return;
+      const cfg = BASEMAPS[key];
+      if (baseLayer) map.removeLayer(baseLayer);
+      baseLayer = L.tileLayer(cfg.url, cfg.options).addTo(map);
+      if (polygonLayer) polygonLayer.bringToFront();
+      if (imageLayer) imageLayer.bringToFront();
+      currentBasemap = key;
+      const sel = document.getElementById('basemap-select');
+      if (sel && sel.value !== key) sel.value = key;
+      try { localStorage.setItem('nauru_basemap', key); } catch (_) {}
+    }
+
+    function getColorStyle() {
+      return getActiveSwatch();
+    }
+
+    function buildSwatchPanel() {
+      const panel = document.getElementById('swatch-panel');
+      if (!panel) return;
+      panel.innerHTML = '';
+
+      const groups = [
+        { id: 'boundary', title: '国の境界' },
+        { id: 'kun', title: 'ナウルくん' }
+      ];
+
+      groups.forEach(g => {
+        const wrap = document.createElement('div');
+        wrap.className = 'swatch-group';
+        const lab = document.createElement('div');
+        lab.className = 'swatch-group-label';
+        lab.innerHTML = `<span class="dot"></span><span>${g.title}</span>`;
+        wrap.appendChild(lab);
+
+        const grid = document.createElement('div');
+        grid.className = 'color-swatches';
+        grid.setAttribute('role', 'listbox');
+        grid.setAttribute('aria-label', g.title);
+
+        SWATCHES.filter(s => s.group === g.id).forEach(s => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'color-swatch';
+          btn.dataset.id = s.id;
+          btn.title = s.label;
+          btn.setAttribute('aria-label', s.label);
+          if (s.id === activeSwatchId) btn.classList.add('active');
+
+          if (s.special === 'original') {
+            btn.classList.add('original-swatch');
+          } else if (s.special === 'semi') {
+            btn.classList.add('semi-swatch');
+          } else if (s.special === 'user') {
+            btn.classList.add('swatch-user');
+            if (s.preview) btn.style.background = s.preview;
+          } else if (s.special === 'outline' || s.special === 'hollow' || s.outlineOnly || s.bodyHollow) {
+            btn.classList.add('transparent-swatch');
+          } else if (s.preview) {
+            btn.style.background = s.preview;
+          }
+
+          btn.addEventListener('click', () => {
+            if (s.id === 'b-user') {
+              // ユーザー色: 適用しつつ設定ウィンドウを開く
+              setActiveSwatch(s.id);
+              openUserColorPop(btn);
+            } else {
+              setActiveSwatch(s.id);
+            }
+          });
+          // ユーザー色は長押し/右クリックでも設定
+          if (s.id === 'b-user') {
+            btn.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+              openUserColorPop(btn);
+            });
+          }
+          grid.appendChild(btn);
+        });
+
+        wrap.appendChild(grid);
+        panel.appendChild(wrap);
+      });
+    }
+
+    function setActiveSwatch(id) {
+      if (!SWATCH_BY_ID[id]) return;
+      activeSwatchId = id;
+      document.querySelectorAll('#swatch-panel .color-swatch').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.id === id);
+      });
+      try { localStorage.setItem('nauru_swatch', id); } catch (_) {}
+      kunBitmapKey = '';
+      updateSilhouette(true);
+    }
+
+    function loadKunImage() {
+      if (kunLoadPromise) return kunLoadPromise;
+      kunLoadPromise = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          kunSourceImage = img;
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          if (h > 0) kunContentAspect = w / h;
+          resolve(img);
+        };
+        img.onerror = () => reject(new Error('ナウルくん画像の読み込みに失敗しました'));
+        img.src = KUN_IMAGE_SRC;
+      });
+      return kunLoadPromise;
+    }
+
+    function getKunBitmapKey() {
+      return [activeSwatchId, currentRotation, currentFlipX ? 1 : 0, currentFlipY ? 1 : 0].join('|');
+    }
+
+    /**
+     * ナウルくん画像を生成。
+     * - 元の塗り / 半透明: 色はそのまま
+     * - 単色: 不透明部分を塗り替え
+     * - 透明: 輪郭のみ
+     * 回転・反転は Canvas 上で行い、Leaflet の transform は触らない（ズレ防止）
+     */
+    function buildKunBitmap() {
+      if (!kunSourceImage) return null;
+      const style = getColorStyle();
+      const srcW = kunSourceImage.naturalWidth || kunSourceImage.width;
+      const srcH = kunSourceImage.naturalHeight || kunSourceImage.height;
+
+      // 1) 色処理用キャンバス
+      const base = document.createElement('canvas');
+      base.width = srcW;
+      base.height = srcH;
+      const bctx = base.getContext('2d');
+      bctx.drawImage(kunSourceImage, 0, 0);
+
+      if (style.bodyHollow) {
+        // 緑の胴体だけ透明 → 外側シルエット＋目・口（暗）＋白を残す
+        const imageData = bctx.getImageData(0, 0, srcW, srcH);
+        const d = imageData.data;
+        const n = srcW * srcH;
+        const alpha = new Uint8Array(n);
+        const greenMask = new Uint8Array(n);
+        for (let i = 0, p = 0; i < d.length; i += 4, p++) {
+          const a = d[i + 3];
+          alpha[p] = a;
+          if (a < 16) continue;
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          // 胴体の緑（ナウル緑系）およびそのアンチエイリアス
+          if (g > 95 && g >= r - 5 && g > b && g - Math.min(r, b) > 18) greenMask[p] = 1;
+        }
+        const out = new Uint8ClampedArray(d.length);
+        for (let y = 0; y < srcH; y++) {
+          for (let x = 0; x < srcW; x++) {
+            const p = y * srcW + x;
+            const i = p * 4;
+            const a = alpha[p];
+            if (a < 16) continue;
+            const r = d[i], g = d[i + 1], b = d[i + 2];
+            const isDark = (r + g + b) < 150 && g < 105;
+            const isWhite = r > 200 && g > 200 && b > 200;
+            if (isDark || isWhite) {
+              out[i] = r; out[i + 1] = g; out[i + 2] = b; out[i + 3] = a;
+              continue;
+            }
+            if (greenMask[p]) {
+              // 外側に透明があればシルエット縁
+              let isOuterEdge = false;
+              for (let dy = -1; dy <= 1 && !isOuterEdge; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                  if (dx === 0 && dy === 0) continue;
+                  const nx = x + dx, ny = y + dy;
+                  if (nx < 0 || ny < 0 || nx >= srcW || ny >= srcH || alpha[ny * srcW + nx] < 16) {
+                    isOuterEdge = true;
+                  }
+                }
+              }
+              if (isOuterEdge) {
+                out[i] = 35; out[i + 1] = 24; out[i + 2] = 21; out[i + 3] = Math.max(a, 220);
+              }
+              // 内側の緑は透明
+              continue;
+            }
+            // その他はそのまま（安全側）
+            out[i] = r; out[i + 1] = g; out[i + 2] = b; out[i + 3] = a;
+          }
+        }
+        imageData.data.set(out);
+        bctx.putImageData(imageData, 0, 0);
+      } else if (style.outlineOnly) {
+        const imageData = bctx.getImageData(0, 0, srcW, srcH);
+        const d = imageData.data;
+        const alpha = new Uint8Array(srcW * srcH);
+        for (let i = 0, p = 0; i < d.length; i += 4, p++) alpha[p] = d[i + 3];
+        const out = new Uint8ClampedArray(d.length);
+        const [cr, cg, cb] = style.rgb;
+        for (let y = 0; y < srcH; y++) {
+          for (let x = 0; x < srcW; x++) {
+            const p = y * srcW + x;
+            if (alpha[p] < 12) continue;
+            let isEdge = false;
+            for (let dy = -1; dy <= 1 && !isEdge; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = x + dx, ny = y + dy;
+                if (nx < 0 || ny < 0 || nx >= srcW || ny >= srcH || alpha[ny * srcW + nx] < 12) {
+                  isEdge = true;
+                }
+              }
+            }
+            if (isEdge) {
+              const i = p * 4;
+              out[i] = cr; out[i + 1] = cg; out[i + 2] = cb; out[i + 3] = Math.max(alpha[p], 220);
+            }
+          }
+        }
+        imageData.data.set(out);
+        bctx.putImageData(imageData, 0, 0);
+      } else if (!style.keepOriginal && style.rgb) {
+        const imageData = bctx.getImageData(0, 0, srcW, srcH);
+        const d = imageData.data;
+        const [cr, cg, cb] = style.rgb;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] < 8) continue;
+          d[i] = cr;
+          d[i + 1] = cg;
+          d[i + 2] = cb;
+        }
+        bctx.putImageData(imageData, 0, 0);
+      }
+      // keepOriginal: 何もしない（元画像のまま）
+
+      // 2) 反転・回転（中心固定、余白を広げてクリップしない）
+      const flipX = currentFlipX ? -1 : 1;
+      const flipY = currentFlipY ? -1 : 1;
+      const rad = (currentRotation || 0) * Math.PI / 180;
+      const cosA = Math.cos(rad);
+      const sinA = Math.sin(rad);
+      const absCos = Math.abs(cosA);
+      const absSin = Math.abs(sinA);
+      const outW = Math.max(1, Math.ceil(srcW * absCos + srcH * absSin));
+      const outH = Math.max(1, Math.ceil(srcW * absSin + srcH * absCos));
+
+      const out = document.createElement('canvas');
+      out.width = outW;
+      out.height = outH;
+      const octx = out.getContext('2d');
+      octx.translate(outW / 2, outH / 2);
+      octx.rotate(rad);
+      octx.scale(flipX, flipY);
+      octx.drawImage(base, -srcW / 2, -srcH / 2);
+
+      // 元画像アスペクト + 回転余白分のスケール（実寸が回転で縮まないように）
+      kunContentAspect = srcW / srcH;
+      kunCanvasScale = { w: outW / srcW, h: outH / srcH };
+
+      kunBitmapUrl = out.toDataURL('image/png');
+      kunBitmapKey = getKunBitmapKey();
+      return kunBitmapUrl;
+    }
+
+    async function ensureKunBitmap(force) {
+      await loadKunImage();
+      const key = getKunBitmapKey();
+      if (!force && kunBitmapUrl && kunBitmapKey === key) return kunBitmapUrl;
+      return buildKunBitmap();
+    }
+
+    /** 画像アスペクトを保ちつつ、ナウル実寸の箱に収まる bounds（中心合わせ） */
+    function physicalBoundsAt(lat, lon) {
+      const clamped = Math.max(-85, Math.min(85, lat));
+      const mPerDegLat = 111320;
+      const mPerDegLon = 111320 * Math.cos(clamped * Math.PI / 180);
+
+      // ナウルの実寸箱に、元画像アスペクトを contain で合わせる
+      const boxW = NAURU_SIZE_M.w;
+      const boxH = NAURU_SIZE_M.h;
+      const aspect = kunContentAspect > 0 ? kunContentAspect : (boxW / boxH);
+      let physW, physH;
+      if (aspect >= boxW / boxH) {
+        physW = boxW;
+        physH = boxW / aspect;
+      } else {
+        physH = boxH;
+        physW = boxH * aspect;
+      }
+
+      // 回転でキャンバスに余白が入った分だけ地理範囲も広げ、キャラ実寸を維持
+      physW *= (kunCanvasScale.w || 1);
+      physH *= (kunCanvasScale.h || 1);
+
+      const dLat = (physH / 2) / mPerDegLat;
+      const dLon = (physW / 2) / Math.max(mPerDegLon, 1e-6);
+      return L.latLngBounds(
+        [clamped - dLat, lon - dLon],
+        [clamped + dLat, lon + dLon]
+      );
+    }
+
+    function hidePolygon() {
+      if (polygonLayer && map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
+    }
+
+    function hideImage() {
+      if (imageLayer && map.hasLayer(imageLayer)) map.removeLayer(imageLayer);
+    }
+
+    function showToast(msg) {
+      const toastEl = document.getElementById('toast');
+      document.getElementById('toast-message').innerText = msg;
+      toastEl.classList.add('show');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 2800);
+    }
+
+    function setActiveSpot(id) {
+      activeSpot = id || '';
+      document.querySelectorAll('#city-bar .chip').forEach(el => {
+        el.classList.toggle('active', id && el.dataset.id === id);
+      });
+    }
+
+    function updateUI() {
+      const displayLat = center.lat;
+      let displayLng = center.lng % 360;
+      if (displayLng > 180) displayLng -= 360;
+      if (displayLng < -180) displayLng += 360;
+
+      const latText = displayLat >= 0 ? 'N' : 'S';
+      const lngText = displayLng >= 0 ? 'E' : 'W';
+
+      const coordEl = document.getElementById('coord-display');
+      if (coordEl) {
+        coordEl.textContent =
+          `${latText} ${Math.abs(displayLat).toFixed(3)}°  ${lngText} ${Math.abs(displayLng).toFixed(3)}°`;
+      }
+      const scaleEl = document.getElementById('scale-display');
+      if (scaleEl) scaleEl.textContent = scale.toFixed(1);
+
+      // bar: map 50–200% into 0–100% width (clamped)
+      const barPct = Math.max(5, Math.min(100, (scale / 200) * 100));
+      const barEl = document.getElementById('scale-bar');
+      if (barEl) barEl.style.width = barPct + '%';
+
+      // 入力欄はフォーカス中は上書きしない
+      const latInput = document.getElementById('input-lat');
+      const lngInput = document.getElementById('input-lng');
+      if (latInput && document.activeElement !== latInput) {
+        latInput.value = displayLat.toFixed(5);
+      }
+      if (lngInput && document.activeElement !== lngInput) {
+        lngInput.value = displayLng.toFixed(5);
+      }
+    }
+
+    function parseCoord(str) {
+      if (str == null) return NaN;
+      let s = String(str).trim().replace(/,/g, '');
+      // N35.6 / E139.7 / 35.6N / 139.7E など
+      const hemi = s.match(/^[NnSsEeWw]/) || s.match(/([NnSsEeWw])$/);
+      s = s.replace(/[NnSsEeWw]/g, '').trim();
+      let v = parseFloat(s);
+      if (!isFinite(v)) return NaN;
+      if (hemi) {
+        const h = hemi[1].toUpperCase();
+        if (h === 'S' || h === 'W') v = -Math.abs(v);
+        else v = Math.abs(v);
+      }
+      return v;
+    }
+
+    function flyToInputCoords() {
+      const lat = parseCoord(document.getElementById('input-lat').value);
+      const lng = parseCoord(document.getElementById('input-lng').value);
+      if (!isFinite(lat) || lat < -85 || lat > 85) {
+        showToast('緯度は -85 〜 85 で入力してください');
+        return;
+      }
+      if (!isFinite(lng) || lng < -180 || lng > 180) {
+        showToast('経度は -180 〜 180 で入力してください');
+        return;
+      }
+      setActiveSpot('');
+      map.flyTo([lat, lng], Math.max(map.getZoom(), 11), { duration: 1.2 });
+      showToast(`移動: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      if (window.matchMedia('(max-width: 767.98px)').matches && typeof window.__closeMobileMenu === 'function') {
+        window.__closeMobileMenu();
+      }
+    }
+
+    function buildShareText() {
+      const lat = center.lat;
+      let lng = center.lng % 360;
+      if (lng > 180) lng -= 360;
+      if (lng < -180) lng += 360;
+      return `#どこでもナウル\n${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+
+    async function captureMapCanvas() {
+      if (typeof html2canvas !== 'function') throw new Error('html2canvas が読み込めていません');
+      const hideEls = [
+        document.querySelector('aside.panel'),
+        document.getElementById('bottom-bar'),
+        document.getElementById('side-dock'),
+        document.getElementById('user-color-pop'),
+        document.getElementById('toast'),
+        document.getElementById('notice-modal'),
+        document.getElementById('loading-overlay')
+      ].filter(Boolean);
+      const prev = hideEls.map(el => el.style.visibility);
+      hideEls.forEach(el => { el.style.visibility = 'hidden'; });
+
+      try {
+        // 地図コンテナを中心にキャプチャ（タイルは CORS の都合で欠ける場合あり）
+        const target = document.getElementById('map') || document.body;
+        const canvas = await html2canvas(target, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#e5e7eb',
+          scale: Math.min(2, window.devicePixelRatio || 1.5),
+          logging: false
+        });
+        return canvas;
+      } finally {
+        hideEls.forEach((el, i) => { el.style.visibility = prev[i] || ''; });
+      }
+    }
+
+    function canvasToBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('画像化に失敗')), 'image/png');
+      });
+    }
+
+    function downloadBlob(blob, filename) {
+      if (!blob) return false;
+      if (lastScreenshotUrl) {
+        try { URL.revokeObjectURL(lastScreenshotUrl); } catch (_) {}
+      }
+      lastScreenshotUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = lastScreenshotUrl;
+      a.download = filename || `nauru-scale-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return true;
+    }
+
+    /** 画像をクリップボードへ（投稿画面で Ctrl+V / 貼り付け＝実質の自動添付） */
+    async function copyImageToClipboard(blob) {
+      if (!blob) return false;
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          // Chrome/Edge: PNG をそのまま書ける
+          const pngBlob = blob.type === 'image/png'
+            ? blob
+            : new Blob([await blob.arrayBuffer()], { type: 'image/png' });
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': pngBlob })
+          ]);
+          return true;
+        }
+      } catch (e) {
+        console.warn('clipboard image failed', e);
+      }
+      return false;
+    }
+
+    async function takeScreenshot(download) {
+      try {
+        showToast('スクリーンショット作成中…');
+        const canvas = await captureMapCanvas();
+        const blob = await canvasToBlob(canvas);
+        lastScreenshotBlob = blob;
+        if (download !== false) {
+          downloadBlob(blob);
+          showToast('画像を保存しました');
+        }
+        return blob;
+      } catch (e) {
+        console.warn(e);
+        showToast('スクショに失敗しました（タイル制限の可能性）');
+        return null;
+      }
+    }
+
+    /**
+     * 保存 + クリップボード貼り付け準備 + 各サービスの投稿画面を開く
+     * ※ブラウザから X/IG/LINE に画像を直接アップロードする API は無いので、
+     *   クリップボードに画像を載せて投稿画面で即貼れる状態にする（自動添付に近い）
+     */
+    async function prepareImageForShare() {
+      showToast('画像を準備中…');
+      const blob = lastScreenshotBlob || await takeScreenshot(false);
+      if (!blob) return { blob: null, saved: false, copied: false };
+      const saved = downloadBlob(blob);
+      const copied = await copyImageToClipboard(blob);
+      return { blob, saved, copied };
+    }
+
+    function shareHint(copied, platform) {
+      if (copied) {
+        return `保存＆コピー済み → ${platform}で Ctrl+V で画像添付！`;
+      }
+      return `画像を保存しました。${platform}でファイルを選んで添付してください`;
+    }
+
+    // Windows の「共有」シート (navigator.share) は使わない
+
+    async function shareToX() {
+      const text = buildShareText();
+      const { blob, copied } = await prepareImageForShare();
+      // 投稿文入りの X 画面
+      const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      showToast(blob ? shareHint(copied, 'X') : 'Xの投稿画面を開きました');
+    }
+
+    async function shareToInstagram() {
+      const { blob, copied } = await prepareImageForShare();
+      // Web の IG は画像入力がファイル選択中心。クリップボードも試す
+      window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+      if (blob && copied) {
+        showToast('保存＆コピー済み → Instagramで新規投稿し、貼り付け or 保存画像を選択');
+      } else if (blob) {
+        showToast('画像を保存しました。Instagramで新規投稿→画像を選んでください');
+      } else {
+        showToast('Instagramを開きました');
+      }
+    }
+
+    async function shareToLine() {
+      const text = buildShareText();
+      const { blob, copied } = await prepareImageForShare();
+      // LINE はテキスト共有 URL + 画像はクリップボード/保存から添付
+      const lineUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(text + '\n' + location.href);
+      window.open(lineUrl, '_blank', 'noopener,noreferrer');
+      showToast(blob ? shareHint(copied, 'LINE') : 'LINE共有を開きました');
+    }
+
+    function toggleFlipButton(btnId, isFlipped) {
+      const btn = document.getElementById(btnId);
+      btn.classList.toggle('active', isFlipped);
+    }
+
+    function resetTransform() {
+      currentRotation = 0;
+      currentFlipX = false;
+      currentFlipY = false;
+      const slider = document.getElementById('rotation-slider');
+      if (slider) {
+        slider.value = 0;
+        document.getElementById('rotation-display').innerText = '0°';
+        toggleFlipButton('btn-flip-x', false);
+        toggleFlipButton('btn-flip-y', false);
+      }
+    }
+
+    function updateScaleOnly() {
+      const clamped_lat = Math.max(-85, Math.min(85, center.lat));
+      const L_lat_rad = L_lat * Math.PI / 180;
+      const C_lat_rad = clamped_lat * Math.PI / 180;
+      const ratio = Math.cos(L_lat_rad) / Math.cos(C_lat_rad);
+      scale = Math.pow(ratio, 2) * 100;
+      updateUI();
+    }
+
+    function updateBoundarySilhouette() {
+      if (!map || !geoData) return;
+      hideImage();
+
+      const c_lat = center.lat;
+      const c_lon = center.lng;
+      const clamped_lat = Math.max(-85, Math.min(85, c_lat));
+
+      const L_lat_rad = L_lat * Math.PI / 180;
+      const C_lat_rad = clamped_lat * Math.PI / 180;
+      const toRad = Math.PI / 180;
+      const toDeg = 180 / Math.PI;
+
+      const lat0 = L_lat * toRad;
+      const lon0 = L_lon * toRad;
+      const lat1 = clamped_lat * toRad;
+      const lon1 = c_lon * toRad;
+
+      const sinLat0 = Math.sin(lat0);
+      const cosLat0 = Math.cos(lat0);
+      const sinLat1 = Math.sin(lat1);
+      const cosLat1 = Math.cos(lat1);
+
+      const shifted = geoData.map(ring => {
+        const newRing = [];
+        for (let i = 0; i < ring.length; i++) {
+          const [lon, lat] = ring[i];
+          const lat_rad = lat * toRad;
+          const lon_rad = lon * toRad;
+          const dLon = lon_rad - lon0;
+          const cosDLon = Math.cos(dLon);
+          const sinDLon = Math.sin(dLon);
+          const sinLatRad = Math.sin(lat_rad);
+          const cosLatRad = Math.cos(lat_rad);
+
+          const cosDeltaInner = sinLat0 * sinLatRad + cosLat0 * cosLatRad * cosDLon;
+          const cosDelta = Math.max(-1.0, Math.min(1.0, cosDeltaInner));
+          const delta = Math.acos(cosDelta);
+          const sinDelta = Math.sin(delta);
+
+          const y = sinDLon * cosLatRad;
+          const x = cosLat0 * sinLatRad - sinLat0 * cosLatRad * cosDLon;
+          let theta = (Math.abs(x) < 1e-10 && Math.abs(y) < 1e-10) ? 0 : Math.atan2(y, x);
+
+          if (currentFlipX) theta = -theta;
+          if (currentFlipY) theta = Math.PI - theta;
+          theta += currentRotation * toRad;
+
+          const sinTheta = Math.sin(theta);
+          const cosTheta = Math.cos(theta);
+
+          const asinInner = sinLat1 * cosDelta + cosLat1 * sinDelta * cosTheta;
+          const clampedAsinInner = Math.max(-1.0, Math.min(1.0, asinInner));
+          const new_lat_rad = Math.asin(clampedAsinInner);
+          const new_lon_rad = lon1 + Math.atan2(
+            sinTheta * sinDelta * cosLat1,
+            cosDelta - sinLat1 * Math.sin(new_lat_rad)
+          );
+
+          const final_lat = new_lat_rad * toDeg;
+          const final_lon = new_lon_rad * toDeg;
+          if (isFinite(final_lat) && isFinite(final_lon)) {
+            newRing.push([final_lat, final_lon]);
+          }
+        }
+        return newRing.length >= 3 ? newRing : null;
+      }).filter(ring => ring !== null);
+
+      const ratio = Math.cos(L_lat_rad) / Math.cos(C_lat_rad);
+      scale = Math.pow(ratio, 2) * 100;
+
+      const style = getColorStyle();
+      // 境界モードでも「元の塗り/半透明」は緑系として扱う
+      const polyOpts = {
+        color: style.stroke,
+        weight: style.outlineOnly ? 2.5 : 2,
+        fillColor: style.fill,
+        fillOpacity: style.fillOpacity,
+        opacity: 1,
+        interactive: false
+      };
+
+      if (!polygonLayer) {
+        polygonLayer = L.polygon(shifted, polyOpts).addTo(map);
+      } else {
+        if (!map.hasLayer(polygonLayer)) polygonLayer.addTo(map);
+        polygonLayer.setLatLngs(shifted);
+        polygonLayer.setStyle(polyOpts);
+      }
+
+      updateUI();
+    }
+
+    async function updateKunSilhouette(forceRebuild) {
+      if (!map) return;
+      hidePolygon();
+      updateScaleOnly();
+
+      const token = ++kunUpdateToken;
+      try {
+        const url = await ensureKunBitmap(!!forceRebuild);
+        if (token !== kunUpdateToken) return; // 古い非同期結果を捨てる
+
+        const bounds = physicalBoundsAt(center.lat, center.lng);
+        const opacity = (getColorStyle().opacity != null) ? getColorStyle().opacity : 0.92;
+
+        if (!imageLayer) {
+          imageLayer = L.imageOverlay(url, bounds, {
+            opacity: opacity,
+            interactive: false,
+            zIndex: 450
+          }).addTo(map);
+        } else {
+          if (!map.hasLayer(imageLayer)) imageLayer.addTo(map);
+          // URL が変わったときだけ差し替え（移動のたびに setUrl しない）
+          if (forceRebuild || (imageLayer._url !== url)) {
+            imageLayer.setUrl(url);
+          }
+          imageLayer.setBounds(bounds);
+          imageLayer.setOpacity(opacity);
+        }
+        // Leaflet の位置 transform は一切触らない
+      } catch (e) {
+        console.warn(e);
+        showToast('ナウルくん画像を読み込めませんでした');
+        activeSwatchId = 'b-gold';
+        buildSwatchPanel();
+        updateBoundarySilhouette();
+      }
+    }
+
+    function updateSilhouette(forceRebuild) {
+      if (!map) return;
+      if (getSilhouetteMode() === 'kun') {
+        updateKunSilhouette(!!forceRebuild);
+      } else {
+        updateBoundarySilhouette();
+      }
+    }
+
+    // 地図移動時は位置だけ更新（画像の再生成はしない）
+    function updatePolygon() {
+      updateSilhouette(false);
+    }
+
+    function getAllSpots() {
+      // 現在地の前にユーザー設定を挟む
+      const list = [];
+      BUILTIN_SPOTS.forEach(s => {
+        if (s.kind === 'loc') {
+          customSpots.forEach(c => list.push(c));
+          list.push(s);
+        } else {
+          list.push(s);
+        }
+      });
+      return list;
+    }
+
+    function loadCustomSpots() {
+      try {
+        const raw = localStorage.getItem('nauru_custom_spots');
+        if (!raw) { customSpots = []; return; }
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) { customSpots = []; return; }
+        customSpots = arr
+          .filter(s => s && typeof s.label === 'string' && typeof s.lat === 'number' && typeof s.lng === 'number')
+          .map((s, i) => ({
+            id: s.id || ('custom-' + i + '-' + Date.now()),
+            label: String(s.label).slice(0, 20),
+            lat: s.lat,
+            lng: s.lng,
+            zoom: typeof s.zoom === 'number' ? s.zoom : 12,
+            kind: 'custom'
+          }))
+          .slice(0, MAX_CUSTOM_SPOTS);
+      } catch (_) {
+        customSpots = [];
+      }
+    }
+
+    function saveCustomSpots() {
+      try {
+        localStorage.setItem('nauru_custom_spots', JSON.stringify(customSpots.slice(0, MAX_CUSTOM_SPOTS)));
+      } catch (_) {}
+    }
+
+    function updateAddSpotButton() {
+      const btn = document.getElementById('btn-add-spot');
+      if (!btn) return;
+      const full = customSpots.length >= MAX_CUSTOM_SPOTS;
+      btn.disabled = full;
+      btn.textContent = full
+        ? `マイ地点 上限${MAX_CUSTOM_SPOTS}件`
+        : `＋ この位置を追加 (${customSpots.length}/${MAX_CUSTOM_SPOTS})`;
+      btn.style.opacity = full ? '0.55' : '';
+      btn.style.cursor = full ? 'not-allowed' : '';
+    }
+
+    function addCustomSpotFromCenter() {
+      if (!map) return;
+      if (customSpots.length >= MAX_CUSTOM_SPOTS) {
+        showToast(`マイ地点は最大${MAX_CUSTOM_SPOTS}件までです。不要な地点を削除してください`);
+        return;
+      }
+      const c = map.getCenter();
+      const z = map.getZoom();
+      const name = window.prompt('この位置の名前（最大20文字）', 'マイ地点');
+      if (name === null) return;
+      const label = String(name).trim().slice(0, 20) || 'マイ地点';
+      const spot = {
+        id: 'custom-' + Date.now(),
+        label,
+        lat: c.lat,
+        lng: c.lng,
+        zoom: Math.max(10, Math.min(16, Math.round(z))),
+        kind: 'custom'
+      };
+      customSpots.push(spot);
+      if (customSpots.length > MAX_CUSTOM_SPOTS) {
+        customSpots = customSpots.slice(0, MAX_CUSTOM_SPOTS);
+      }
+      saveCustomSpots();
+      buildCityBar();
+      setActiveSpot(spot.id);
+      showToast('「' + label + '」を追加しました');
+    }
+
+    function removeCustomSpot(id, ev) {
+      if (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+      const spot = customSpots.find(s => s.id === id);
+      if (!spot) return;
+      if (!window.confirm('「' + spot.label + '」を削除しますか？')) return;
+      customSpots = customSpots.filter(s => s.id !== id);
+      saveCustomSpots();
+      if (activeSpot === id) activeSpot = 'tokyo';
+      buildCityBar();
+      showToast('削除しました');
+    }
+
+    function flyToSpot(spot) {
+      if (spot.kind === 'loc') {
+        if (!navigator.geolocation) {
+          showToast('このブラウザでは現在地を取得できません');
+          return;
+        }
+        showToast('現在地を取得しています…');
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setActiveSpot('here');
+            map.flyTo([pos.coords.latitude, pos.coords.longitude], spot.zoom, { duration: 1.4 });
+            if (window.matchMedia('(max-width: 767.98px)').matches && typeof window.__closeMobileMenu === 'function') {
+              window.__closeMobileMenu();
+            }
+          },
+          () => showToast('現在地の取得に失敗しました')
+        );
+        return;
+      }
+      setActiveSpot(spot.id);
+      map.flyTo([spot.lat, spot.lng], spot.zoom || 12, { duration: 1.4 });
+      if (window.matchMedia('(max-width: 767.98px)').matches && typeof window.__closeMobileMenu === 'function') {
+        window.__closeMobileMenu();
+      }
+    }
+
+    function buildCityBar() {
+      const bar = document.getElementById('city-bar');
+      bar.innerHTML = '';
+      getAllSpots().forEach(spot => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.id = spot.id;
+        btn.className = 'chip px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm' +
+          (spot.kind === 'loc' ? ' loc' : '') +
+          (spot.kind === 'custom' ? ' custom' : '') +
+          (spot.id === activeSpot ? ' active' : '');
+        const icon = spot.kind === 'home' ? '★ ' : (spot.kind === 'loc' ? '◎ ' : (spot.kind === 'custom' ? '☆ ' : ''));
+        const labelSpan = document.createElement('span');
+        labelSpan.textContent = icon + spot.label;
+        btn.appendChild(labelSpan);
+        if (spot.kind === 'custom') {
+          const x = document.createElement('span');
+          x.className = 'spot-x';
+          x.textContent = '×';
+          x.title = '削除';
+          x.setAttribute('role', 'button');
+          x.addEventListener('click', (e) => removeCustomSpot(spot.id, e));
+          btn.appendChild(x);
+        }
+        btn.addEventListener('click', () => flyToSpot(spot));
+        bar.appendChild(btn);
+      });
+      updateAddSpotButton();
+    }
+
+    window.onload = function () {
+      map = L.map('map', {
+        center: [center.lat, center.lng],
+        zoom: 12,
+        zoomControl: false,
+        attributionControl: true
+      });
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      // デフォルトは明るい OSM。前回の選択があれば復元
+      let initialBasemap = 'osm';
+      try {
+        const saved = localStorage.getItem('nauru_basemap');
+        if (saved && BASEMAPS[saved]) initialBasemap = saved;
+      } catch (_) {}
+      setBasemap(initialBasemap);
+
+      document.getElementById('basemap-select').addEventListener('change', (e) => {
+        setBasemap(e.target.value);
+      });
+
+      // 見た目スウォッチの復元
+      loadUserBoundaryColor();
+      try {
+        const saved = localStorage.getItem('nauru_swatch');
+        if (saved && SWATCH_BY_ID[saved]) activeSwatchId = saved;
+        else {
+          const oldShape = localStorage.getItem('nauru_shape');
+          const oldColor = localStorage.getItem('nauru_color');
+          if (oldShape === 'kun' || (saved && String(saved).startsWith('k-'))) activeSwatchId = 'k-original';
+          else if (oldColor === 'transparent' || oldColor === 'outline') activeSwatchId = 'b-outline';
+          else if (oldColor === 'green') activeSwatchId = 'b-nauru';
+          else if (oldColor && SWATCH_BY_ID['b-' + oldColor]) activeSwatchId = 'b-' + oldColor;
+        }
+        const ret = localStorage.getItem('nauru_reticle');
+        if (ret === '0') showReticle = false;
+      } catch (_) {}
+      buildSwatchPanel();
+      setReticleVisible(showReticle);
+
+      const chkReticle = document.getElementById('chk-reticle');
+      if (chkReticle) {
+        chkReticle.addEventListener('change', () => setReticleVisible(chkReticle.checked));
+      }
+
+      // ユーザー色ポップ
+      document.getElementById('user-fill-opacity').addEventListener('input', (e) => {
+        document.getElementById('user-fill-opacity-label').textContent = e.target.value + '%';
+      });
+      document.getElementById('user-color-apply').addEventListener('click', applyUserColorFromPop);
+      document.getElementById('user-color-cancel').addEventListener('click', closeUserColorPop);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeUserColorPop();
+      });
+
+      // 緯度経度ジャンプ
+      document.getElementById('btn-goto-coord').addEventListener('click', flyToInputCoords);
+      ['input-lat', 'input-lng'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') flyToInputCoords();
+        });
+      });
+
+      // スクショ & SNS
+      document.getElementById('btn-screenshot').addEventListener('click', () => takeScreenshot(true));
+      document.getElementById('btn-share-x').addEventListener('click', () => shareToX());
+      document.getElementById('btn-share-ig').addEventListener('click', () => shareToInstagram());
+      document.getElementById('btn-share-line').addEventListener('click', () => shareToLine());
+
+      // スマホ: メニュー開閉（PCは常時表示のまま）
+      const mobileToggle = document.getElementById('mobile-toggle');
+      const setMobileMenu = (open) => {
+        document.body.classList.toggle('m-open', open);
+        if (mobileToggle) {
+          mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          mobileToggle.title = open ? 'メニューを閉じる' : 'メニューを開く';
+        }
+      };
+      if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+          setMobileMenu(!document.body.classList.contains('m-open'));
+        });
+      }
+      window.__closeMobileMenu = () => setMobileMenu(false);
+
+      // ナウルくん画像は先読み
+      loadKunImage().catch(() => {});
+
+      loadCustomSpots();
+      const btnAddSpot = document.getElementById('btn-add-spot');
+      if (btnAddSpot) btnAddSpot.addEventListener('click', addCustomSpotFromCenter);
+
+      map.on('zoomstart', () => { isZooming = true; });
+      map.on('zoomend', () => {
+        isZooming = false;
+        const c = map.getCenter();
+        center = { lat: c.lat, lng: c.lng };
+        updatePolygon();
+      });
+
+      let moveRaf = null;
+      map.on('move', () => {
+        if (isZooming) return;
+        const c = map.getCenter();
+        center = { lat: c.lat, lng: c.lng };
+        if (!moveRaf) {
+          moveRaf = requestAnimationFrame(() => {
+            updatePolygon();
+            moveRaf = null;
+          });
+        }
+      });
+
+      map.on('moveend', () => {
+        const c = map.getCenter();
+        const MAX_LAT = 84.5;
+        if (c.lat > MAX_LAT + 0.05) {
+          map.panTo([MAX_LAT, c.lng], { animate: true, duration: 0.4 });
+        } else if (c.lat < -MAX_LAT - 0.05) {
+          map.panTo([-MAX_LAT, c.lng], { animate: true, duration: 0.4 });
+        }
+      });
+
+      // 回転・反転はナウルくんでは Canvas 再生成が必要
+      const refreshTransform = () => {
+        kunBitmapKey = '';
+        requestAnimationFrame(() => updateSilhouette(true));
+      };
+
+      document.getElementById('rotation-slider').addEventListener('input', (e) => {
+        currentRotation = parseInt(e.target.value, 10);
+        document.getElementById('rotation-display').innerText = `${currentRotation}°`;
+        refreshTransform();
+      });
+
+      document.getElementById('btn-flip-x').addEventListener('click', () => {
+        currentFlipX = !currentFlipX;
+        toggleFlipButton('btn-flip-x', currentFlipX);
+        refreshTransform();
+      });
+
+      document.getElementById('btn-flip-y').addEventListener('click', () => {
+        currentFlipY = !currentFlipY;
+        toggleFlipButton('btn-flip-y', currentFlipY);
+        refreshTransform();
+      });
+
+      document.getElementById('btn-reset-transform').addEventListener('click', () => {
+        resetTransform();
+        refreshTransform();
+      });
+
+      const noticeModal = document.getElementById('notice-modal');
+      const closeModal = () => {
+        noticeModal.classList.add('fade-out');
+        setTimeout(() => noticeModal.classList.add('hidden-modal'), 280);
+      };
+      document.getElementById('close-notice-btn').addEventListener('click', closeModal);
+      noticeModal.addEventListener('click', (e) => {
+        if (e.target === noticeModal) closeModal();
+      });
+
+      buildCityBar();
+      updatePolygon();
+      updateUI();
+      document.getElementById('loading-overlay').style.display = 'none';
+    };
+  </script>
+</body>
+</html>
