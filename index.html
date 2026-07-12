@@ -1486,12 +1486,14 @@
       }
     }
 
+    const SITE_URL = 'https://issonokoto.github.io/dokodemo-nauru/';
+
     function buildShareText() {
       const lat = center.lat;
       let lng = center.lng % 360;
       if (lng > 180) lng -= 360;
       if (lng < -180) lng += 360;
-      return `#どこでもナウル\n${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      return `#どこでもナウル\n${lat.toFixed(5)}, ${lng.toFixed(5)}\n${SITE_URL}`;
     }
 
     async function captureMapCanvas() {
