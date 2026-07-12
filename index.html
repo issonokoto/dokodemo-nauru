@@ -1634,7 +1634,7 @@
       const text = buildShareText();
       const { blob, copied } = await prepareImageForShare();
       // LINE はテキスト共有 URL + 画像はクリップボード/保存から添付
-      const lineUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(text + '\n' + location.href);
+      const lineUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(text);
       window.open(lineUrl, '_blank', 'noopener,noreferrer');
       showToast(blob ? shareHint(copied, 'LINE') : 'LINE共有を開きました');
     }
