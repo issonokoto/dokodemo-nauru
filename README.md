@@ -2,7 +2,7 @@
 
 ナウル共和国の**実寸シルエット**を地図上に重ねて、大きさの感覚を体感するWebアプリです。
 
-**公開ページ:** [https://issonokoto.github.io/issonokoto/](https://issonokoto.github.io/issonokoto/)
+**公開ページ:** [https://issonokoto.github.io/dokodemo-nauru/](https://issonokoto.github.io/dokodemo-nauru/)
 
 地図を動かすと、画面中央にナウル（またはナウルくん）がついてきます。赤道付近では小さく、高緯度ではメルカトル図法の影響で大きく見えます。
 
