@@ -450,12 +450,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        position: absolute;
-        top: max(0.65rem, env(safe-area-inset-top));
-        left: 0.65rem;
+        position: fixed;
+        left: 50%;
+        bottom: max(0.65rem, env(safe-area-inset-bottom));
         z-index: 1200;
-        width: 44px;
-        height: 44px;
+        width: 52px;
+        height: 38px;
         border-radius: 14px;
         border: 1px solid rgba(245, 197, 66, 0.4);
         background: linear-gradient(155deg, rgba(10, 39, 68, 0.96), rgba(6, 21, 37, 0.94));
@@ -464,7 +464,8 @@
         cursor: pointer;
         font-size: 18px;
         line-height: 1;
-        transition: transform 0.2s ease;
+        transform: translateX(-50%);
+        transition: opacity 0.2s ease, background 0.2s ease;
         padding: 0;
       }
       #mobile-toggle .chev {
@@ -474,22 +475,29 @@
       body.m-open #mobile-toggle .chev {
         transform: rotate(180deg);
       }
+      body.m-open #mobile-toggle {
+        z-index: 1700;
+        background: rgba(245, 197, 66, 0.96);
+        color: #061525;
+      }
 
-      /* 展開シート：初期は隠す（横はみ出し防止） */
+      /* カテゴリ一覧も操作パネルと同じ下部シートとして開く */
       #app-ui {
-        position: absolute;
-        top: max(3.6rem, calc(env(safe-area-inset-top) + 3.1rem));
+        position: fixed;
+        top: auto;
         left: max(0.55rem, env(safe-area-inset-left));
         right: max(0.55rem, env(safe-area-inset-right));
+        bottom: max(0.55rem, env(safe-area-inset-bottom));
         width: auto;
         max-width: calc(100vw - 1.1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-        z-index: 1150;
-        max-height: 0;
+        z-index: 1600;
+        max-height: min(78dvh, calc(100dvh - 1.1rem));
         opacity: 0;
-        overflow: hidden;
         overflow-x: hidden;
+        overflow-y: auto;
         pointer-events: none;
-        transition: max-height 0.32s ease, opacity 0.22s ease;
+        transform: translateY(calc(100% + 1.25rem));
+        transition: transform 0.28s ease, opacity 0.2s ease;
         border-radius: 1rem;
         background: linear-gradient(155deg, rgba(10, 39, 68, 0.97), rgba(6, 21, 37, 0.95));
         border: 1px solid rgba(245, 197, 66, 0.28);
@@ -499,6 +507,7 @@
       body.m-open #app-ui {
         max-height: min(78dvh, calc(100dvh - 5rem));
         opacity: 1;
+        transform: translateY(0);
         overflow-x: hidden;
         overflow-y: auto;
         pointer-events: auto;
@@ -529,6 +538,7 @@
       }
       #app-ui .ui-main-panel {
         border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+        padding-bottom: 3.5rem !important;
       }
       #app-ui #bottom-bar {
         border-bottom: 1px solid rgba(255,255,255,0.08) !important;
@@ -795,7 +805,7 @@
         cursor: pointer;
       }
 
-      /* スマホの左上はランチャーだけ。各操作は下部パネルに集約 */
+      /* スマホは下部のランチャーから各操作パネルへつなぐ */
       #app-ui #desktop-basemap-block,
       #app-ui #appearance-block,
       #app-ui #transform-block,
@@ -837,9 +847,9 @@
     </svg>
   </div>
 
-  <!-- スマホ: 左上の開閉ボタン -->
+  <!-- スマホ: 画面下の開閉ボタン -->
   <button type="button" id="mobile-toggle" aria-expanded="false" aria-controls="app-ui" title="メニュー">
-    <span class="chev" aria-hidden="true">▼</span>
+    <span class="chev" aria-hidden="true">▲</span>
   </button>
 
   <div id="app-ui">
