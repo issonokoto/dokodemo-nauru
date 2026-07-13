@@ -549,13 +549,21 @@
     .comparison-share-actions { display: flex; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
     .comparison-share-actions button { border: 1px solid rgba(255,255,255,0.45); border-radius: 0.75rem; padding: 0.6rem 0.9rem; background: rgba(6,21,37,0.48); color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; }
     .comparison-share-actions .comparison-post { background: #061525; }
-    /* html2canvas はグラデーションを分割して描く環境があるため、書き出し時だけ単色に固定する */
-    .comparison-card.is-capturing {
+    /* 共有画像はモーダル外の独立カードを撮る。合成レイヤーによる分割描画を避けるため単色に固定する。 */
+    .comparison-card.comparison-export-card {
+      position: absolute !important;
+      left: -10000px !important;
+      top: 0 !important;
+      z-index: -1 !important;
+      max-height: none !important;
+      overflow: hidden !important;
       background: #7ea6cf !important;
       background-image: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
     }
-    .comparison-card.is-capturing .comparison-close,
-    .comparison-card.is-capturing .comparison-share-actions { visibility: hidden; }
+    .comparison-card.comparison-export-card .comparison-close,
+    .comparison-card.comparison-export-card .comparison-share-actions { display: none !important; }
 
     /* ===== モバイルメニュー（PCでは非表示） ===== */
     #mobile-toggle {
@@ -3041,16 +3049,27 @@
     async function captureComparisonCanvas() {
       if (typeof html2canvas !== 'function') throw new Error('html2canvas が読み込めていません');
       const card = document.getElementById('comparison-card');
-      card.classList.add('is-capturing');
+      if (!card) throw new Error('比較カードが見つかりません');
+      // 表示中のモーダルは backdrop-filter などの合成レイヤーを持つため、
+      // 同じ内容を独立した要素に複製してから画像化する。
+      const exportCard = card.cloneNode(true);
+      exportCard.removeAttribute('id');
+      exportCard.classList.add('comparison-export-card');
+      exportCard.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+      exportCard.querySelector('.comparison-close')?.remove();
+      exportCard.querySelector('.comparison-share-actions')?.remove();
+      exportCard.style.width = `${Math.ceil(card.getBoundingClientRect().width)}px`;
+      exportCard.style.height = 'auto';
+      document.body.appendChild(exportCard);
       try {
         await new Promise(resolve => requestAnimationFrame(resolve));
-        return await html2canvas(card, {
+        return await html2canvas(exportCard, {
           backgroundColor: '#7ea6cf',
           scale: Math.min(2, window.devicePixelRatio || 1.5),
           logging: false
         });
       } finally {
-        card.classList.remove('is-capturing');
+        exportCard.remove();
       }
     }
 
