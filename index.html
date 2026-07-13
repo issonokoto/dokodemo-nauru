@@ -415,12 +415,18 @@
       box-sizing: border-box;
       max-width: 100vw;
       overflow-x: hidden;
+      pointer-events: none;
     }
     #bottom-bar > .panel {
       max-width: min(56rem, calc(100vw - 1.5rem));
       margin-left: auto;
       margin-right: auto;
       overflow: hidden;
+      pointer-events: auto;
+    }
+    .mobile-edit-start,
+    #mobile-edit-dock {
+      display: none;
     }
     #city-bar {
       max-width: 100%;
@@ -559,6 +565,155 @@
         text-align: right;
       }
 
+      .mobile-edit-start {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        margin-top: 0.65rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(245, 197, 66, 0.45);
+        background: rgba(245, 197, 66, 0.1);
+        color: #f5c542;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      #mobile-edit-dock {
+        display: block;
+        position: fixed;
+        left: max(0.55rem, env(safe-area-inset-left));
+        right: max(0.55rem, env(safe-area-inset-right));
+        bottom: max(0.55rem, env(safe-area-inset-bottom));
+        z-index: 1600;
+        padding: 0.7rem 0.75rem 0.75rem;
+        border: 1px solid rgba(245, 197, 66, 0.38);
+        border-radius: 1rem;
+        background: linear-gradient(155deg, rgba(10, 39, 68, 0.98), rgba(6, 21, 37, 0.97));
+        box-shadow: 0 14px 36px rgba(0,0,0,0.48);
+        transform: translateY(calc(100% + 1.25rem));
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.24s ease, opacity 0.18s ease;
+      }
+      body.m-editing #mobile-edit-dock {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      body.m-editing #mobile-toggle {
+        opacity: 0;
+        pointer-events: none;
+      }
+      body.m-editing .leaflet-bottom.leaflet-right {
+        bottom: 12.5rem !important;
+      }
+      body.m-editing #toast {
+        bottom: 13rem !important;
+      }
+      .mobile-edit-head,
+      .mobile-edit-tabs,
+      .mobile-edit-transform,
+      .mobile-edit-actions {
+        display: flex;
+        align-items: center;
+      }
+      .mobile-edit-head {
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.55rem;
+      }
+      .mobile-edit-title {
+        color: #efe6d4;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      #mobile-edit-done {
+        border: 1px solid #f5c542;
+        border-radius: 999px;
+        background: #f5c542;
+        color: #061525;
+        padding: 0.3rem 0.75rem;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .mobile-edit-tabs {
+        gap: 0.35rem;
+        margin-bottom: 0.55rem;
+      }
+      .mobile-edit-tab {
+        flex: 1;
+        border: 1px solid rgba(126, 200, 227, 0.25);
+        border-radius: 0.6rem;
+        background: rgba(15, 58, 95, 0.72);
+        color: #7ec8e3;
+        padding: 0.42rem 0.5rem;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .mobile-edit-tab.active {
+        border-color: rgba(245, 197, 66, 0.7);
+        background: rgba(245, 197, 66, 0.14);
+        color: #f5c542;
+        font-weight: 700;
+      }
+      #mobile-edit-swatches {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 34px;
+        margin-bottom: 0.6rem;
+        padding: 2px 3px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      #mobile-edit-swatches::-webkit-scrollbar { display: none; }
+      #mobile-edit-swatches .color-swatch {
+        width: 30px;
+        height: 30px;
+      }
+      .mobile-edit-transform {
+        gap: 0.55rem;
+        margin-bottom: 0.55rem;
+      }
+      .mobile-edit-transform label {
+        flex: 0 0 auto;
+        color: #7ec8e3;
+        font-size: 10px;
+      }
+      #mobile-edit-rotation {
+        flex: 1;
+        min-width: 0;
+      }
+      #mobile-edit-rotation-display {
+        width: 2.6rem;
+        color: #f5c542;
+        font-family: monospace;
+        font-size: 11px;
+        text-align: right;
+      }
+      .mobile-edit-actions {
+        gap: 0.4rem;
+      }
+      .mobile-edit-action {
+        flex: 1;
+        border: 1px solid rgba(126, 200, 227, 0.25);
+        border-radius: 0.55rem;
+        background: rgba(15, 58, 95, 0.76);
+        color: #efe6d4;
+        padding: 0.43rem 0.35rem;
+        font-size: 10px;
+        cursor: pointer;
+      }
+      .mobile-edit-action.active {
+        border-color: #f5c542;
+        color: #f5c542;
+        background: rgba(245, 197, 66, 0.14);
+      }
+
       /* 地図のズームは右下のまま、少し上に */
       .leaflet-bottom.leaflet-right {
         bottom: 0.5rem !important;
@@ -660,6 +815,9 @@
           <span>中央の星を表示</span>
         </label>
       </div>
+      <button type="button" id="mobile-edit-start" class="mobile-edit-start">
+        <span aria-hidden="true">◎</span><span>地図を見ながら調整</span>
+      </button>
     </div>
 
     <!-- Transform controls -->
@@ -713,6 +871,29 @@
     <button type="button" id="btn-share-line" class="dock-btn sns" title="LINEで送る">LINE</button>
   </div>
   </div><!-- /#app-ui -->
+
+  <!-- スマホ専用: 地図を見ながら使うコンパクト調整バー -->
+  <section id="mobile-edit-dock" aria-label="見た目調整" aria-hidden="true">
+    <div class="mobile-edit-head">
+      <span class="mobile-edit-title">見た目調整</span>
+      <button type="button" id="mobile-edit-done">完了</button>
+    </div>
+    <div class="mobile-edit-tabs" role="tablist" aria-label="形を選択">
+      <button type="button" id="mobile-edit-boundary" class="mobile-edit-tab" role="tab">国の境界</button>
+      <button type="button" id="mobile-edit-kun" class="mobile-edit-tab" role="tab">ナウルくん</button>
+    </div>
+    <div id="mobile-edit-swatches" role="listbox" aria-label="色と表示方法"></div>
+    <div class="mobile-edit-transform">
+      <label for="mobile-edit-rotation">回転</label>
+      <input type="range" id="mobile-edit-rotation" min="-180" max="180" value="0">
+      <span id="mobile-edit-rotation-display">0°</span>
+    </div>
+    <div class="mobile-edit-actions">
+      <button type="button" id="mobile-edit-flip-x" class="mobile-edit-action">左右反転</button>
+      <button type="button" id="mobile-edit-flip-y" class="mobile-edit-action">上下反転</button>
+      <button type="button" id="mobile-edit-reset" class="mobile-edit-action">リセット</button>
+    </div>
+  </section>
 
   <!-- 境界ユーザー色の小さな設定ウィンドウ -->
   <div id="user-color-pop" class="pop-card hidden" role="dialog" aria-label="境界の色設定">
@@ -1067,6 +1248,7 @@
     let activeSpot = 'tokyo';
     let currentBasemap = 'osm';
     let activeSwatchId = 'k-original';
+    const lastSwatchByGroup = { boundary: 'b-gold', kun: 'k-original' };
     let kunSourceImage = null;
     let kunBitmapUrl = null;
     let kunBitmapKey = '';
@@ -1177,17 +1359,93 @@
         wrap.appendChild(grid);
         panel.appendChild(wrap);
       });
+
+      buildMobileEditSwatches();
+      syncMobileEditControls();
+    }
+
+    function styleMobileSwatchButton(btn, s) {
+      btn.type = 'button';
+      btn.className = 'color-swatch';
+      btn.dataset.id = s.id;
+      btn.title = s.label;
+      btn.setAttribute('aria-label', s.label);
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', s.id === activeSwatchId ? 'true' : 'false');
+      if (s.id === activeSwatchId) btn.classList.add('active');
+
+      if (s.special === 'original') {
+        btn.classList.add('original-swatch');
+      } else if (s.special === 'semi') {
+        btn.classList.add('semi-swatch');
+      } else if (s.special === 'user') {
+        btn.classList.add('swatch-user');
+        if (s.preview) btn.style.background = s.preview;
+      } else if (s.special === 'outline' || s.special === 'hollow' || s.outlineOnly || s.bodyHollow) {
+        btn.classList.add('transparent-swatch');
+      } else if (s.preview) {
+        btn.style.background = s.preview;
+      }
+    }
+
+    function buildMobileEditSwatches() {
+      const panel = document.getElementById('mobile-edit-swatches');
+      if (!panel) return;
+      const active = getActiveSwatch();
+      const group = active.group || 'kun';
+      lastSwatchByGroup[group] = activeSwatchId;
+      panel.innerHTML = '';
+
+      SWATCHES.filter(s => s.group === group).forEach(s => {
+        const btn = document.createElement('button');
+        styleMobileSwatchButton(btn, s);
+        btn.addEventListener('click', () => {
+          setActiveSwatch(s.id);
+          if (s.id === 'b-user') {
+            const anchor = document.querySelector('#mobile-edit-swatches [data-id="b-user"]');
+            openUserColorPop(anchor || btn);
+          }
+        });
+        panel.appendChild(btn);
+      });
+    }
+
+    function syncMobileEditControls() {
+      const active = getActiveSwatch();
+      const boundaryTab = document.getElementById('mobile-edit-boundary');
+      const kunTab = document.getElementById('mobile-edit-kun');
+      const rotation = document.getElementById('mobile-edit-rotation');
+      const rotationDisplay = document.getElementById('mobile-edit-rotation-display');
+      const flipX = document.getElementById('mobile-edit-flip-x');
+      const flipY = document.getElementById('mobile-edit-flip-y');
+      if (boundaryTab) {
+        const on = active.group === 'boundary';
+        boundaryTab.classList.toggle('active', on);
+        boundaryTab.setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+      if (kunTab) {
+        const on = active.group === 'kun';
+        kunTab.classList.toggle('active', on);
+        kunTab.setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+      if (rotation) rotation.value = String(currentRotation);
+      if (rotationDisplay) rotationDisplay.textContent = `${currentRotation}°`;
+      if (flipX) flipX.classList.toggle('active', currentFlipX);
+      if (flipY) flipY.classList.toggle('active', currentFlipY);
     }
 
     function setActiveSwatch(id) {
       if (!SWATCH_BY_ID[id]) return;
       activeSwatchId = id;
+      lastSwatchByGroup[SWATCH_BY_ID[id].group] = id;
       document.querySelectorAll('#swatch-panel .color-swatch').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.id === id);
       });
       try { localStorage.setItem('nauru_swatch', id); } catch (_) {}
       kunBitmapKey = '';
       updateSilhouette(true);
+      buildMobileEditSwatches();
+      syncMobileEditControls();
     }
 
     function loadKunImage() {
@@ -2044,11 +2302,35 @@
           mobileToggle.title = open ? 'メニューを閉じる' : 'メニューを開く';
         }
       };
+      const mobileEditDock = document.getElementById('mobile-edit-dock');
+      const setMobileEditing = (open) => {
+        const enabled = !!open && window.matchMedia('(max-width: 767.98px)').matches;
+        document.body.classList.toggle('m-editing', enabled);
+        if (mobileEditDock) mobileEditDock.setAttribute('aria-hidden', enabled ? 'false' : 'true');
+        if (enabled) {
+          setMobileMenu(false);
+          buildMobileEditSwatches();
+          syncMobileEditControls();
+        }
+        requestAnimationFrame(() => {
+          if (map) map.invalidateSize({ pan: false });
+        });
+      };
       if (mobileToggle) {
         mobileToggle.addEventListener('click', () => {
           setMobileMenu(!document.body.classList.contains('m-open'));
         });
       }
+      const mobileEditStart = document.getElementById('mobile-edit-start');
+      const mobileEditDone = document.getElementById('mobile-edit-done');
+      if (mobileEditStart) mobileEditStart.addEventListener('click', () => setMobileEditing(true));
+      if (mobileEditDone) mobileEditDone.addEventListener('click', () => setMobileEditing(false));
+      window.addEventListener('resize', () => {
+        if (!window.matchMedia('(max-width: 767.98px)').matches) {
+          setMobileEditing(false);
+          setMobileMenu(false);
+        }
+      });
       window.__closeMobileMenu = () => setMobileMenu(false);
 
       // ナウルくん画像は先読み
@@ -2099,23 +2381,53 @@
         currentRotation = parseInt(e.target.value, 10);
         document.getElementById('rotation-display').innerText = `${currentRotation}°`;
         refreshTransform();
+        syncMobileEditControls();
       });
 
       document.getElementById('btn-flip-x').addEventListener('click', () => {
         currentFlipX = !currentFlipX;
         toggleFlipButton('btn-flip-x', currentFlipX);
         refreshTransform();
+        syncMobileEditControls();
       });
 
       document.getElementById('btn-flip-y').addEventListener('click', () => {
         currentFlipY = !currentFlipY;
         toggleFlipButton('btn-flip-y', currentFlipY);
         refreshTransform();
+        syncMobileEditControls();
       });
 
       document.getElementById('btn-reset-transform').addEventListener('click', () => {
         resetTransform();
         refreshTransform();
+        syncMobileEditControls();
+      });
+
+      const mobileRotation = document.getElementById('mobile-edit-rotation');
+      if (mobileRotation) {
+        mobileRotation.addEventListener('input', (e) => {
+          currentRotation = parseInt(e.target.value, 10);
+          document.getElementById('rotation-slider').value = String(currentRotation);
+          document.getElementById('rotation-display').innerText = `${currentRotation}°`;
+          document.getElementById('mobile-edit-rotation-display').textContent = `${currentRotation}°`;
+          refreshTransform();
+        });
+      }
+      document.getElementById('mobile-edit-flip-x').addEventListener('click', () => {
+        document.getElementById('btn-flip-x').click();
+      });
+      document.getElementById('mobile-edit-flip-y').addEventListener('click', () => {
+        document.getElementById('btn-flip-y').click();
+      });
+      document.getElementById('mobile-edit-reset').addEventListener('click', () => {
+        document.getElementById('btn-reset-transform').click();
+      });
+      document.getElementById('mobile-edit-boundary').addEventListener('click', () => {
+        setActiveSwatch(lastSwatchByGroup.boundary || 'b-gold');
+      });
+      document.getElementById('mobile-edit-kun').addEventListener('click', () => {
+        setActiveSwatch(lastSwatchByGroup.kun || 'k-original');
       });
 
       const noticeModal = document.getElementById('notice-modal');
