@@ -549,6 +549,11 @@
     .comparison-share-actions { display: flex; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
     .comparison-share-actions button { border: 1px solid rgba(255,255,255,0.45); border-radius: 0.75rem; padding: 0.6rem 0.9rem; background: rgba(6,21,37,0.48); color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; }
     .comparison-share-actions .comparison-post { background: #061525; }
+    /* html2canvas はグラデーションを分割して描く環境があるため、書き出し時だけ単色に固定する */
+    .comparison-card.is-capturing {
+      background: #7ea6cf !important;
+      background-image: none !important;
+    }
     .comparison-card.is-capturing .comparison-close,
     .comparison-card.is-capturing .comparison-share-actions { visibility: hidden; }
 
