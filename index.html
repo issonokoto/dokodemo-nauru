@@ -1249,7 +1249,7 @@
         </section>
       </div>
       <p id="comparison-summary" class="comparison-summary"></p>
-      <p class="comparison-note">市区町村・都道府県の境界データから面積を概算しています。</p>
+      <p class="comparison-note">面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。</p>
       <div class="comparison-share-actions">
         <button type="button" id="btn-comparison-save">📷 比較画像を保存</button>
         <button type="button" id="btn-comparison-post" class="comparison-post">𝕏 に投稿</button>
@@ -1274,7 +1274,7 @@
           <strong class="text-gold-400">どこでもナウル（β版）</strong>は、ナウルの<strong class="text-gold-400">実寸シルエット</strong>を地図上の好きな場所に重ねて、大きさの感覚をつかむためのものです。機能・表示は今後変更されることがあります。
         </p>
         <p class="text-xs bg-black/25 border border-white/10 rounded-xl p-3 text-ocean-300">
-          メルカトル図法では高緯度ほど見た目が大きくなります。球体近似のため誤差があります。測量・面積計算には使えません。境界は geoBoundaries（OSM 系）に基づきます。
+          メルカトル図法では高緯度ほど見た目が大きくなります。球体近似のため誤差があります。測量・面積計算には使えません。市区町村境界は国土数値情報（行政区域データ）に基づきます。
         </p>
         <div class="text-xs bg-black/25 border border-white/10 rounded-xl p-3 text-ocean-300 space-y-1">
           <p class="font-semibold text-sand-50">ナウルくんについて</p>
@@ -1308,6 +1308,7 @@
     const PREFECTURES_GEOJSON_URL = 'https://raw.githubusercontent.com/geolonia/prefecture-tiles/master/prefectures.geojson';
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
+    const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const PREFECTURES = [
       ['01','北海道'], ['02','青森県'], ['03','岩手県'], ['04','宮城県'], ['05','秋田県'], ['06','山形県'], ['07','福島県'], ['08','茨城県'], ['09','栃木県'], ['10','群馬県'],
       ['11','埼玉県'], ['12','千葉県'], ['13','東京都'], ['14','神奈川県'], ['15','新潟県'], ['16','富山県'], ['17','石川県'], ['18','福井県'], ['19','山梨県'], ['20','長野県'],
@@ -1334,14 +1335,14 @@
       osm: {
         url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         options: {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           maxZoom: 19
         }
       },
       voyager: {
         url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
         options: {
-          attribution: '&copy; OSM &copy; CARTO · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           subdomains: 'abcd',
           maxZoom: 19
         }
@@ -1349,21 +1350,21 @@
       topo: {
         url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
         options: {
-          attribution: '&copy; OpenStreetMap, SRTM | OpenTopoMap · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          attribution: '&copy; OpenStreetMap, SRTM | OpenTopoMap · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           maxZoom: 17
         }
       },
       satellite: {
         url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         options: {
-          attribution: 'Tiles &copy; Esri · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          attribution: 'Tiles &copy; Esri · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           maxZoom: 19
         }
       },
       dark: {
         url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
         options: {
-          attribution: '&copy; OSM &copy; CARTO · 境界 geoBoundaries · ナウルくん © ナウル共和国政府観光局',
+          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           subdomains: 'abcd',
           maxZoom: 19
         }
@@ -1468,6 +1469,7 @@
     let pendingOtherShare = null;
     let comparisonTargets = PREFECTURES.slice();
     let comparisonCatalogPromise = null;
+    let officialAreaDataPromise = null;
     let prefecturesGeojsonPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
@@ -2806,6 +2808,29 @@
       return String(value || '').replace(/[\s　]/g, '').toLowerCase();
     }
 
+    async function loadOfficialAreaData() {
+      if (officialAreaDataPromise) return officialAreaDataPromise;
+      officialAreaDataPromise = fetch(OFFICIAL_AREA_DATA_URL)
+        .then(response => {
+          if (!response.ok) throw new Error('公式面積データを取得できませんでした');
+          return response.json();
+        })
+        .catch(error => {
+          officialAreaDataPromise = null;
+          throw error;
+        });
+      return officialAreaDataPromise;
+    }
+
+    async function getOfficialAreaKm2(target) {
+      const data = await loadOfficialAreaData();
+      const area = target.kind === 'prefecture'
+        ? data.prefectures[String(target.code).padStart(2, '0')]
+        : data.municipalities[String(target.adminCode).padStart(5, '0')];
+      if (!Number.isFinite(area)) throw new Error(`${target.name}の公式面積が見つかりませんでした`);
+      return area;
+    }
+
     function syncComparisonSearch(value) {
       ['comparison-search', 'mobile-comparison-search'].forEach(id => {
         const input = document.getElementById(id);
@@ -2912,27 +2937,6 @@
       return { minLng, minLat, maxLng, maxLat };
     }
 
-    function calculateAreaKm2(polygons) {
-      const radius = 6378137;
-      const ringArea = ring => {
-        if (!ring || ring.length < 3) return 0;
-        let sum = 0;
-        for (let i = 0; i < ring.length; i++) {
-          const [lng1, lat1] = ring[i];
-          const [lng2, lat2] = ring[(i + 1) % ring.length];
-          sum += ((Number(lng2) - Number(lng1)) * Math.PI / 180) *
-            (2 + Math.sin(Number(lat1) * Math.PI / 180) + Math.sin(Number(lat2) * Math.PI / 180));
-        }
-        return Math.abs(sum * radius * radius / 2);
-      };
-      const area = polygons.reduce((total, polygon) => {
-        const outer = ringArea(polygon[0]);
-        const holes = polygon.slice(1).reduce((sum, ring) => sum + ringArea(ring), 0);
-        return total + Math.max(0, outer - holes);
-      }, 0);
-      return area / 1000000;
-    }
-
     function geometryMetrics(polygons) {
       const points = allCoordinatesFromPolygons(polygons);
       if (!points.length) return null;
@@ -3006,7 +3010,7 @@
       return bounds ? L.latLngBounds([bounds.minLat, bounds.minLng], [bounds.maxLat, bounds.maxLng]) : null;
     }
 
-    function renderComparison(result) {
+    async function renderComparison(result) {
       const targetMetrics = geometryMetrics(result.polygons);
       const nauruPolygons = [NAURU_RINGS];
       const nauruMetrics = geometryMetrics(nauruPolygons);
@@ -3015,7 +3019,7 @@
       const pixelsPerMeter = 226 / commonExtent;
       const targetPath = makeComparisonPath(result.polygons, targetMetrics, pixelsPerMeter);
       const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
-      const targetArea = calculateAreaKm2(result.polygons);
+      const targetArea = await getOfficialAreaKm2(result.target);
       const ratio = targetArea / NAURU_AREA_KM2;
       const ratioLabel = formatRatio(ratio);
       const nauruSvg = document.getElementById('comparison-nauru-svg');
@@ -3054,10 +3058,10 @@
           showToast(`${target.name}へ移動しました`);
           return;
         }
-        renderComparison(result);
+        await renderComparison(result);
       } catch (error) {
         console.warn(error);
-        showToast('境界データを読み込めませんでした');
+        showToast('比較データを読み込めませんでした');
       }
     }
 
