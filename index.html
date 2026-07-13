@@ -425,6 +425,7 @@
       pointer-events: auto;
     }
     .mobile-edit-start,
+    #mobile-launchers,
     #mobile-edit-dock {
       display: none;
     }
@@ -565,21 +566,36 @@
         text-align: right;
       }
 
-      .mobile-edit-start {
-        display: flex;
-        width: 100%;
-        align-items: center;
-        justify-content: center;
-        gap: 0.45rem;
-        margin-top: 0.65rem;
-        padding: 0.65rem 0.75rem;
+      #mobile-launchers {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+      }
+      .mobile-launcher {
+        min-width: 0;
+        border: 1px solid rgba(126, 200, 227, 0.25);
         border-radius: 0.75rem;
-        border: 1px solid rgba(245, 197, 66, 0.45);
-        background: rgba(245, 197, 66, 0.1);
+        background: rgba(15, 58, 95, 0.76);
+        color: #efe6d4;
+        padding: 0.65rem 0.55rem;
+        text-align: left;
+        cursor: pointer;
+      }
+      .mobile-launcher strong,
+      .mobile-launcher small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .mobile-launcher strong {
         color: #f5c542;
         font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
+      }
+      .mobile-launcher small {
+        margin-top: 0.18rem;
+        color: #7ec8e3;
+        font-size: 9px;
       }
       #mobile-edit-dock {
         display: block;
@@ -608,10 +624,10 @@
         pointer-events: none;
       }
       body.m-editing .leaflet-bottom.leaflet-right {
-        bottom: 12.5rem !important;
+        bottom: calc(var(--mobile-tool-height, 12rem) + 0.9rem) !important;
       }
       body.m-editing #toast {
-        bottom: 13rem !important;
+        bottom: calc(var(--mobile-tool-height, 12rem) + 1.4rem) !important;
       }
       .mobile-edit-head,
       .mobile-edit-tabs,
@@ -713,6 +729,80 @@
         color: #f5c542;
         background: rgba(245, 197, 66, 0.14);
       }
+      .mobile-tool-panel { display: none; }
+      .mobile-tool-panel.active { display: block; }
+      .mobile-tool-copy {
+        margin: 0 0 0.55rem;
+        color: #7ec8e3;
+        font-size: 10px;
+        line-height: 1.45;
+      }
+      #mobile-basemap-select {
+        width: 100%;
+      }
+      .mobile-place-inputs {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.55rem;
+      }
+      .mobile-place-inputs label {
+        color: #7ec8e3;
+        font-size: 10px;
+      }
+      .mobile-place-inputs .coord-input {
+        width: 100%;
+        max-width: none;
+      }
+      #mobile-btn-add-spot {
+        width: 100%;
+        margin-bottom: 0.55rem;
+        border: 1px solid rgba(245, 197, 66, 0.42);
+        border-radius: 0.6rem;
+        background: rgba(245, 197, 66, 0.1);
+        color: #f5c542;
+        padding: 0.45rem 0.55rem;
+        font-size: 10px;
+        cursor: pointer;
+      }
+      #mobile-city-bar {
+        display: flex;
+        gap: 0.4rem;
+        overflow-x: auto;
+        padding: 2px 1px;
+        scrollbar-width: none;
+      }
+      #mobile-city-bar::-webkit-scrollbar { display: none; }
+      #mobile-city-bar .chip {
+        flex: 0 0 auto;
+        padding: 0.48rem 0.65rem;
+        font-size: 10px;
+      }
+      .mobile-share-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+      }
+      .mobile-share-action {
+        border: 1px solid rgba(126, 200, 227, 0.28);
+        border-radius: 0.7rem;
+        background: rgba(15, 58, 95, 0.82);
+        color: #efe6d4;
+        min-height: 44px;
+        padding: 0.55rem;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      /* スマホの左上はランチャーだけ。各操作は下部パネルに集約 */
+      #app-ui #desktop-basemap-block,
+      #app-ui #appearance-block,
+      #app-ui #transform-block,
+      #app-ui #bottom-bar,
+      #app-ui #side-dock {
+        display: none !important;
+      }
 
       /* 地図のズームは右下のまま、少し上に */
       .leaflet-bottom.leaflet-right {
@@ -781,6 +871,22 @@
       <p class="text-[9px] text-ocean-300/80 mt-1 leading-snug">実寸は一定 · 高緯度ほど地図上では大きく見える</p>
     </div>
 
+    <!-- スマホ: 操作カテゴリだけを表示 -->
+    <div id="mobile-launchers" aria-label="操作を選択">
+      <button type="button" class="mobile-launcher" data-mobile-tool="map">
+        <strong>地図</strong><small id="mobile-map-summary">標準（明るい）</small>
+      </button>
+      <button type="button" class="mobile-launcher" data-mobile-tool="style">
+        <strong>見た目</strong><small id="mobile-style-summary">ナウルくん・元の塗り</small>
+      </button>
+      <button type="button" class="mobile-launcher" data-mobile-tool="place">
+        <strong>場所・比較</strong><small>都市・座標・マイ地点</small>
+      </button>
+      <button type="button" class="mobile-launcher" data-mobile-tool="share">
+        <strong>保存・共有</strong><small>画像・SNS</small>
+      </button>
+    </div>
+
     <p class="hidden sm:block text-xs text-sand-100/80 leading-relaxed mb-3">
       地図を動かすと、中央に<strong class="text-gold-400 font-semibold">ナウル共和国</strong>の実寸シルエットが乗ります。都市と比べて「どれくらい小さいか」を体感できます。
     </p>
@@ -790,7 +896,7 @@
     </div>
 
     <!-- Basemap picker -->
-    <div class="mb-2">
+    <div id="desktop-basemap-block" class="mb-2">
       <label for="basemap-select" class="block text-[10px] text-ocean-300 mb-1 tracking-wide">地図の種類</label>
       <select id="basemap-select" class="basemap-select" aria-label="地図の種類">
         <option value="osm">標準（明るい）</option>
@@ -802,7 +908,7 @@
     </div>
 
     <!-- 見た目（形＋色をスウォッチで一括選択） -->
-    <div class="mb-2">
+    <div id="appearance-block" class="mb-2">
       <div class="text-[10px] text-ocean-300 mb-1.5 tracking-wide">見た目（形・色）</div>
       <div id="swatch-panel"></div>
       <p class="text-[9px] text-ocean-300 mt-1 leading-snug">色を押すとその形・色に切り替わります</p>
@@ -815,13 +921,10 @@
           <span>中央の星を表示</span>
         </label>
       </div>
-      <button type="button" id="mobile-edit-start" class="mobile-edit-start">
-        <span aria-hidden="true">◎</span><span>地図を見ながら調整</span>
-      </button>
     </div>
 
     <!-- Transform controls -->
-    <details class="group border-t border-white/10 pt-2">
+    <details id="transform-block" class="group border-t border-white/10 pt-2">
       <summary class="cursor-pointer list-none flex items-center justify-between text-[11px] text-ocean-300 hover:text-gold-400 transition-colors">
         <span>シルエット操作</span>
         <span class="text-gold-400 group-open:rotate-180 transition-transform">▾</span>
@@ -872,26 +975,68 @@
   </div>
   </div><!-- /#app-ui -->
 
-  <!-- スマホ専用: 地図を見ながら使うコンパクト調整バー -->
-  <section id="mobile-edit-dock" aria-label="見た目調整" aria-hidden="true">
+  <!-- スマホ専用: 選んだ操作だけを表示する下部パネル -->
+  <section id="mobile-edit-dock" aria-label="操作パネル" aria-hidden="true">
     <div class="mobile-edit-head">
-      <span class="mobile-edit-title">見た目調整</span>
+      <span id="mobile-tool-title" class="mobile-edit-title">見た目調整</span>
       <button type="button" id="mobile-edit-done">完了</button>
     </div>
-    <div class="mobile-edit-tabs" role="tablist" aria-label="形を選択">
-      <button type="button" id="mobile-edit-boundary" class="mobile-edit-tab" role="tab">国の境界</button>
-      <button type="button" id="mobile-edit-kun" class="mobile-edit-tab" role="tab">ナウルくん</button>
+
+    <div class="mobile-tool-panel" data-mobile-panel="map">
+      <p class="mobile-tool-copy">地図の見え方を切り替えます。</p>
+      <select id="mobile-basemap-select" class="basemap-select" aria-label="スマホ用の地図の種類">
+        <option value="osm">標準（明るい）</option>
+        <option value="voyager">カラー地図</option>
+        <option value="topo">地形図</option>
+        <option value="satellite">衛星写真</option>
+        <option value="dark">ダーク</option>
+      </select>
     </div>
-    <div id="mobile-edit-swatches" role="listbox" aria-label="色と表示方法"></div>
-    <div class="mobile-edit-transform">
-      <label for="mobile-edit-rotation">回転</label>
-      <input type="range" id="mobile-edit-rotation" min="-180" max="180" value="0">
-      <span id="mobile-edit-rotation-display">0°</span>
+
+    <div class="mobile-tool-panel" data-mobile-panel="style">
+      <div class="mobile-edit-tabs" role="tablist" aria-label="形を選択">
+        <button type="button" id="mobile-edit-boundary" class="mobile-edit-tab" role="tab">国の境界</button>
+        <button type="button" id="mobile-edit-kun" class="mobile-edit-tab" role="tab">ナウルくん</button>
+      </div>
+      <div id="mobile-edit-swatches" role="listbox" aria-label="色と表示方法"></div>
+      <div class="mobile-edit-transform">
+        <label for="mobile-edit-rotation">回転</label>
+        <input type="range" id="mobile-edit-rotation" min="-180" max="180" value="0">
+        <span id="mobile-edit-rotation-display">0°</span>
+      </div>
+      <div class="mobile-edit-actions">
+        <button type="button" id="mobile-edit-flip-x" class="mobile-edit-action">左右反転</button>
+        <button type="button" id="mobile-edit-flip-y" class="mobile-edit-action">上下反転</button>
+        <button type="button" id="mobile-edit-reset" class="mobile-edit-action">リセット</button>
+      </div>
+      <div class="check-row">
+        <label for="mobile-chk-reticle">
+          <input type="checkbox" id="mobile-chk-reticle" checked>
+          <span>中央の星を表示</span>
+        </label>
+      </div>
     </div>
-    <div class="mobile-edit-actions">
-      <button type="button" id="mobile-edit-flip-x" class="mobile-edit-action">左右反転</button>
-      <button type="button" id="mobile-edit-flip-y" class="mobile-edit-action">上下反転</button>
-      <button type="button" id="mobile-edit-reset" class="mobile-edit-action">リセット</button>
+
+    <div class="mobile-tool-panel" data-mobile-panel="place">
+      <div class="mobile-place-inputs">
+        <label for="mobile-input-lat">緯度</label>
+        <input id="mobile-input-lat" class="coord-input" type="text" inputmode="decimal" placeholder="35.681" autocomplete="off">
+        <label for="mobile-input-lng">経度</label>
+        <input id="mobile-input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
+        <button type="button" id="mobile-btn-goto-coord" class="coord-go">移動</button>
+      </div>
+      <button type="button" id="mobile-btn-add-spot">＋ この位置を追加 (0/2)</button>
+      <div id="mobile-city-bar" aria-label="比較スポット"></div>
+    </div>
+
+    <div class="mobile-tool-panel" data-mobile-panel="share">
+      <p class="mobile-tool-copy">現在の地図を画像にして保存・共有します。</p>
+      <div class="mobile-share-grid">
+        <button type="button" id="mobile-btn-screenshot" class="mobile-share-action">📷 保存</button>
+        <button type="button" id="mobile-btn-share-x" class="mobile-share-action">𝕏 に投稿</button>
+        <button type="button" id="mobile-btn-share-ig" class="mobile-share-action">Instagram</button>
+        <button type="button" id="mobile-btn-share-line" class="mobile-share-action">LINE</button>
+      </div>
     </div>
   </section>
 
@@ -1268,6 +1413,8 @@
       if (el) el.style.display = showReticle ? '' : 'none';
       const chk = document.getElementById('chk-reticle');
       if (chk) chk.checked = showReticle;
+      const mobileChk = document.getElementById('mobile-chk-reticle');
+      if (mobileChk) mobileChk.checked = showReticle;
       try { localStorage.setItem('nauru_reticle', showReticle ? '1' : '0'); } catch (_) {}
     }
 
@@ -1285,6 +1432,13 @@
       currentBasemap = key;
       const sel = document.getElementById('basemap-select');
       if (sel && sel.value !== key) sel.value = key;
+      const mobileSel = document.getElementById('mobile-basemap-select');
+      if (mobileSel && mobileSel.value !== key) mobileSel.value = key;
+      const mapSummary = document.getElementById('mobile-map-summary');
+      if (mapSummary && sel) {
+        const option = Array.from(sel.options).find(o => o.value === key);
+        if (option) mapSummary.textContent = option.textContent;
+      }
       try { localStorage.setItem('nauru_basemap', key); } catch (_) {}
     }
 
@@ -1362,6 +1516,8 @@
 
       buildMobileEditSwatches();
       syncMobileEditControls();
+      const styleSummary = document.getElementById('mobile-style-summary');
+      if (styleSummary) styleSummary.textContent = getActiveSwatch().label;
     }
 
     function styleMobileSwatchButton(btn, s) {
@@ -1442,6 +1598,8 @@
         btn.classList.toggle('active', btn.dataset.id === id);
       });
       try { localStorage.setItem('nauru_swatch', id); } catch (_) {}
+      const styleSummary = document.getElementById('mobile-style-summary');
+      if (styleSummary) styleSummary.textContent = SWATCH_BY_ID[id].label;
       kunBitmapKey = '';
       updateSilhouette(true);
       buildMobileEditSwatches();
@@ -1671,7 +1829,7 @@
 
     function setActiveSpot(id) {
       activeSpot = id || '';
-      document.querySelectorAll('#city-bar .chip').forEach(el => {
+      document.querySelectorAll('#city-bar .chip, #mobile-city-bar .chip').forEach(el => {
         el.classList.toggle('active', id && el.dataset.id === id);
       });
     }
@@ -1706,6 +1864,14 @@
       }
       if (lngInput && document.activeElement !== lngInput) {
         lngInput.value = displayLng.toFixed(5);
+      }
+      const mobileLatInput = document.getElementById('mobile-input-lat');
+      const mobileLngInput = document.getElementById('mobile-input-lng');
+      if (mobileLatInput && document.activeElement !== mobileLatInput) {
+        mobileLatInput.value = displayLat.toFixed(5);
+      }
+      if (mobileLngInput && document.activeElement !== mobileLngInput) {
+        mobileLngInput.value = displayLng.toFixed(5);
       }
     }
 
@@ -1760,6 +1926,8 @@
         document.querySelector('aside.panel'),
         document.getElementById('bottom-bar'),
         document.getElementById('side-dock'),
+        document.getElementById('mobile-toggle'),
+        document.getElementById('mobile-edit-dock'),
         document.getElementById('user-color-pop'),
         document.getElementById('toast'),
         document.getElementById('notice-modal'),
@@ -2112,15 +2280,17 @@
     }
 
     function updateAddSpotButton() {
-      const btn = document.getElementById('btn-add-spot');
-      if (!btn) return;
       const full = customSpots.length >= MAX_CUSTOM_SPOTS;
-      btn.disabled = full;
-      btn.textContent = full
-        ? `マイ地点 上限${MAX_CUSTOM_SPOTS}件`
-        : `＋ この位置を追加 (${customSpots.length}/${MAX_CUSTOM_SPOTS})`;
-      btn.style.opacity = full ? '0.55' : '';
-      btn.style.cursor = full ? 'not-allowed' : '';
+      ['btn-add-spot', 'mobile-btn-add-spot'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.disabled = full;
+        btn.textContent = full
+          ? `マイ地点 上限${MAX_CUSTOM_SPOTS}件`
+          : `＋ この位置を追加 (${customSpots.length}/${MAX_CUSTOM_SPOTS})`;
+        btn.style.opacity = full ? '0.55' : '';
+        btn.style.cursor = full ? 'not-allowed' : '';
+      });
     }
 
     function addCustomSpotFromCenter() {
@@ -2194,31 +2364,34 @@
     }
 
     function buildCityBar() {
-      const bar = document.getElementById('city-bar');
-      bar.innerHTML = '';
-      getAllSpots().forEach(spot => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.dataset.id = spot.id;
-        btn.className = 'chip px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm' +
-          (spot.kind === 'loc' ? ' loc' : '') +
-          (spot.kind === 'custom' ? ' custom' : '') +
-          (spot.id === activeSpot ? ' active' : '');
-        const icon = spot.kind === 'home' ? '★ ' : (spot.kind === 'loc' ? '◎ ' : (spot.kind === 'custom' ? '☆ ' : ''));
-        const labelSpan = document.createElement('span');
-        labelSpan.textContent = icon + spot.label;
-        btn.appendChild(labelSpan);
-        if (spot.kind === 'custom') {
-          const x = document.createElement('span');
-          x.className = 'spot-x';
-          x.textContent = '×';
-          x.title = '削除';
-          x.setAttribute('role', 'button');
-          x.addEventListener('click', (e) => removeCustomSpot(spot.id, e));
-          btn.appendChild(x);
-        }
-        btn.addEventListener('click', () => flyToSpot(spot));
-        bar.appendChild(btn);
+      ['city-bar', 'mobile-city-bar'].forEach(barId => {
+        const bar = document.getElementById(barId);
+        if (!bar) return;
+        bar.innerHTML = '';
+        getAllSpots().forEach(spot => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.id = spot.id;
+          btn.className = 'chip px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm' +
+            (spot.kind === 'loc' ? ' loc' : '') +
+            (spot.kind === 'custom' ? ' custom' : '') +
+            (spot.id === activeSpot ? ' active' : '');
+          const icon = spot.kind === 'home' ? '★ ' : (spot.kind === 'loc' ? '◎ ' : (spot.kind === 'custom' ? '☆ ' : ''));
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = icon + spot.label;
+          btn.appendChild(labelSpan);
+          if (spot.kind === 'custom') {
+            const x = document.createElement('span');
+            x.className = 'spot-x';
+            x.textContent = '×';
+            x.title = '削除';
+            x.setAttribute('role', 'button');
+            x.addEventListener('click', (e) => removeCustomSpot(spot.id, e));
+            btn.appendChild(x);
+          }
+          btn.addEventListener('click', () => flyToSpot(spot));
+          bar.appendChild(btn);
+        });
       });
       updateAddSpotButton();
     }
@@ -2242,6 +2415,9 @@
       setBasemap(initialBasemap);
 
       document.getElementById('basemap-select').addEventListener('change', (e) => {
+        setBasemap(e.target.value);
+      });
+      document.getElementById('mobile-basemap-select').addEventListener('change', (e) => {
         setBasemap(e.target.value);
       });
 
@@ -2268,6 +2444,10 @@
       if (chkReticle) {
         chkReticle.addEventListener('change', () => setReticleVisible(chkReticle.checked));
       }
+      const mobileChkReticle = document.getElementById('mobile-chk-reticle');
+      if (mobileChkReticle) {
+        mobileChkReticle.addEventListener('change', () => setReticleVisible(mobileChkReticle.checked));
+      }
 
       // ユーザー色ポップ
       document.getElementById('user-fill-opacity').addEventListener('input', (e) => {
@@ -2286,12 +2466,27 @@
           if (e.key === 'Enter') flyToInputCoords();
         });
       });
+      const flyToMobileCoords = () => {
+        document.getElementById('input-lat').value = document.getElementById('mobile-input-lat').value;
+        document.getElementById('input-lng').value = document.getElementById('mobile-input-lng').value;
+        flyToInputCoords();
+      };
+      document.getElementById('mobile-btn-goto-coord').addEventListener('click', flyToMobileCoords);
+      ['mobile-input-lat', 'mobile-input-lng'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') flyToMobileCoords();
+        });
+      });
 
       // スクショ & SNS
       document.getElementById('btn-screenshot').addEventListener('click', () => takeScreenshot(true));
       document.getElementById('btn-share-x').addEventListener('click', () => shareToX());
       document.getElementById('btn-share-ig').addEventListener('click', () => shareToInstagram());
       document.getElementById('btn-share-line').addEventListener('click', () => shareToLine());
+      document.getElementById('mobile-btn-screenshot').addEventListener('click', () => takeScreenshot(true));
+      document.getElementById('mobile-btn-share-x').addEventListener('click', () => shareToX());
+      document.getElementById('mobile-btn-share-ig').addEventListener('click', () => shareToInstagram());
+      document.getElementById('mobile-btn-share-line').addEventListener('click', () => shareToLine());
 
       // スマホ: メニュー開閉（PCは常時表示のまま）
       const mobileToggle = document.getElementById('mobile-toggle');
@@ -2303,16 +2498,38 @@
         }
       };
       const mobileEditDock = document.getElementById('mobile-edit-dock');
-      const setMobileEditing = (open) => {
-        const enabled = !!open && window.matchMedia('(max-width: 767.98px)').matches;
+      const mobileToolTitles = {
+        map: '地図',
+        style: '見た目調整',
+        place: '場所・比較',
+        share: '保存・共有'
+      };
+      const updateMobileToolOffset = () => {
+        if (!mobileEditDock || !document.body.classList.contains('m-editing')) return;
+        const height = Math.ceil(mobileEditDock.getBoundingClientRect().height);
+        document.body.style.setProperty('--mobile-tool-height', `${height}px`);
+      };
+      const setMobileTool = (tool) => {
+        const enabled = !!tool && !!mobileToolTitles[tool] && window.matchMedia('(max-width: 767.98px)').matches;
         document.body.classList.toggle('m-editing', enabled);
         if (mobileEditDock) mobileEditDock.setAttribute('aria-hidden', enabled ? 'false' : 'true');
+        document.querySelectorAll('.mobile-tool-panel').forEach(panel => {
+          panel.classList.toggle('active', enabled && panel.dataset.mobilePanel === tool);
+        });
+        const title = document.getElementById('mobile-tool-title');
+        if (title && enabled) title.textContent = mobileToolTitles[tool];
         if (enabled) {
           setMobileMenu(false);
-          buildMobileEditSwatches();
-          syncMobileEditControls();
+          if (tool === 'style') {
+            buildMobileEditSwatches();
+            syncMobileEditControls();
+          } else if (tool === 'place') {
+            updateUI();
+            buildCityBar();
+          }
         }
         requestAnimationFrame(() => {
+          updateMobileToolOffset();
           if (map) map.invalidateSize({ pan: false });
         });
       };
@@ -2321,17 +2538,19 @@
           setMobileMenu(!document.body.classList.contains('m-open'));
         });
       }
-      const mobileEditStart = document.getElementById('mobile-edit-start');
       const mobileEditDone = document.getElementById('mobile-edit-done');
-      if (mobileEditStart) mobileEditStart.addEventListener('click', () => setMobileEditing(true));
-      if (mobileEditDone) mobileEditDone.addEventListener('click', () => setMobileEditing(false));
+      document.querySelectorAll('[data-mobile-tool]').forEach(btn => {
+        btn.addEventListener('click', () => setMobileTool(btn.dataset.mobileTool));
+      });
+      if (mobileEditDone) mobileEditDone.addEventListener('click', () => setMobileTool(null));
       window.addEventListener('resize', () => {
         if (!window.matchMedia('(max-width: 767.98px)').matches) {
-          setMobileEditing(false);
+          setMobileTool(null);
           setMobileMenu(false);
         }
       });
       window.__closeMobileMenu = () => setMobileMenu(false);
+      window.__closeMobileTool = () => setMobileTool(null);
 
       // ナウルくん画像は先読み
       loadKunImage().catch(() => {});
@@ -2339,6 +2558,8 @@
       loadCustomSpots();
       const btnAddSpot = document.getElementById('btn-add-spot');
       if (btnAddSpot) btnAddSpot.addEventListener('click', addCustomSpotFromCenter);
+      const mobileBtnAddSpot = document.getElementById('mobile-btn-add-spot');
+      if (mobileBtnAddSpot) mobileBtnAddSpot.addEventListener('click', addCustomSpotFromCenter);
 
       map.on('zoomstart', () => { isZooming = true; });
       map.on('zoomend', () => {
