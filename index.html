@@ -129,6 +129,30 @@
       accent-color: #e8b020;
       cursor: pointer;
     }
+    .opacity-control {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-top: 0.65rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .opacity-control label {
+      flex: 0 0 auto;
+      color: #7ec8e3;
+      font-size: 10px;
+    }
+    .opacity-control input[type="range"] {
+      flex: 1;
+      min-width: 0;
+    }
+    .opacity-value {
+      width: 2.8rem;
+      color: #f5c542;
+      font-family: monospace;
+      font-size: 11px;
+      text-align: right;
+    }
     .color-swatch:hover { transform: scale(1.08); }
     .color-swatch.active {
       box-shadow: 0 0 0 2px #061525, 0 0 0 4px #f5c542;
@@ -154,14 +178,6 @@
     }
     .color-swatch.original-swatch {
       background: linear-gradient(135deg, #8ec31f 55%, #231814 55%);
-    }
-    .color-swatch.semi-swatch {
-      background:
-        linear-gradient(135deg, rgba(142,195,31,0.45) 55%, rgba(35,24,21,0.45) 55%),
-        linear-gradient(45deg, #ccc 25%, transparent 25%),
-        linear-gradient(-45deg, #ccc 25%, transparent 25%);
-      background-size: auto, 8px 8px, 8px 8px;
-      background-position: 0 0, 0 0, 0 4px;
     }
     /* Leaflet の位置 transform を壊さないこと */
     .leaflet-image-layer {
@@ -804,6 +820,9 @@
         font-size: 11px;
         cursor: pointer;
       }
+      .mobile-share-action.wide {
+        grid-column: 1 / -1;
+      }
 
       /* スマホは下部のランチャーから各操作パネルへつなぐ */
       #app-ui #desktop-basemap-block,
@@ -921,6 +940,11 @@
     <div id="appearance-block" class="mb-2">
       <div class="text-[10px] text-ocean-300 mb-1.5 tracking-wide">見た目（形・色）</div>
       <div id="swatch-panel"></div>
+      <div class="opacity-control">
+        <label for="opacity-slider">不透明度</label>
+        <input type="range" id="opacity-slider" min="0" max="100" value="100">
+        <span id="opacity-display" class="opacity-value">100%</span>
+      </div>
       <p class="text-[9px] text-ocean-300 mt-1 leading-snug">色を押すとその形・色に切り替わります</p>
       <p class="text-[9px] text-ocean-300/90 mt-1.5 leading-snug">
         ナウルくん © ナウル共和国政府観光局
@@ -980,8 +1004,7 @@
   <div class="side-dock" id="side-dock">
     <button type="button" id="btn-screenshot" class="dock-btn" title="スクリーンショット">📷 保存</button>
     <button type="button" id="btn-share-x" class="dock-btn sns" title="Xに投稿">𝕏</button>
-    <button type="button" id="btn-share-ig" class="dock-btn sns" title="Instagram">IG</button>
-    <button type="button" id="btn-share-line" class="dock-btn sns" title="LINEで送る">LINE</button>
+    <button type="button" id="btn-share-other" class="dock-btn sns" title="その他の共有先">その他</button>
   </div>
   </div><!-- /#app-ui -->
 
@@ -1009,6 +1032,11 @@
         <button type="button" id="mobile-edit-kun" class="mobile-edit-tab" role="tab">ナウルくん</button>
       </div>
       <div id="mobile-edit-swatches" role="listbox" aria-label="色と表示方法"></div>
+      <div class="opacity-control">
+        <label for="mobile-opacity-slider">不透明度</label>
+        <input type="range" id="mobile-opacity-slider" min="0" max="100" value="100">
+        <span id="mobile-opacity-display" class="opacity-value">100%</span>
+      </div>
       <div class="mobile-edit-transform">
         <label for="mobile-edit-rotation">回転</label>
         <input type="range" id="mobile-edit-rotation" min="-180" max="180" value="0">
@@ -1044,8 +1072,7 @@
       <div class="mobile-share-grid">
         <button type="button" id="mobile-btn-screenshot" class="mobile-share-action">📷 保存</button>
         <button type="button" id="mobile-btn-share-x" class="mobile-share-action">𝕏 に投稿</button>
-        <button type="button" id="mobile-btn-share-ig" class="mobile-share-action">Instagram</button>
-        <button type="button" id="mobile-btn-share-line" class="mobile-share-action">LINE</button>
+        <button type="button" id="mobile-btn-share-other" class="mobile-share-action wide">その他の共有</button>
       </div>
     </div>
   </section>
@@ -1060,11 +1087,6 @@
     <div class="pop-row">
       <span>線</span>
       <input type="color" id="user-stroke-color" value="#c9940a">
-    </div>
-    <div class="pop-row">
-      <span>不透明度</span>
-      <input type="range" id="user-fill-opacity" min="0" max="100" value="45">
-      <span id="user-fill-opacity-label" class="w-8 text-right font-mono text-[10px] text-gold-400">45%</span>
     </div>
     <label class="pop-row" style="justify-content:flex-start;cursor:pointer;">
       <input type="checkbox" id="user-outline-only" style="accent-color:#e8b020;">
@@ -1102,16 +1124,15 @@
           </p>
         </div>
         <div class="text-xs bg-black/25 border border-gold-500/25 rounded-xl p-3 text-sand-100/90 space-y-1.5">
-          <p class="font-semibold text-gold-400">X / Instagram / LINE への共有について</p>
+          <p class="font-semibold text-gold-400">X / その他の共有について</p>
           <p class="text-ocean-300 leading-relaxed">
-            ブラウザの制限で、投稿画面への<strong class="text-sand-50">画像の自動添付・自動貼り付けはできません</strong>。次の流れになります。
+            Xは画像をコピーして投稿画面を開きます。「その他」は端末の共通共有画面へ画像と場所のURLを渡します。
           </p>
           <ol class="list-decimal list-inside space-y-0.5 text-ocean-300 leading-relaxed">
-            <li>画像を<strong class="text-sand-50">保存</strong>（ダウンロード）</li>
-            <li>画像を<strong class="text-sand-50">クリップボードにコピー</strong></li>
-            <li>各サービスの投稿画面を開く</li>
-            <li>投稿欄で <strong class="text-sand-50">Ctrl+V</strong> して画像を貼り付け</li>
+            <li>Xでは画像を<strong class="text-sand-50">貼り付け</strong>（PCは Ctrl+V）</li>
+            <li>その他は画像準備後、もう一度押して共有先を選択</li>
           </ol>
+          <p class="text-ocean-300 leading-relaxed">画像を保存したい場合だけ「📷 保存」を使ってください。</p>
         </div>
       </div>
       <button id="close-notice-btn" type="button" class="mt-5 w-full py-2.5 rounded-xl font-semibold text-ocean-950 bg-gradient-to-r from-gold-400 to-gold-600 hover:brightness-110 active:scale-[0.98] transition">
@@ -1193,13 +1214,11 @@
       { key: 'black', label: '黒',       hex: '#1e293b', rgb: [30, 41, 59] }
     ];
 
-    function solidStyle(p, { fillOpacity = 0.45, opacity = 1 } = {}) {
+    function solidStyle(p) {
       return {
         stroke: p.hex,
         fill: p.hex,
-        fillOpacity,
         rgb: p.rgb,
-        opacity,
         keepOriginal: false,
         outlineOnly: false
       };
@@ -1227,10 +1246,8 @@
       special: 'outline',
       stroke: '#f5c542',
       fill: '#f5c542',
-      fillOpacity: 0,
       rgb: [245, 197, 66],
       outlineOnly: true,
-      opacity: 1,
       keepOriginal: false
     });
     // 境界ユーザー色（localStorage で上書き）
@@ -1243,10 +1260,8 @@
       special: 'user',
       stroke: '#c9940a',
       fill: '#f5c542',
-      fillOpacity: 0.45,
       rgb: [245, 197, 66],
       outlineOnly: false,
-      opacity: 1,
       keepOriginal: false
     });
 
@@ -1259,23 +1274,7 @@
       special: 'original',
       stroke: '#6ea312',
       fill: '#8ec31f',
-      fillOpacity: 0.5,
       keepOriginal: true,
-      opacity: 1,
-      outlineOnly: false
-    });
-    SWATCHES.push({
-      id: 'k-semi',
-      mode: 'kun',
-      group: 'kun',
-      label: 'ナウルくん・半透明',
-      preview: null,
-      special: 'semi',
-      stroke: '#6ea312',
-      fill: '#8ec31f',
-      fillOpacity: 0.22,
-      keepOriginal: true,
-      opacity: 0.42,
       outlineOnly: false
     });
     SWATCHES.push({
@@ -1287,17 +1286,16 @@
       special: 'hollow',
       stroke: '#231815',
       fill: '#231815',
-      fillOpacity: 0,
       rgb: [35, 24, 21],
       bodyHollow: true,
       outlineOnly: false,
-      opacity: 1,
       keepOriginal: false
     });
 
     let SWATCH_BY_ID = Object.fromEntries(SWATCHES.map(s => [s.id, s]));
     let lastScreenshotBlob = null;
     let lastScreenshotUrl = null;
+    let pendingOtherShare = null;
 
     function hexToRgb(hex) {
       const m = String(hex || '').replace('#', '').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -1316,7 +1314,6 @@
         if (!s || !u) return;
         if (u.fill) s.fill = u.fill;
         if (u.stroke) s.stroke = u.stroke;
-        if (typeof u.fillOpacity === 'number') s.fillOpacity = u.fillOpacity;
         if (typeof u.outlineOnly === 'boolean') s.outlineOnly = u.outlineOnly;
         s.rgb = hexToRgb(s.fill);
         s.preview = s.outlineOnly ? null : s.fill;
@@ -1330,7 +1327,6 @@
         localStorage.setItem('nauru_user_boundary', JSON.stringify({
           fill: s.fill,
           stroke: s.stroke,
-          fillOpacity: s.fillOpacity,
           outlineOnly: !!s.outlineOnly
         }));
       } catch (_) {}
@@ -1342,9 +1338,6 @@
       if (!pop || !s) return;
       document.getElementById('user-fill-color').value = s.fill || '#f5c542';
       document.getElementById('user-stroke-color').value = s.stroke || '#c9940a';
-      const op = Math.round((s.fillOpacity != null ? s.fillOpacity : 0.45) * 100);
-      document.getElementById('user-fill-opacity').value = String(op);
-      document.getElementById('user-fill-opacity-label').textContent = op + '%';
       document.getElementById('user-outline-only').checked = !!s.outlineOnly;
 
       // 左パネル付近に配置
@@ -1370,11 +1363,9 @@
       if (!s) return;
       const fill = document.getElementById('user-fill-color').value;
       const stroke = document.getElementById('user-stroke-color').value;
-      const op = parseInt(document.getElementById('user-fill-opacity').value, 10) / 100;
       const outlineOnly = document.getElementById('user-outline-only').checked;
       s.fill = fill;
       s.stroke = stroke;
-      s.fillOpacity = outlineOnly ? 0 : op;
       s.outlineOnly = outlineOnly;
       s.rgb = hexToRgb(fill);
       s.preview = outlineOnly ? null : fill;
@@ -1398,12 +1389,14 @@
     let currentFlipX = false;
     let currentFlipY = false;
     let isZooming = false;
+    let initialMapZoom = 12;
     let L_lon = NAURU_CENTER.lon;
     let L_lat = NAURU_CENTER.lat;
     let activeSpot = 'tokyo';
     let currentBasemap = 'osm';
     let activeSwatchId = 'k-original';
     const lastSwatchByGroup = { boundary: 'b-gold', kun: 'k-original' };
+    let silhouetteOpacity = 1;
     let kunSourceImage = null;
     let kunBitmapUrl = null;
     let kunBitmapKey = '';
@@ -1412,9 +1405,32 @@
     let kunCanvasScale = { w: 1, h: 1 }; // 回転余白込みの拡大率
     let kunUpdateToken = 0;
     let showReticle = true;
+    let sharedUserBoundaryStyle = null;
 
     function getActiveSwatch() {
       return SWATCH_BY_ID[activeSwatchId] || SWATCH_BY_ID['k-original'];
+    }
+
+    function syncOpacityControls() {
+      const percent = Math.round(silhouetteOpacity * 100);
+      const desktopSlider = document.getElementById('opacity-slider');
+      const mobileSlider = document.getElementById('mobile-opacity-slider');
+      const desktopDisplay = document.getElementById('opacity-display');
+      const mobileDisplay = document.getElementById('mobile-opacity-display');
+      if (desktopSlider) desktopSlider.value = String(percent);
+      if (mobileSlider) mobileSlider.value = String(percent);
+      if (desktopDisplay) desktopDisplay.textContent = `${percent}%`;
+      if (mobileDisplay) mobileDisplay.textContent = `${percent}%`;
+    }
+
+    function setSilhouetteOpacity(percent, persist = true) {
+      const value = Number(percent);
+      silhouetteOpacity = Math.max(0, Math.min(1, (Number.isFinite(value) ? value : 100) / 100));
+      syncOpacityControls();
+      if (persist) {
+        try { localStorage.setItem('nauru_opacity', String(Math.round(silhouetteOpacity * 100))); } catch (_) {}
+      }
+      updateSilhouette(false);
     }
 
     function setReticleVisible(on) {
@@ -1426,6 +1442,16 @@
       const mobileChk = document.getElementById('mobile-chk-reticle');
       if (mobileChk) mobileChk.checked = showReticle;
       try { localStorage.setItem('nauru_reticle', showReticle ? '1' : '0'); } catch (_) {}
+    }
+
+    function syncTransformControls() {
+      const slider = document.getElementById('rotation-slider');
+      const display = document.getElementById('rotation-display');
+      if (slider) slider.value = String(currentRotation);
+      if (display) display.textContent = `${currentRotation}°`;
+      toggleFlipButton('btn-flip-x', currentFlipX);
+      toggleFlipButton('btn-flip-y', currentFlipY);
+      syncMobileEditControls();
     }
 
     function getSilhouetteMode() {
@@ -1490,8 +1516,6 @@
 
           if (s.special === 'original') {
             btn.classList.add('original-swatch');
-          } else if (s.special === 'semi') {
-            btn.classList.add('semi-swatch');
           } else if (s.special === 'user') {
             btn.classList.add('swatch-user');
             if (s.preview) btn.style.background = s.preview;
@@ -1542,8 +1566,6 @@
 
       if (s.special === 'original') {
         btn.classList.add('original-swatch');
-      } else if (s.special === 'semi') {
-        btn.classList.add('semi-swatch');
       } else if (s.special === 'user') {
         btn.classList.add('swatch-user');
         if (s.preview) btn.style.background = s.preview;
@@ -1598,6 +1620,7 @@
       if (rotationDisplay) rotationDisplay.textContent = `${currentRotation}°`;
       if (flipX) flipX.classList.toggle('active', currentFlipX);
       if (flipY) flipY.classList.toggle('active', currentFlipY);
+      syncOpacityControls();
     }
 
     function setActiveSwatch(id) {
@@ -1640,7 +1663,7 @@
 
     /**
      * ナウルくん画像を生成。
-     * - 元の塗り / 半透明: 色はそのまま
+     * - 元の塗り: 色はそのまま
      * - 単色: 不透明部分を塗り替え
      * - 透明: 輪郭のみ
      * 回転・反転は Canvas 上で行い、Leaflet の transform は触らない（ズレ防止）
@@ -1922,12 +1945,96 @@
 
     const SITE_URL = 'https://issonokoto.github.io/dokodemo-nauru/';
 
-    function buildShareText() {
+    function readSharedViewFromUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.has('lat') || !params.has('lng')) return null;
+        const lat = Number(params.get('lat'));
+        const lng = Number(params.get('lng'));
+        const zoomValue = Number(params.get('z'));
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+        if (lat < -84.5 || lat > 84.5 || lng < -180 || lng > 180) return null;
+        const zoom = Number.isFinite(zoomValue)
+          ? Math.max(2, Math.min(18, Math.round(zoomValue)))
+          : 12;
+        const styleKeys = ['map', 'style', 'opacity', 'rotation', 'flipX', 'flipY', 'reticle'];
+        const hasStyle = styleKeys.some(key => params.has(key));
+        const mapKey = params.get('map');
+        const swatchId = params.get('style');
+        const opacityValue = Number(params.get('opacity'));
+        const rotationValue = Number(params.get('rotation'));
+        const fill = params.get('fill');
+        const stroke = params.get('stroke');
+        const hexColor = value => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : null;
+        return {
+          lat,
+          lng,
+          zoom,
+          hasStyle,
+          basemap: BASEMAPS[mapKey] ? mapKey : null,
+          swatch: SWATCH_BY_ID[swatchId] ? swatchId : null,
+          opacity: Number.isFinite(opacityValue) ? Math.max(0, Math.min(100, Math.round(opacityValue))) : null,
+          rotation: Number.isFinite(rotationValue) ? Math.max(-180, Math.min(180, Math.round(rotationValue))) : null,
+          flipX: params.get('flipX') === '1',
+          flipY: params.get('flipY') === '1',
+          reticle: params.get('reticle') !== '0',
+          userBoundary: (hexColor(fill) && hexColor(stroke))
+            ? { fill: hexColor(fill), stroke: hexColor(stroke), outlineOnly: params.get('outline') === '1' }
+            : null
+        };
+      } catch (_) {
+        return null;
+      }
+    }
+
+    const sharedView = readSharedViewFromUrl();
+    if (sharedView) {
+      center = { lat: sharedView.lat, lng: sharedView.lng };
+      initialMapZoom = sharedView.zoom;
+      activeSpot = '';
+      if (sharedView.hasStyle) {
+        if (sharedView.basemap) currentBasemap = sharedView.basemap;
+        if (sharedView.swatch) activeSwatchId = sharedView.swatch;
+        if (sharedView.opacity !== null) silhouetteOpacity = sharedView.opacity / 100;
+        if (sharedView.rotation !== null) currentRotation = sharedView.rotation;
+        currentFlipX = sharedView.flipX;
+        currentFlipY = sharedView.flipY;
+        showReticle = sharedView.reticle;
+        sharedUserBoundaryStyle = sharedView.userBoundary;
+      }
+    }
+
+    function buildLocationUrl() {
+      const url = new URL(SITE_URL);
+      let lng = center.lng % 360;
+      if (lng > 180) lng -= 360;
+      if (lng < -180) lng += 360;
+      url.searchParams.set('lat', center.lat.toFixed(5));
+      url.searchParams.set('lng', lng.toFixed(5));
+      url.searchParams.set('z', String(map ? map.getZoom() : initialMapZoom));
+      url.searchParams.set('map', currentBasemap);
+      url.searchParams.set('style', activeSwatchId);
+      url.searchParams.set('opacity', String(Math.round(silhouetteOpacity * 100)));
+      url.searchParams.set('rotation', String(currentRotation));
+      url.searchParams.set('flipX', currentFlipX ? '1' : '0');
+      url.searchParams.set('flipY', currentFlipY ? '1' : '0');
+      url.searchParams.set('reticle', showReticle ? '1' : '0');
+      if (activeSwatchId === 'b-user') {
+        const style = getActiveSwatch();
+        url.searchParams.set('fill', style.fill);
+        url.searchParams.set('stroke', style.stroke);
+        url.searchParams.set('outline', style.outlineOnly ? '1' : '0');
+      }
+      return url.toString();
+    }
+
+    function buildShareText(includeUrl = true) {
       const lat = center.lat;
       let lng = center.lng % 360;
       if (lng > 180) lng -= 360;
       if (lng < -180) lng += 360;
-      return `#どこでもナウル\n${lat.toFixed(5)}, ${lng.toFixed(5)}\n${SITE_URL}`;
+      const body = `#どこでもナウル\n${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      return includeUrl ? `${body}\n${buildLocationUrl()}` : body;
     }
 
     async function captureMapCanvas() {
@@ -1983,24 +2090,33 @@
       return true;
     }
 
-    /** 画像をクリップボードへ（投稿画面で Ctrl+V / 貼り付け＝実質の自動添付） */
-    async function copyImageToClipboard(blob) {
-      if (!blob) return false;
+    /** 画像をクリップボードへ。Promise を先に渡して Safari のユーザー操作判定にも合わせる。 */
+    async function copyImageToClipboard(blobOrPromise) {
+      if (!navigator.clipboard || !window.ClipboardItem) return false;
+      const pngPromise = Promise.resolve(blobOrPromise).then(async blob => {
+        if (!blob) throw new Error('コピーする画像がありません');
+        return blob.type === 'image/png'
+          ? blob
+          : new Blob([await blob.arrayBuffer()], { type: 'image/png' });
+      });
       try {
-        if (navigator.clipboard && window.ClipboardItem) {
-          // Chrome/Edge: PNG をそのまま書ける
-          const pngBlob = blob.type === 'image/png'
-            ? blob
-            : new Blob([await blob.arrayBuffer()], { type: 'image/png' });
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': pngPromise })
+        ]);
+        return true;
+      } catch (firstError) {
+        try {
+          // Promise 値に未対応のブラウザ向け
+          const pngBlob = await pngPromise;
           await navigator.clipboard.write([
             new ClipboardItem({ 'image/png': pngBlob })
           ]);
           return true;
+        } catch (e) {
+          console.warn('clipboard image failed', firstError, e);
+          return false;
         }
-      } catch (e) {
-        console.warn('clipboard image failed', e);
       }
-      return false;
     }
 
     async function takeScreenshot(download) {
@@ -2021,58 +2137,151 @@
       }
     }
 
-    /**
-     * 保存 + クリップボード貼り付け準備 + 各サービスの投稿画面を開く
-     * ※ブラウザから X/IG/LINE に画像を直接アップロードする API は無いので、
-     *   クリップボードに画像を載せて投稿画面で即貼れる状態にする（自動添付に近い）
-     */
+    function createCurrentMapBlob() {
+      return captureMapCanvas()
+        .then(canvasToBlob)
+        .then(blob => {
+          lastScreenshotBlob = blob;
+          return blob;
+        });
+    }
+
+    /** X共有時は保存せず、現在の地図を画像化してクリップボードへコピーする。 */
     async function prepareImageForShare() {
-      showToast('画像を準備中…');
-      const blob = lastScreenshotBlob || await takeScreenshot(false);
-      if (!blob) return { blob: null, saved: false, copied: false };
-      const saved = downloadBlob(blob);
-      const copied = await copyImageToClipboard(blob);
-      return { blob, saved, copied };
+      showToast('画像をコピー中…');
+      const blobPromise = createCurrentMapBlob();
+      // 画像生成を待つ前に clipboard.write を開始し、クリック操作との関連を保つ
+      const copyPromise = copyImageToClipboard(blobPromise);
+      try {
+        const blob = await blobPromise;
+        const copied = await copyPromise;
+        return { blob, copied };
+      } catch (e) {
+        console.warn(e);
+        await copyPromise.catch(() => false);
+        return { blob: null, copied: false };
+      }
     }
 
     function shareHint(copied, platform) {
       if (copied) {
-        return `保存＆コピー済み → ${platform}で Ctrl+V で画像添付！`;
+        return `画像をコピーしました → ${platform}で貼り付けてください`;
       }
-      return `画像を保存しました。${platform}でファイルを選んで添付してください`;
+      return `画像をコピーできませんでした。${platform}の投稿画面を開きました`;
     }
 
-    // Windows の「共有」シート (navigator.share) は使わない
+    function openPendingShareWindow() {
+      const popup = window.open('about:blank', '_blank');
+      if (!popup) return null;
+      try {
+        popup.opener = null;
+        popup.document.title = '共有を準備中';
+        popup.document.body.textContent = '共有を準備しています…';
+      } catch (_) {}
+      return popup;
+    }
+
+    function navigateShareWindow(popup, url) {
+      if (popup && !popup.closed) {
+        popup.location.replace(url);
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
 
     async function shareToX() {
       const text = buildShareText();
-      const { blob, copied } = await prepareImageForShare();
+      const prepared = prepareImageForShare();
+      const popup = openPendingShareWindow();
+      const { blob, copied } = await prepared;
       // 投稿文入りの X 画面
       const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      navigateShareWindow(popup, url);
       showToast(blob ? shareHint(copied, 'X') : 'Xの投稿画面を開きました');
     }
 
-    async function shareToInstagram() {
-      const { blob, copied } = await prepareImageForShare();
-      // Web の IG は画像入力がファイル選択中心。クリップボードも試す
-      window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
-      if (blob && copied) {
-        showToast('保存＆コピー済み → Instagramで新規投稿し、貼り付け or 保存画像を選択');
-      } else if (blob) {
-        showToast('画像を保存しました。Instagramで新規投稿→画像を選んでください');
-      } else {
-        showToast('Instagramを開きました');
-      }
+    function setOtherShareReady(ready) {
+      const desktop = document.getElementById('btn-share-other');
+      const mobile = document.getElementById('mobile-btn-share-other');
+      if (desktop) desktop.textContent = ready ? '共有を開く' : 'その他';
+      if (mobile) mobile.textContent = ready ? 'もう一度押して共有' : 'その他の共有';
     }
 
-    async function shareToLine() {
-      const text = buildShareText();
-      const { blob, copied } = await prepareImageForShare();
-      // LINE はテキスト共有 URL + 画像はクリップボード/保存から添付
-      const lineUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(text);
-      window.open(lineUrl, '_blank', 'noopener,noreferrer');
-      showToast(blob ? shareHint(copied, 'LINE') : 'LINE共有を開きました');
+    function handleNativeShareResult(sharePromise, fallbackFile) {
+      sharePromise
+        .then(() => showToast('共有画面を開きました'))
+        .catch(e => {
+          if (e && e.name === 'AbortError') {
+            showToast('共有をキャンセルしました');
+            return;
+          }
+          console.warn('native share failed', e);
+          copyImageToClipboard(fallbackFile).then(copied => {
+            showToast(copied
+              ? '共有画面を開けなかったため、画像をコピーしました'
+              : '共有画面を開けませんでした');
+          });
+        });
+    }
+
+    function shareOther() {
+      const locationUrl = buildLocationUrl();
+
+      // Web Share API はクリック直後に呼ぶ必要があるため、画像準備後の2回目のクリックで開く。
+      if (pendingOtherShare && pendingOtherShare.locationUrl === locationUrl) {
+        const file = pendingOtherShare.file;
+        pendingOtherShare = null;
+        setOtherShareReady(false);
+        const canShareFile = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] });
+        if (typeof navigator.share === 'function') {
+          const payload = {
+            title: 'どこでもナウル',
+            text: buildShareText(false),
+            url: locationUrl
+          };
+          if (canShareFile) payload.files = [file];
+          handleNativeShareResult(navigator.share(payload), file);
+          return;
+        }
+        copyImageToClipboard(file).then(copied => {
+          showToast(copied
+            ? '共通共有に未対応のため、画像をコピーしました'
+            : 'このブラウザでは共通共有を利用できません');
+        });
+        return;
+      }
+
+      pendingOtherShare = null;
+      setOtherShareReady(false);
+      showToast('共有画像を準備中…');
+      const blobPromise = createCurrentMapBlob();
+
+      if (typeof navigator.share !== 'function') {
+        const copyPromise = copyImageToClipboard(blobPromise);
+        Promise.all([blobPromise, copyPromise])
+          .then(([, copied]) => showToast(copied
+            ? '共通共有に未対応のため、画像をコピーしました'
+            : 'このブラウザでは共通共有を利用できません'))
+          .catch(e => {
+            console.warn(e);
+            showToast('共有画像を作成できませんでした');
+          });
+        return;
+      }
+
+      blobPromise
+        .then(blob => {
+          pendingOtherShare = {
+            file: new File([blob], `dokodemo-nauru-${Date.now()}.png`, { type: 'image/png' }),
+            locationUrl
+          };
+          setOtherShareReady(true);
+          showToast('準備できました。もう一度押すと共有画面が開きます');
+        })
+        .catch(e => {
+          console.warn(e);
+          showToast('共有画像を作成できませんでした');
+        });
     }
 
     function toggleFlipButton(btnId, isFlipped) {
@@ -2084,13 +2293,7 @@
       currentRotation = 0;
       currentFlipX = false;
       currentFlipY = false;
-      const slider = document.getElementById('rotation-slider');
-      if (slider) {
-        slider.value = 0;
-        document.getElementById('rotation-display').innerText = '0°';
-        toggleFlipButton('btn-flip-x', false);
-        toggleFlipButton('btn-flip-y', false);
-      }
+      syncTransformControls();
     }
 
     function updateScaleOnly() {
@@ -2174,13 +2377,12 @@
       scale = Math.pow(ratio, 2) * 100;
 
       const style = getColorStyle();
-      // 境界モードでも「元の塗り/半透明」は緑系として扱う
       const polyOpts = {
         color: style.stroke,
         weight: style.outlineOnly ? 2.5 : 2,
         fillColor: style.fill,
-        fillOpacity: style.fillOpacity,
-        opacity: 1,
+        fillOpacity: style.outlineOnly ? 0 : silhouetteOpacity,
+        opacity: silhouetteOpacity,
         interactive: false
       };
 
@@ -2206,7 +2408,7 @@
         if (token !== kunUpdateToken) return; // 古い非同期結果を捨てる
 
         const bounds = physicalBoundsAt(center.lat, center.lng);
-        const opacity = (getColorStyle().opacity != null) ? getColorStyle().opacity : 0.92;
+        const opacity = silhouetteOpacity;
 
         if (!imageLayer) {
           imageLayer = L.imageOverlay(url, bounds, {
@@ -2409,19 +2611,23 @@
     window.onload = function () {
       map = L.map('map', {
         center: [center.lat, center.lng],
-        zoom: 12,
+        zoom: initialMapZoom,
         zoomControl: false,
         attributionControl: true
       });
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      // デフォルトは明るい OSM。前回の選択があれば復元
-      let initialBasemap = 'osm';
-      try {
-        const saved = localStorage.getItem('nauru_basemap');
-        if (saved && BASEMAPS[saved]) initialBasemap = saved;
-      } catch (_) {}
+      // 共有リンクの見た目を優先。指定がなければ前回の地図を復元
+      let initialBasemap = sharedView && sharedView.hasStyle && sharedView.basemap
+        ? sharedView.basemap
+        : 'osm';
+      if (!(sharedView && sharedView.hasStyle)) {
+        try {
+          const saved = localStorage.getItem('nauru_basemap');
+          if (saved && BASEMAPS[saved]) initialBasemap = saved;
+        } catch (_) {}
+      }
       setBasemap(initialBasemap);
 
       document.getElementById('basemap-select').addEventListener('change', (e) => {
@@ -2433,22 +2639,39 @@
 
       // 見た目スウォッチの復元
       loadUserBoundaryColor();
-      try {
-        const saved = localStorage.getItem('nauru_swatch');
-        if (saved && SWATCH_BY_ID[saved]) activeSwatchId = saved;
-        else {
-          const oldShape = localStorage.getItem('nauru_shape');
-          const oldColor = localStorage.getItem('nauru_color');
-          if (oldShape === 'kun' || (saved && String(saved).startsWith('k-'))) activeSwatchId = 'k-original';
-          else if (oldColor === 'transparent' || oldColor === 'outline') activeSwatchId = 'b-outline';
-          else if (oldColor === 'green') activeSwatchId = 'b-nauru';
-          else if (oldColor && SWATCH_BY_ID['b-' + oldColor]) activeSwatchId = 'b-' + oldColor;
-        }
-        const ret = localStorage.getItem('nauru_reticle');
-        if (ret === '0') showReticle = false;
-      } catch (_) {}
+      if (sharedUserBoundaryStyle) {
+        const userStyle = SWATCH_BY_ID['b-user'];
+        userStyle.fill = sharedUserBoundaryStyle.fill;
+        userStyle.stroke = sharedUserBoundaryStyle.stroke;
+        userStyle.outlineOnly = sharedUserBoundaryStyle.outlineOnly;
+        userStyle.rgb = hexToRgb(sharedUserBoundaryStyle.fill);
+        userStyle.preview = sharedUserBoundaryStyle.outlineOnly ? null : sharedUserBoundaryStyle.fill;
+      }
+      if (!(sharedView && sharedView.hasStyle)) {
+        try {
+          const saved = localStorage.getItem('nauru_swatch');
+          if (saved && SWATCH_BY_ID[saved]) activeSwatchId = saved;
+          else {
+            const oldShape = localStorage.getItem('nauru_shape');
+            const oldColor = localStorage.getItem('nauru_color');
+            if (oldShape === 'kun' || (saved && String(saved).startsWith('k-'))) activeSwatchId = 'k-original';
+            else if (oldColor === 'transparent' || oldColor === 'outline') activeSwatchId = 'b-outline';
+            else if (oldColor === 'green') activeSwatchId = 'b-nauru';
+            else if (oldColor && SWATCH_BY_ID['b-' + oldColor]) activeSwatchId = 'b-' + oldColor;
+          }
+          const ret = localStorage.getItem('nauru_reticle');
+          if (ret === '0') showReticle = false;
+          const savedOpacityRaw = localStorage.getItem('nauru_opacity');
+          const savedOpacity = savedOpacityRaw === null ? NaN : Number(savedOpacityRaw);
+          if (Number.isFinite(savedOpacity) && savedOpacity >= 0 && savedOpacity <= 100) {
+            silhouetteOpacity = savedOpacity / 100;
+          }
+        } catch (_) {}
+      }
       buildSwatchPanel();
       setReticleVisible(showReticle);
+      syncOpacityControls();
+      syncTransformControls();
 
       const chkReticle = document.getElementById('chk-reticle');
       if (chkReticle) {
@@ -2459,10 +2682,12 @@
         mobileChkReticle.addEventListener('change', () => setReticleVisible(mobileChkReticle.checked));
       }
 
-      // ユーザー色ポップ
-      document.getElementById('user-fill-opacity').addEventListener('input', (e) => {
-        document.getElementById('user-fill-opacity-label').textContent = e.target.value + '%';
+      ['opacity-slider', 'mobile-opacity-slider'].forEach(id => {
+        const slider = document.getElementById(id);
+        if (slider) slider.addEventListener('input', (e) => setSilhouetteOpacity(e.target.value));
       });
+
+      // ユーザー色ポップ
       document.getElementById('user-color-apply').addEventListener('click', applyUserColorFromPop);
       document.getElementById('user-color-cancel').addEventListener('click', closeUserColorPop);
       document.addEventListener('keydown', (e) => {
@@ -2491,12 +2716,10 @@
       // スクショ & SNS
       document.getElementById('btn-screenshot').addEventListener('click', () => takeScreenshot(true));
       document.getElementById('btn-share-x').addEventListener('click', () => shareToX());
-      document.getElementById('btn-share-ig').addEventListener('click', () => shareToInstagram());
-      document.getElementById('btn-share-line').addEventListener('click', () => shareToLine());
+      document.getElementById('btn-share-other').addEventListener('click', () => shareOther());
       document.getElementById('mobile-btn-screenshot').addEventListener('click', () => takeScreenshot(true));
       document.getElementById('mobile-btn-share-x').addEventListener('click', () => shareToX());
-      document.getElementById('mobile-btn-share-ig').addEventListener('click', () => shareToInstagram());
-      document.getElementById('mobile-btn-share-line').addEventListener('click', () => shareToLine());
+      document.getElementById('mobile-btn-share-other').addEventListener('click', () => shareOther());
 
       // スマホ: メニュー開閉（PCは常時表示のまま）
       const mobileToggle = document.getElementById('mobile-toggle');
