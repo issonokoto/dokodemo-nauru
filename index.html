@@ -463,6 +463,94 @@
       max-width: 100%;
       min-width: 0;
     }
+    .comparison-search-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: min(100%, 25rem);
+      flex: 1 1 20rem;
+    }
+    .comparison-search {
+      min-width: 0;
+      width: 100%;
+      height: 2rem;
+      border: 1px solid rgba(126, 200, 227, 0.38);
+      border-radius: 0.65rem;
+      background: rgba(6, 21, 37, 0.68);
+      color: #f7f3ea;
+      padding: 0 0.65rem;
+      font-size: 12px;
+      outline: none;
+    }
+    .comparison-search:focus { border-color: #f5c542; box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.14); }
+    .comparison-action {
+      height: 2rem;
+      flex: 0 0 auto;
+      border: 1px solid rgba(245, 197, 66, 0.42);
+      border-radius: 0.65rem;
+      background: rgba(15, 58, 95, 0.86);
+      color: #f7f3ea;
+      padding: 0 0.65rem;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .comparison-action.primary { background: linear-gradient(135deg, #f5c542, #e8b020); color: #061525; }
+    .comparison-action:hover { filter: brightness(1.12); }
+    #comparison-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 3500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(3, 16, 30, 0.72);
+      backdrop-filter: blur(5px);
+    }
+    #comparison-modal.open { display: flex; }
+    .comparison-card {
+      position: relative;
+      width: min(860px, 100%);
+      max-height: min(760px, calc(100vh - 2rem));
+      overflow: auto;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 28px;
+      background: linear-gradient(145deg, #84a9d0, #6d93bd);
+      box-shadow: 0 22px 65px rgba(0,0,0,0.42);
+      padding: clamp(1rem, 3vw, 2rem);
+    }
+    .comparison-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.8rem;
+      z-index: 1;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: 999px;
+      background: rgba(6, 21, 37, 0.28);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    .comparison-kicker { margin: 0 2.25rem 0.3rem 0; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; }
+    .comparison-title { margin: 0; font-size: clamp(1.1rem, 3.4vw, 1.75rem); line-height: 1.35; }
+    .comparison-figures { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(0.5rem, 3vw, 2rem); margin-top: 0.85rem; }
+    .comparison-figure { min-width: 0; text-align: center; }
+    .comparison-svg { display: block; width: 100%; height: min(42vw, 270px); min-height: 150px; overflow: visible; }
+    .comparison-name { min-height: 2.7em; margin: 0.1rem 0 0; font-weight: 800; font-size: clamp(1rem, 3.3vw, 1.65rem); line-height: 1.25; word-break: break-word; }
+    .comparison-area { margin: 0.25rem 0 0; color: rgba(255,255,255,0.86); font-size: clamp(0.74rem, 2.3vw, 0.94rem); }
+    .comparison-summary { margin: 0.9rem auto 0; max-width: 44rem; padding: 0.75rem 0.9rem; border-radius: 1rem; background: rgba(6, 21, 37, 0.2); color: #fff; text-align: center; font-size: clamp(0.88rem, 2.7vw, 1.08rem); font-weight: 700; line-height: 1.55; }
+    .comparison-note { margin: 0.5rem 0 0; color: rgba(255,255,255,0.78); text-align: center; font-size: 10px; }
+    .comparison-share-actions { display: flex; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
+    .comparison-share-actions button { border: 1px solid rgba(255,255,255,0.45); border-radius: 0.75rem; padding: 0.6rem 0.9rem; background: rgba(6,21,37,0.48); color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .comparison-share-actions .comparison-post { background: #061525; }
+    .comparison-card.is-capturing .comparison-close,
+    .comparison-card.is-capturing .comparison-share-actions { visibility: hidden; }
 
     /* ===== モバイルメニュー（PCでは非表示） ===== */
     #mobile-toggle {
@@ -856,6 +944,10 @@
       #toast {
         bottom: calc(var(--map-credit-height) + 1.25rem) !important;
       }
+      .comparison-card { border-radius: 22px; padding: 1rem 0.8rem 0.85rem; }
+      .comparison-figures { gap: 0.3rem; }
+      .comparison-svg { height: min(47vw, 220px); min-height: 125px; }
+      .comparison-name { font-size: 1rem; }
     }
   </style>
 </head>
@@ -1005,6 +1097,11 @@
           <input id="input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
           <button type="button" id="btn-goto-coord" class="coord-go">移動</button>
         </div>
+        <div class="comparison-search-row" role="search" aria-label="自治体・都道府県を検索">
+          <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off">
+          <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
+          <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
+        </div>
         <button type="button" id="btn-add-spot" class="ml-auto text-[10px] sm:text-[11px] px-2 py-1 rounded-lg border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 transition-colors shrink-0">
           ＋ この位置を追加 (0/2)
         </button>
@@ -1078,6 +1175,11 @@
         <input id="mobile-input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
         <button type="button" id="mobile-btn-goto-coord" class="coord-go">移動</button>
       </div>
+      <div class="comparison-search-row" role="search" aria-label="自治体・都道府県を検索">
+        <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off">
+        <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
+        <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
+      </div>
       <button type="button" id="mobile-btn-add-spot">＋ この位置を追加 (0/2)</button>
       <div id="mobile-city-bar" aria-label="比較スポット"></div>
     </div>
@@ -1091,6 +1193,8 @@
       </div>
     </div>
   </section>
+
+  <datalist id="comparison-targets"></datalist>
 
   <!-- 境界ユーザー色の小さな設定ウィンドウ -->
   <div id="user-color-pop" class="pop-card hidden" role="dialog" aria-label="境界の色設定">
@@ -1111,6 +1215,33 @@
       <button type="button" id="user-color-cancel">閉じる</button>
       <button type="button" id="user-color-apply" class="primary">適用</button>
     </div>
+  </div>
+
+  <!-- 市区町村・都道府県との面積比較 -->
+  <div id="comparison-modal" role="dialog" aria-modal="true" aria-labelledby="comparison-title">
+    <article id="comparison-card" class="comparison-card">
+      <button type="button" id="comparison-close" class="comparison-close" aria-label="比較を閉じる">×</button>
+      <p class="comparison-kicker">同じ縮尺でくらべる</p>
+      <h2 id="comparison-title" class="comparison-title">ナウル共和国と自治体の大きさ比較</h2>
+      <div class="comparison-figures">
+        <section class="comparison-figure" aria-label="ナウル共和国">
+          <svg id="comparison-nauru-svg" class="comparison-svg" viewBox="0 0 300 270" aria-hidden="true"></svg>
+          <p id="comparison-nauru-name" class="comparison-name">ナウル共和国</p>
+          <p id="comparison-nauru-area" class="comparison-area">面積 21 km²</p>
+        </section>
+        <section class="comparison-figure" aria-label="選択した自治体">
+          <svg id="comparison-target-svg" class="comparison-svg" viewBox="0 0 300 270" aria-hidden="true"></svg>
+          <p id="comparison-target-name" class="comparison-name"></p>
+          <p id="comparison-target-area" class="comparison-area"></p>
+        </section>
+      </div>
+      <p id="comparison-summary" class="comparison-summary"></p>
+      <p class="comparison-note">市区町村・都道府県の境界データから面積を概算しています。</p>
+      <div class="comparison-share-actions">
+        <button type="button" id="btn-comparison-save">📷 比較画像を保存</button>
+        <button type="button" id="btn-comparison-post" class="comparison-post">𝕏 に投稿</button>
+      </div>
+    </article>
   </div>
 
   <!-- Toast -->
@@ -1160,6 +1291,17 @@
 
     const NAURU_RINGS = [[[166.909908,-0.537735],[166.909987,-0.537745],[166.910041,-0.537742],[166.910181,-0.538021],[166.910259,-0.538268],[166.91032,-0.53869],[166.910395,-0.539048],[166.910513,-0.539355],[166.910663,-0.539759],[166.910828,-0.540069],[166.910953,-0.540311],[166.911089,-0.540619],[166.911169,-0.540858],[166.911247,-0.541177],[166.911294,-0.541429],[166.91134,-0.541611],[166.911378,-0.541779],[166.911483,-0.542069],[166.911687,-0.542532],[166.911866,-0.542846],[166.912102,-0.543206],[166.912629,-0.54403],[166.912951,-0.544444],[166.913219,-0.544741],[166.913844,-0.545316],[166.914083,-0.545565],[166.914463,-0.546011],[166.914498,-0.546087],[166.914824,-0.546463],[166.914985,-0.54664],[166.915422,-0.547012],[166.915579,-0.547159],[166.91579,-0.547302],[166.915905,-0.547363],[166.915969,-0.547406],[166.916005,-0.547445],[166.916073,-0.547563],[166.916148,-0.547649],[166.916748,-0.548095],[166.918219,-0.549051],[166.91963,-0.54993],[166.921302,-0.550802],[166.922305,-0.551424],[166.923686,-0.552573],[166.925081,-0.553796],[166.925341,-0.553802],[166.926064,-0.554129],[166.926478,-0.554064],[166.926936,-0.553594],[166.927179,-0.553253],[166.927824,-0.553339],[166.929091,-0.553527],[166.930181,-0.553676],[166.930355,-0.553692],[166.93047,-0.553656],[166.93072,-0.553692],[166.930851,-0.553686],[166.931107,-0.553736],[166.93134,-0.553788],[166.931409,-0.553793],[166.931464,-0.553805],[166.931574,-0.553849],[166.931695,-0.553821],[166.931837,-0.553807],[166.931992,-0.553805],[166.932148,-0.553811],[166.932285,-0.553834],[166.932432,-0.55389],[166.932489,-0.553934],[166.932548,-0.553994],[166.932635,-0.554015],[166.932806,-0.554048],[166.932992,-0.554046],[166.933149,-0.553994],[166.933336,-0.553917],[166.933701,-0.553846],[166.934519,-0.553721],[166.935912,-0.55332],[166.937263,-0.552844],[166.93844,-0.552275],[166.939523,-0.551689],[166.941376,-0.550387],[166.942257,-0.549715],[166.942935,-0.549283],[166.945164,-0.548045],[166.945333,-0.548003],[166.945538,-0.548166],[166.945794,-0.548174],[166.946437,-0.54771],[166.949034,-0.546053],[166.949636,-0.545445],[166.950224,-0.544647],[166.950335,-0.544374],[166.950524,-0.543911],[166.950714,-0.543448],[166.950765,-0.543365],[166.950792,-0.543224],[166.950796,-0.542991],[166.950744,-0.542645],[166.950699,-0.542504],[166.950725,-0.54241],[166.950698,-0.542208],[166.950588,-0.541817],[166.950486,-0.541166],[166.950251,-0.539987],[166.950226,-0.538434],[166.950321,-0.537563],[166.950765,-0.537515],[166.950821,-0.53722],[166.950885,-0.536672],[166.950865,-0.536661],[166.95073,-0.537328],[166.950307,-0.537348],[166.95029,-0.536672],[166.950491,-0.536635],[166.950526,-0.536311],[166.950669,-0.536205],[166.95098,-0.536386],[166.951007,-0.536366],[166.950689,-0.536177],[166.950826,-0.535925],[166.950771,-0.535702],[166.950627,-0.535629],[166.95041,-0.535518],[166.951627,-0.531341],[166.952261,-0.529357],[166.953225,-0.52736],[166.954365,-0.525718],[166.954573,-0.525601],[166.955463,-0.525099],[166.956179,-0.524057],[166.956965,-0.523074],[166.957478,-0.522523],[166.958157,-0.521718],[166.958524,-0.521027],[166.958873,-0.520044],[166.958923,-0.519315],[166.958873,-0.518466],[166.958385,-0.515937],[166.957928,-0.514193],[166.957142,-0.512247],[166.956743,-0.511328],[166.956001,-0.510827],[166.955095,-0.50949],[166.954074,-0.508359],[166.953269,-0.507468],[166.952407,-0.506701],[166.950765,-0.505528],[166.949009,-0.504431],[166.94724,-0.503734],[166.945757,-0.50329],[166.944755,-0.503018],[166.943925,-0.502986],[166.942891,-0.503138],[166.940761,-0.503107],[166.938879,-0.502745],[166.937782,-0.502574],[166.936546,-0.50253],[166.934514,-0.502681],[166.933503,-0.503398],[166.931969,-0.504216],[166.931335,-0.505274],[166.929807,-0.506865],[166.926035,-0.510948],[166.923506,-0.513376],[166.92111,-0.515728],[166.919284,-0.517268],[166.917627,-0.518609],[166.917236,-0.518821],[166.915018,-0.520685],[166.912659,-0.522935],[166.911461,-0.524792],[166.910833,-0.526276],[166.910529,-0.527227],[166.91034,-0.528113],[166.91019,-0.528434],[166.909937,-0.528397],[166.909785,-0.528474],[166.909648,-0.528631],[166.909199,-0.528516],[166.909179,-0.52854],[166.90966,-0.528689],[166.909809,-0.528508],[166.909906,-0.528554],[166.910265,-0.528639],[166.910087,-0.529345],[166.909691,-0.529273],[166.909597,-0.52914],[166.909652,-0.528916],[166.90999,-0.529008],[166.91,-0.528964],[166.909614,-0.528844],[166.909561,-0.529148],[166.909669,-0.529309],[166.910016,-0.529426],[166.909585,-0.532291],[166.909769,-0.534555],[166.909813,-0.536114],[166.910134,-0.537212],[166.910108,-0.537377],[166.91007,-0.537528],[166.910031,-0.537608],[166.909848,-0.537553],[166.909719,-0.537557],[166.909547,-0.537528],[166.909486,-0.537492],[166.909361,-0.537509],[166.909186,-0.537615],[166.909189,-0.537684],[166.909116,-0.537622],[166.908444,-0.537693],[166.90846,-0.537887],[166.909114,-0.537816],[166.909192,-0.537738],[166.9092,-0.537881],[166.909454,-0.537947],[166.909537,-0.537938],[166.909611,-0.537875],[166.909715,-0.537836],[166.909908,-0.537735]]];
     const NAURU_CENTER = { lat: -0.52833, lon: 166.933684 };
+    const NAURU_AREA_KM2 = 21;
+    const PREFECTURES_GEOJSON_URL = 'https://raw.githubusercontent.com/geolonia/prefecture-tiles/master/prefectures.geojson';
+    const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
+    const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
+    const PREFECTURES = [
+      ['01','北海道'], ['02','青森県'], ['03','岩手県'], ['04','宮城県'], ['05','秋田県'], ['06','山形県'], ['07','福島県'], ['08','茨城県'], ['09','栃木県'], ['10','群馬県'],
+      ['11','埼玉県'], ['12','千葉県'], ['13','東京都'], ['14','神奈川県'], ['15','新潟県'], ['16','富山県'], ['17','石川県'], ['18','福井県'], ['19','山梨県'], ['20','長野県'],
+      ['21','岐阜県'], ['22','静岡県'], ['23','愛知県'], ['24','三重県'], ['25','滋賀県'], ['26','京都府'], ['27','大阪府'], ['28','兵庫県'], ['29','奈良県'], ['30','和歌山県'],
+      ['31','鳥取県'], ['32','島根県'], ['33','岡山県'], ['34','広島県'], ['35','山口県'], ['36','徳島県'], ['37','香川県'], ['38','愛媛県'], ['39','高知県'], ['40','福岡県'],
+      ['41','佐賀県'], ['42','長崎県'], ['43','熊本県'], ['44','大分県'], ['45','宮崎県'], ['46','鹿児島県'], ['47','沖縄県']
+    ].map(([code, name]) => ({ kind: 'prefecture', code, name, search: name }));
 
 
     // 比較用スポット（日本の主要都市 + ナウル本体 + 現在地）
@@ -1311,6 +1453,11 @@
     let lastScreenshotBlob = null;
     let lastScreenshotUrl = null;
     let pendingOtherShare = null;
+    let comparisonTargets = PREFECTURES.slice();
+    let comparisonCatalogPromise = null;
+    let prefecturesGeojsonPromise = null;
+    const comparisonGeometryCache = new Map();
+    let activeComparison = null;
 
     function hexToRgb(hex) {
       const m = String(hex || '').replace('#', '').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -2623,6 +2770,316 @@
       updateAddSpotButton();
     }
 
+    function normalizeComparisonQuery(value) {
+      return String(value || '').replace(/[\s　]/g, '').toLowerCase();
+    }
+
+    function syncComparisonSearch(value) {
+      ['comparison-search', 'mobile-comparison-search'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input && input.value !== value) input.value = value;
+      });
+    }
+
+    async function loadComparisonCatalog() {
+      if (comparisonCatalogPromise) return comparisonCatalogPromise;
+      comparisonCatalogPromise = fetch(MUNICIPALITY_LIST_URL)
+        .then(response => {
+          if (!response.ok) throw new Error('自治体一覧を取得できませんでした');
+          return response.json();
+        })
+        .then(data => {
+          const municipalities = Object.entries(data)
+            .filter(([code, item]) => /^\d{6}$/.test(code) && item && item.prefecture && item.city)
+            .map(([code, item]) => ({
+              kind: 'municipality',
+              prefCode: code.slice(0, 2),
+              adminCode: code.slice(0, -1),
+              name: `${item.prefecture}${item.city}`,
+              shortName: item.city,
+              search: `${item.prefecture}${item.city} ${item.city}`
+            }));
+          comparisonTargets = PREFECTURES.concat(municipalities);
+          const list = document.getElementById('comparison-targets');
+          if (list) {
+            list.replaceChildren(...comparisonTargets.map(target => {
+              const option = document.createElement('option');
+              option.value = target.name;
+              option.label = target.kind === 'prefecture' ? '都道府県' : '市区町村';
+              return option;
+            }));
+          }
+          return comparisonTargets;
+        })
+        .catch(error => {
+          comparisonCatalogPromise = null;
+          throw error;
+        });
+      return comparisonCatalogPromise;
+    }
+
+    async function resolveComparisonTarget(value) {
+      const query = normalizeComparisonQuery(value);
+      if (!query) {
+        showToast('市区町村または都道府県を入力してください');
+        return null;
+      }
+      try {
+        await loadComparisonCatalog();
+      } catch (error) {
+        console.warn(error);
+        showToast('自治体一覧を読み込めませんでした。通信を確認してください');
+        return null;
+      }
+      const exact = comparisonTargets.find(target =>
+        normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query
+      );
+      const partial = comparisonTargets.find(target => normalizeComparisonQuery(target.search || target.name).includes(query));
+      const target = exact || partial;
+      if (!target) {
+        showToast('一致する市区町村・都道府県が見つかりません');
+        return null;
+      }
+      syncComparisonSearch(target.name);
+      return target;
+    }
+
+    function polygonGroupsFromGeojson(value) {
+      const polygons = [];
+      const visit = item => {
+        if (!item) return;
+        if (item.type === 'FeatureCollection') {
+          (item.features || []).forEach(visit);
+        } else if (item.type === 'Feature') {
+          visit(item.geometry);
+        } else if (item.type === 'GeometryCollection') {
+          (item.geometries || []).forEach(visit);
+        } else if (item.type === 'Polygon') {
+          polygons.push(item.coordinates || []);
+        } else if (item.type === 'MultiPolygon') {
+          (item.coordinates || []).forEach(polygon => polygons.push(polygon));
+        }
+      };
+      visit(value);
+      return polygons.filter(polygon => polygon.some(ring => Array.isArray(ring) && ring.length >= 3));
+    }
+
+    function allCoordinatesFromPolygons(polygons) {
+      return polygons.flatMap(polygon => polygon.flatMap(ring => ring))
+        .filter(point => Array.isArray(point) && Number.isFinite(Number(point[0])) && Number.isFinite(Number(point[1])));
+    }
+
+    function getGeometryBounds(polygons) {
+      const points = allCoordinatesFromPolygons(polygons);
+      if (!points.length) return null;
+      let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+      points.forEach(([lng, lat]) => {
+        minLng = Math.min(minLng, lng); maxLng = Math.max(maxLng, lng);
+        minLat = Math.min(minLat, lat); maxLat = Math.max(maxLat, lat);
+      });
+      return { minLng, minLat, maxLng, maxLat };
+    }
+
+    function calculateAreaKm2(polygons) {
+      const radius = 6378137;
+      const ringArea = ring => {
+        if (!ring || ring.length < 3) return 0;
+        let sum = 0;
+        for (let i = 0; i < ring.length; i++) {
+          const [lng1, lat1] = ring[i];
+          const [lng2, lat2] = ring[(i + 1) % ring.length];
+          sum += ((Number(lng2) - Number(lng1)) * Math.PI / 180) *
+            (2 + Math.sin(Number(lat1) * Math.PI / 180) + Math.sin(Number(lat2) * Math.PI / 180));
+        }
+        return Math.abs(sum * radius * radius / 2);
+      };
+      const area = polygons.reduce((total, polygon) => {
+        const outer = ringArea(polygon[0]);
+        const holes = polygon.slice(1).reduce((sum, ring) => sum + ringArea(ring), 0);
+        return total + Math.max(0, outer - holes);
+      }, 0);
+      return area / 1000000;
+    }
+
+    function geometryMetrics(polygons) {
+      const points = allCoordinatesFromPolygons(polygons);
+      if (!points.length) return null;
+      const lon0 = points.reduce((sum, [lng]) => sum + Number(lng), 0) / points.length;
+      const lat0 = points.reduce((sum, [, lat]) => sum + Number(lat), 0) / points.length;
+      const cosLat = Math.cos(lat0 * Math.PI / 180);
+      const projected = points.map(([lng, lat]) => ({
+        x: (Number(lng) - lon0) * 111320 * cosLat,
+        y: -(Number(lat) - lat0) * 110540
+      }));
+      const minX = Math.min(...projected.map(point => point.x));
+      const maxX = Math.max(...projected.map(point => point.x));
+      const minY = Math.min(...projected.map(point => point.y));
+      const maxY = Math.max(...projected.map(point => point.y));
+      return { lon0, lat0, cosLat, minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
+    }
+
+    function makeComparisonPath(polygons, metrics, pixelsPerMeter) {
+      const xMid = (metrics.minX + metrics.maxX) / 2;
+      const yMid = (metrics.minY + metrics.maxY) / 2;
+      const pointToSvg = ([lng, lat]) => {
+        const x = (Number(lng) - metrics.lon0) * 111320 * metrics.cosLat;
+        const y = -(Number(lat) - metrics.lat0) * 110540;
+        return [150 + (x - xMid) * pixelsPerMeter, 135 + (y - yMid) * pixelsPerMeter];
+      };
+      return polygons.flatMap(polygon => polygon.map(ring => {
+        const points = ring.map(pointToSvg);
+        if (points.length < 3) return '';
+        return `M${points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join('L')}Z`;
+      })).join(' ');
+    }
+
+    function formatArea(area) {
+      const fraction = area < 100 ? 1 : 0;
+      return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: fraction, minimumFractionDigits: area < 100 ? 1 : 0 }).format(area);
+    }
+
+    function formatRatio(value) {
+      const digits = value < 10 ? 1 : value < 100 ? 0 : 0;
+      return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: digits, minimumFractionDigits: 0 }).format(value);
+    }
+
+    async function getComparisonGeometry(target) {
+      const cacheKey = target.kind === 'prefecture' ? `pref:${target.code}` : `city:${target.adminCode}`;
+      if (comparisonGeometryCache.has(cacheKey)) return comparisonGeometryCache.get(cacheKey);
+      let source;
+      if (target.kind === 'prefecture') {
+        if (!prefecturesGeojsonPromise) {
+          prefecturesGeojsonPromise = fetch(PREFECTURES_GEOJSON_URL)
+            .then(response => {
+              if (!response.ok) throw new Error('都道府県境界を取得できませんでした');
+              return response.json();
+            });
+        }
+        const collection = await prefecturesGeojsonPromise;
+        source = (collection.features || []).find(feature => String(feature.properties && feature.properties.code).padStart(2, '0') === target.code);
+      } else {
+        const url = `${MUNICIPALITY_GEOJSON_BASE}/${target.prefCode}/${target.adminCode}.json`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('市区町村の境界を取得できませんでした');
+        source = await response.json();
+      }
+      const polygons = polygonGroupsFromGeojson(source);
+      if (!polygons.length) throw new Error('境界データが見つかりませんでした');
+      const result = { target, polygons, bounds: getGeometryBounds(polygons) };
+      comparisonGeometryCache.set(cacheKey, result);
+      return result;
+    }
+
+    function comparisonBoundsToLeaflet(bounds) {
+      return bounds ? L.latLngBounds([bounds.minLat, bounds.minLng], [bounds.maxLat, bounds.maxLng]) : null;
+    }
+
+    function renderComparison(result) {
+      const targetMetrics = geometryMetrics(result.polygons);
+      const nauruPolygons = [NAURU_RINGS];
+      const nauruMetrics = geometryMetrics(nauruPolygons);
+      if (!targetMetrics || !nauruMetrics) throw new Error('比較図を作れませんでした');
+      const commonExtent = Math.max(targetMetrics.width, targetMetrics.height, nauruMetrics.width, nauruMetrics.height, 1);
+      const pixelsPerMeter = 226 / commonExtent;
+      const targetPath = makeComparisonPath(result.polygons, targetMetrics, pixelsPerMeter);
+      const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
+      const targetArea = calculateAreaKm2(result.polygons);
+      const ratio = targetArea / NAURU_AREA_KM2;
+      const ratioLabel = formatRatio(ratio);
+      const nauruSvg = document.getElementById('comparison-nauru-svg');
+      const targetSvg = document.getElementById('comparison-target-svg');
+      const style = getActiveSwatch();
+      const flipX = currentFlipX ? -1 : 1;
+      const flipY = currentFlipY ? -1 : 1;
+      const transform = `translate(150 135) rotate(${currentRotation}) scale(${flipX} ${flipY}) translate(-150 -135)`;
+      if (getSilhouetteMode() === 'kun') {
+        const imageUrl = kunBitmapUrl || KUN_IMAGE_SRC;
+        nauruSvg.innerHTML = `<g transform="${transform}"><image href="${imageUrl}" x="${(150 - nauruMetrics.width * pixelsPerMeter / 2).toFixed(2)}" y="${(135 - nauruMetrics.height * pixelsPerMeter / 2).toFixed(2)}" width="${Math.max(1, nauruMetrics.width * pixelsPerMeter).toFixed(2)}" height="${Math.max(1, nauruMetrics.height * pixelsPerMeter).toFixed(2)}" preserveAspectRatio="none" /></g>`;
+      } else {
+        const fill = style.outlineOnly ? 'none' : style.fill;
+        nauruSvg.innerHTML = `<g transform="${transform}"><path d="${nauruPath}" fill="${fill}" stroke="${style.stroke}" stroke-width="2.5" fill-rule="evenodd" /></g>`;
+      }
+      targetSvg.innerHTML = `<path d="${targetPath}" fill="#8ec31f" stroke="#365c16" stroke-width="2.2" fill-rule="evenodd" />`;
+      document.getElementById('comparison-title').textContent = `ナウル共和国と${result.target.name}の大きさ比較`;
+      document.getElementById('comparison-nauru-area').textContent = `面積 ${NAURU_AREA_KM2} km²`;
+      document.getElementById('comparison-target-name').textContent = result.target.name;
+      document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
+      document.getElementById('comparison-summary').textContent = `${result.target.name}の面積は約${formatArea(targetArea)} km²。ナウルの約${ratioLabel}倍、ナウル約${ratioLabel}個分です。`;
+      activeComparison = { ...result, targetArea, ratio, ratioLabel };
+      document.getElementById('comparison-modal').classList.add('open');
+    }
+
+    async function handleComparisonAction(action, sourceId) {
+      const input = document.getElementById(sourceId);
+      const target = await resolveComparisonTarget(input && input.value);
+      if (!target) return;
+      try {
+        showToast(action === 'move' ? '境界を読み込み中…' : '比較を作成中…');
+        const result = await getComparisonGeometry(target);
+        if (action === 'move') {
+          const bounds = comparisonBoundsToLeaflet(result.bounds);
+          if (bounds && map) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 12, animate: true });
+          showToast(`${target.name}へ移動しました`);
+          return;
+        }
+        renderComparison(result);
+      } catch (error) {
+        console.warn(error);
+        showToast('境界データを読み込めませんでした');
+      }
+    }
+
+    function closeComparison() {
+      document.getElementById('comparison-modal').classList.remove('open');
+    }
+
+    async function captureComparisonCanvas() {
+      if (typeof html2canvas !== 'function') throw new Error('html2canvas が読み込めていません');
+      const card = document.getElementById('comparison-card');
+      card.classList.add('is-capturing');
+      try {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        return await html2canvas(card, {
+          backgroundColor: '#7ea6cf',
+          scale: Math.min(2, window.devicePixelRatio || 1.5),
+          logging: false
+        });
+      } finally {
+        card.classList.remove('is-capturing');
+      }
+    }
+
+    async function saveComparisonImage() {
+      if (!activeComparison) return;
+      try {
+        showToast('比較画像を作成中…');
+        const blob = await canvasToBlob(await captureComparisonCanvas());
+        downloadBlob(blob, `nauru-vs-${activeComparison.target.name}.png`);
+        showToast('比較画像を保存しました');
+      } catch (error) {
+        console.warn(error);
+        showToast('比較画像を作成できませんでした');
+      }
+    }
+
+    async function postComparisonToX() {
+      if (!activeComparison) return;
+      const text = `#どこでもナウル\n${activeComparison.target.name}の面積は約${formatArea(activeComparison.targetArea)} km²。ナウルの約${activeComparison.ratioLabel}倍、ナウル約${activeComparison.ratioLabel}個分です。\n${buildLocationUrl()}`;
+      const popup = openPendingShareWindow();
+      try {
+        showToast('比較画像をコピー中…');
+        const blobPromise = captureComparisonCanvas().then(canvasToBlob);
+        const copyPromise = copyImageToClipboard(blobPromise);
+        const [blob, copied] = await Promise.all([blobPromise, copyPromise]);
+        navigateShareWindow(popup, 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text));
+        showToast(blob ? shareHint(copied, 'X') : 'Xの投稿画面を開きました');
+      } catch (error) {
+        console.warn(error);
+        navigateShareWindow(popup, 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text));
+        showToast('Xの投稿画面を開きました');
+      }
+    }
+
     window.onload = function () {
       map = L.map('map', {
         center: [center.lat, center.lng],
@@ -2706,7 +3163,10 @@
       document.getElementById('user-color-apply').addEventListener('click', applyUserColorFromPop);
       document.getElementById('user-color-cancel').addEventListener('click', closeUserColorPop);
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeUserColorPop();
+        if (e.key === 'Escape') {
+          closeUserColorPop();
+          closeComparison();
+        }
       });
 
       // 緯度経度ジャンプ
@@ -2727,6 +3187,29 @@
           if (e.key === 'Enter') flyToMobileCoords();
         });
       });
+
+      // 市区町村・都道府県の検索。候補一覧は必要になったときに読み込む。
+      ['comparison-search', 'mobile-comparison-search'].forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('focus', () => {
+          loadComparisonCatalog().catch(() => {});
+        });
+        input.addEventListener('input', () => syncComparisonSearch(input.value));
+        input.addEventListener('keydown', event => {
+          if (event.key === 'Enter') handleComparisonAction('move', id);
+        });
+      });
+      document.getElementById('btn-comparison-move').addEventListener('click', () => handleComparisonAction('move', 'comparison-search'));
+      document.getElementById('btn-comparison-open').addEventListener('click', () => handleComparisonAction('compare', 'comparison-search'));
+      document.getElementById('mobile-btn-comparison-move').addEventListener('click', () => handleComparisonAction('move', 'mobile-comparison-search'));
+      document.getElementById('mobile-btn-comparison-open').addEventListener('click', () => handleComparisonAction('compare', 'mobile-comparison-search'));
+      document.getElementById('comparison-close').addEventListener('click', closeComparison);
+      document.getElementById('comparison-modal').addEventListener('click', event => {
+        if (event.target === event.currentTarget) closeComparison();
+      });
+      document.getElementById('btn-comparison-save').addEventListener('click', saveComparisonImage);
+      document.getElementById('btn-comparison-post').addEventListener('click', postComparisonToX);
 
       // スクショ & SNS
       document.getElementById('btn-screenshot').addEventListener('click', () => takeScreenshot(true));
