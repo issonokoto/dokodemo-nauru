@@ -2364,14 +2364,33 @@
       }
     }
 
+    function isMobileXShare() {
+      return window.matchMedia('(max-width: 767.98px)').matches ||
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    }
+
+    function buildXIntentUrl(text) {
+      return 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
+    }
+
+    function openXComposer(popup, url) {
+      // スマホは別タブを経由せず、X のモバイル Web Intent に同じ画面から遷移する。
+      // Xアプリが入っている端末ではOSのアプリハンドラが受け取り、未導入時はWeb投稿画面へ進む。
+      if (isMobileXShare()) {
+        window.location.assign(url);
+        return;
+      }
+      navigateShareWindow(popup, url);
+    }
+
     async function shareToX() {
       const text = buildShareText();
       const prepared = prepareImageForShare();
-      const popup = openPendingShareWindow();
+      const popup = isMobileXShare() ? null : openPendingShareWindow();
       const { blob, copied } = await prepared;
       // 投稿文入りの X 画面
-      const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
-      navigateShareWindow(popup, url);
+      const url = buildXIntentUrl(text);
+      openXComposer(popup, url);
       showToast(blob ? shareHint(copied, 'X') : 'Xの投稿画面を開きました');
     }
 
@@ -3089,17 +3108,17 @@
     async function postComparisonToX() {
       if (!activeComparison) return;
       const text = `#どこでもナウル\n${activeComparison.target.name}の面積は約${formatArea(activeComparison.targetArea)} km²。ナウルの約${activeComparison.ratioLabel}倍、ナウル約${activeComparison.ratioLabel}個分です。\n${buildLocationUrl()}`;
-      const popup = openPendingShareWindow();
+      const popup = isMobileXShare() ? null : openPendingShareWindow();
       try {
         showToast('比較画像をコピー中…');
         const blobPromise = captureComparisonCanvas().then(canvasToBlob);
         const copyPromise = copyImageToClipboard(blobPromise);
         const [blob, copied] = await Promise.all([blobPromise, copyPromise]);
-        navigateShareWindow(popup, 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text));
+        openXComposer(popup, buildXIntentUrl(text));
         showToast(blob ? shareHint(copied, 'X') : 'Xの投稿画面を開きました');
       } catch (error) {
         console.warn(error);
-        navigateShareWindow(popup, 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text));
+        openXComposer(popup, buildXIntentUrl(text));
         showToast('Xの投稿画面を開きました');
       }
     }
