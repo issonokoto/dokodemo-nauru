@@ -3319,7 +3319,7 @@
         ? `${result.target.prefecture}${result.target.parent ? `・${result.target.parent}` : ''}／${HISTORICAL_1995_DATE}`
         : '';
       document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
-      document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウルの約${ratioLabel}倍、ナウル約${ratioLabel}個分です。`;
+      document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウル約${ratioLabel}個分です。`;
       document.getElementById('comparison-note').textContent = historical
         ? '1995年境界：「歴史的行政区域データセットβ版」（CODH作成、CC BY 4.0）。面積は境界データから算出した概算です。'
         : '面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。';
@@ -3395,7 +3395,7 @@
 
     async function postComparisonToX() {
       if (!activeComparison) return;
-      const text = `#どこでもナウル\n${activeComparison.targetLabel}${activeComparison.targetPeriodLabel}の面積は約${formatArea(activeComparison.targetArea)} km²。ナウルの約${activeComparison.ratioLabel}倍、ナウル約${activeComparison.ratioLabel}個分です。\n${buildLocationUrl()}`;
+      const text = `#どこでもナウル\n${activeComparison.targetLabel}${activeComparison.targetPeriodLabel}の面積は約${formatArea(activeComparison.targetArea)} km²。ナウル約${activeComparison.ratioLabel}個分です。\n${buildLocationUrl()}`;
       const popup = isMobileXShare() ? null : openPendingShareWindow();
       try {
         showToast('比較画像をコピー中…');
