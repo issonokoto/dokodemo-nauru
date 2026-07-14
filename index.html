@@ -2967,17 +2967,30 @@
       };
     }
 
-    function renderComparisonCatalogOptions(targets) {
+    function renderComparisonCatalogOptions(targets, value = '') {
       const list = document.getElementById('comparison-targets');
       if (!list) return;
-      list.replaceChildren(...targets.map(target => {
+      const query = normalizeComparisonQuery(value);
+      if (query.length < 2) {
+        list.replaceChildren();
+        return;
+      }
+      const matches = [];
+      for (const target of targets) {
+        if (!normalizeComparisonQuery(target.search || target.name).includes(query)) continue;
+        matches.push(target);
+        if (matches.length >= 20) break;
+      }
+      const fragment = document.createDocumentFragment();
+      matches.forEach(target => {
         const option = document.createElement('option');
         option.value = target.name;
         option.label = isHistoricalComparisonTarget(target)
           ? '旧市区町村・1995年時点'
           : target.kind === 'prefecture' ? '都道府県' : '市区町村';
-        return option;
-      }));
+        fragment.appendChild(option);
+      });
+      list.replaceChildren(fragment);
     }
 
     function syncComparisonSearch(value) {
@@ -3055,7 +3068,10 @@
       const targets = await comparisonCatalogPromises.get(period);
       if (period === comparisonPeriod) {
         comparisonTargets = targets;
-        renderComparisonCatalogOptions(targets);
+        const activeInput = document.activeElement && document.activeElement.classList.contains('comparison-search')
+          ? document.activeElement
+          : document.getElementById('comparison-search');
+        renderComparisonCatalogOptions(targets, activeInput ? activeInput.value : '');
       }
       return targets;
     }
@@ -3566,14 +3582,26 @@
         select.addEventListener('change', () => setComparisonPeriod(select.value));
       });
 
-      // 市区町村・都道府県の検索。候補一覧は必要になったときに読み込む。
+      // 大きな datalist はモバイルブラウザのメイン処理を塞ぐため、
+      // 2文字以上の入力後に読み込み、一致する先頭20件だけをDOMへ追加する。
       ['comparison-search', 'mobile-comparison-search'].forEach(id => {
         const input = document.getElementById(id);
         if (!input) return;
-        input.addEventListener('focus', () => {
-          loadComparisonCatalog().catch(() => {});
+        let catalogTimer = null;
+        input.addEventListener('input', () => {
+          syncComparisonSearch(input.value);
+          clearTimeout(catalogTimer);
+          const query = normalizeComparisonQuery(input.value);
+          if (query.length < 2) {
+            renderComparisonCatalogOptions([], '');
+            return;
+          }
+          catalogTimer = setTimeout(() => {
+            loadComparisonCatalog()
+              .then(targets => renderComparisonCatalogOptions(targets, input.value))
+              .catch(() => {});
+          }, 150);
         });
-        input.addEventListener('input', () => syncComparisonSearch(input.value));
         input.addEventListener('keydown', event => {
           if (event.key === 'Enter') handleComparisonAction('move', id);
         });

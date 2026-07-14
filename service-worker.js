@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v10';
+const CACHE_NAME = 'dokodemo-nauru-v11';
 const APP_SHELL = [
   './',
   './index.html',
