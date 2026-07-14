@@ -42,6 +42,32 @@
       overflow: hidden;
     }
     #map { position: absolute; inset: 0; z-index: 0; }
+    #map-share-logo {
+      position: absolute;
+      top: max(0.75rem, env(safe-area-inset-top));
+      left: max(0.75rem, env(safe-area-inset-left));
+      z-index: 950;
+      display: none;
+      pointer-events: none;
+    }
+    #map-screen-logo {
+      position: absolute;
+      top: max(0.75rem, env(safe-area-inset-top));
+      right: max(0.75rem, env(safe-area-inset-right));
+      z-index: 900;
+      width: clamp(150px, 22vw, 250px);
+      pointer-events: none;
+    }
+    .app-logo {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.28));
+    }
+    #map-share-logo .app-logo { width: clamp(150px, 22vw, 250px); }
+    @media (max-width: 767.98px) {
+      #map-screen-logo { width: clamp(108px, 32vw, 145px); }
+    }
     /* Leaflet dark chrome */
     .leaflet-control-zoom a {
       background: rgba(255, 255, 255, 0.95) !important;
@@ -545,8 +571,14 @@
       font-size: 1.25rem;
       line-height: 1;
     }
-    .comparison-kicker { margin: 0 2.25rem 0.3rem 0; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; }
-    .comparison-title { margin: 0; font-size: clamp(1.1rem, 3.4vw, 1.75rem); line-height: 1.35; }
+    .comparison-kicker { margin: 0 10rem 0.3rem 0; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; }
+    .comparison-brand-logo {
+      position: absolute;
+      top: clamp(0.9rem, 2vw, 1.35rem);
+      right: clamp(1rem, 3vw, 1.8rem);
+      width: clamp(118px, 19vw, 180px);
+    }
+    .comparison-title { margin: 0 10rem 0 0; font-size: clamp(1.1rem, 3.4vw, 1.75rem); line-height: 1.35; }
     .comparison-figures { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(0.5rem, 3vw, 2rem); margin-top: 0.85rem; }
     .comparison-figure { min-width: 0; text-align: center; }
     .comparison-svg { display: block; width: 100%; height: min(42vw, 270px); min-height: 150px; overflow: visible; }
@@ -572,6 +604,10 @@
     }
     .comparison-card.comparison-export-card .comparison-close,
     .comparison-card.comparison-export-card .comparison-share-actions { display: none !important; }
+    @media (max-width: 420px) {
+      .comparison-brand-logo { width: 104px; }
+      .comparison-kicker, .comparison-title { margin-right: 6.5rem; }
+    }
 
     /* ===== モバイルメニュー（PCでは非表示） ===== */
     #mobile-toggle {
@@ -985,6 +1021,12 @@
   </div>
 
   <div id="map"></div>
+  <div id="map-share-logo" aria-hidden="true">
+    <img class="app-logo" src="assets/dokodemo-nauru-logo-transparent-v3.png" alt="">
+  </div>
+  <div id="map-screen-logo" aria-hidden="true">
+    <img class="app-logo" src="assets/dokodemo-nauru-logo-transparent-v3.png" alt="">
+  </div>
 
   <!-- Center reticle: Nauru-style star -->
   <div id="reticle" class="absolute inset-0 pointer-events-none z-[1000] flex items-center justify-center">
@@ -1003,7 +1045,6 @@
   <!-- 左パネル（PC: 常時表示 / スマホ: シート内） -->
   <aside class="ui-main-panel absolute top-[max(0.75rem,env(safe-area-inset-top))] left-3 sm:left-4 z-[1000] w-[min(calc(100%-1.5rem),300px)] max-h-[min(72vh,calc(100dvh-7.5rem))] overflow-y-auto pointer-events-auto panel rounded-2xl p-3 sm:p-4">
     <div class="flex items-center gap-2 mb-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-ocean-800 border border-gold-500/40 text-gold-400 text-sm shrink-0">★</span>
       <div class="min-w-0">
         <h1 class="text-sm sm:text-base font-bold text-sand-50 tracking-tight leading-tight truncate">どこでもナウル <span class="text-[10px] sm:text-xs font-semibold text-gold-400 align-middle">β</span></h1>
         <p class="text-[10px] sm:text-[11px] text-ocean-300 tracking-wide">実寸シルエット比較 · 21 km² · β版</p>
@@ -1242,6 +1283,7 @@
   <div id="comparison-modal" role="dialog" aria-modal="true" aria-labelledby="comparison-title">
     <article id="comparison-card" class="comparison-card">
       <button type="button" id="comparison-close" class="comparison-close" aria-label="比較を閉じる">×</button>
+      <img class="app-logo comparison-brand-logo" src="assets/dokodemo-nauru-logo-transparent-v3.png" alt="どこでもナウル">
       <p class="comparison-kicker">同じ縮尺でくらべる</p>
       <h2 id="comparison-title" class="comparison-title">ナウル共和国と自治体の大きさ比較</h2>
       <div class="comparison-figures">
@@ -1648,7 +1690,7 @@
       if (!map || !BASEMAPS[key]) return;
       const cfg = BASEMAPS[key];
       if (baseLayer) map.removeLayer(baseLayer);
-      baseLayer = L.tileLayer(cfg.url, cfg.options).addTo(map);
+      baseLayer = L.tileLayer(cfg.url, { ...cfg.options, crossOrigin: 'anonymous' }).addTo(map);
       if (polygonLayer) polygonLayer.bringToFront();
       if (imageLayer) imageLayer.bringToFront();
       currentBasemap = key;
@@ -2233,24 +2275,33 @@
         document.getElementById('mobile-edit-dock'),
         document.getElementById('user-color-pop'),
         document.getElementById('toast'),
+        document.getElementById('map-screen-logo'),
         document.getElementById('notice-modal'),
         document.getElementById('loading-overlay')
       ].filter(Boolean);
       const prev = hideEls.map(el => el.style.visibility);
+      const mapShareLogo = document.getElementById('map-share-logo');
+      const prevLogoDisplay = mapShareLogo ? mapShareLogo.style.display : '';
       hideEls.forEach(el => { el.style.visibility = 'hidden'; });
+      if (mapShareLogo) mapShareLogo.style.display = 'block';
 
       try {
-        // 地図コンテナを中心にキャプチャ（タイルは CORS の都合で欠ける場合あり）
-        const target = document.getElementById('map') || document.body;
+        // 地図と左上のロゴを含む表示全体をキャプチャする。
+        const target = document.body;
+        const shareLogoImage = mapShareLogo && mapShareLogo.querySelector('img');
+        if (shareLogoImage && typeof shareLogoImage.decode === 'function') {
+          await shareLogoImage.decode().catch(() => {});
+        }
         const canvas = await html2canvas(target, {
           useCORS: true,
-          allowTaint: true,
+          allowTaint: false,
           backgroundColor: '#e5e7eb',
           scale: Math.min(2, window.devicePixelRatio || 1.5),
           logging: false
         });
         return canvas;
       } finally {
+        if (mapShareLogo) mapShareLogo.style.display = prevLogoDisplay;
         hideEls.forEach((el, i) => { el.style.visibility = prev[i] || ''; });
       }
     }
@@ -2949,17 +3000,27 @@
     function geometryMetrics(polygons) {
       const points = allCoordinatesFromPolygons(polygons);
       if (!points.length) return null;
-      const lon0 = points.reduce((sum, [lng]) => sum + Number(lng), 0) / points.length;
-      const lat0 = points.reduce((sum, [, lat]) => sum + Number(lat), 0) / points.length;
+      let lonSum = 0;
+      let latSum = 0;
+      for (const [lng, lat] of points) {
+        lonSum += Number(lng);
+        latSum += Number(lat);
+      }
+      const lon0 = lonSum / points.length;
+      const lat0 = latSum / points.length;
       const cosLat = Math.cos(lat0 * Math.PI / 180);
-      const projected = points.map(([lng, lat]) => ({
-        x: (Number(lng) - lon0) * 111320 * cosLat,
-        y: -(Number(lat) - lat0) * 110540
-      }));
-      const minX = Math.min(...projected.map(point => point.x));
-      const maxX = Math.max(...projected.map(point => point.x));
-      const minY = Math.min(...projected.map(point => point.y));
-      const maxY = Math.max(...projected.map(point => point.y));
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      for (const [lng, lat] of points) {
+        const x = (Number(lng) - lon0) * 111320 * cosLat;
+        const y = -(Number(lat) - lat0) * 110540;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
       return { lon0, lat0, cosLat, minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
     }
 
@@ -3070,7 +3131,9 @@
         await renderComparison(result);
       } catch (error) {
         console.warn(error);
-        showToast('比較データを読み込めませんでした');
+        showToast(location.protocol === 'file:'
+          ? '比較はファイル直開きでは使えません。ローカルサーバーで開いてください'
+          : '比較データを読み込めませんでした');
       }
     }
 
@@ -3136,9 +3199,10 @@
       }
     }
 
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch(error => console.warn('Service Worker registration failed:', error));
+        navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
+          .catch(error => console.warn('Service Worker registration failed:', error));
       });
     }
 
