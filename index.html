@@ -65,7 +65,7 @@
       filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.28));
     }
     #map-share-logo .app-logo { width: clamp(150px, 22vw, 250px); }
-    @media (max-width: 767.98px) {
+    @media (max-width: 767.98px), (max-height: 500px) and (orientation: landscape) {
       #map-screen-logo { width: clamp(108px, 32vw, 145px); }
     }
     /* Leaflet dark chrome */
@@ -625,7 +625,7 @@
       .comparison-kicker, .comparison-title { margin-right: 6.5rem; }
     }
 
-    /* ===== モバイルメニュー（PCでは非表示） ===== */
+    /* ===== モバイル・低い横画面メニュー（PCでは非表示） ===== */
     #mobile-toggle {
       display: none;
     }
@@ -633,7 +633,7 @@
     #app-ui {
       display: contents;
     }
-    @media (max-width: 767.98px) {
+    @media (max-width: 767.98px), (max-height: 500px) and (orientation: landscape) {
       :root { --map-credit-height: 3.25rem; }
       #app-ui {
         display: block;
@@ -817,7 +817,10 @@
         transition: transform 0.24s ease, opacity 0.18s ease;
         box-sizing: border-box;
         max-width: calc(100dvw - 1.1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        max-height: calc(100dvh - var(--map-credit-height) - 1.1rem);
         overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       body.m-editing #mobile-edit-dock {
         transform: translateY(0);
@@ -1051,6 +1054,55 @@
       .comparison-svg { height: min(47vw, 220px); min-height: 125px; }
       .comparison-name { font-size: 1rem; }
     }
+    @media (max-height: 500px) and (orientation: landscape) {
+      #app-ui,
+      #mobile-edit-dock {
+        left: 50%;
+        right: auto;
+        width: min(36rem, calc(100dvw - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+        max-width: calc(100dvw - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+      }
+      #app-ui {
+        transform: translate(-50%, calc(100% + 1.25rem));
+      }
+      body.m-open #app-ui {
+        transform: translate(-50%, 0);
+      }
+      #app-ui .ui-main-panel {
+        padding-bottom: 2rem !important;
+      }
+      #mobile-edit-dock {
+        transform: translate(-50%, calc(100% + 1.25rem));
+      }
+      body.m-editing #mobile-edit-dock {
+        transform: translate(-50%, 0);
+      }
+      #notice-modal {
+        align-items: stretch;
+        padding: 0.5rem;
+        overflow-y: auto;
+      }
+      #notice-modal > .panel {
+        max-height: calc(100dvh - 1rem);
+        margin: auto;
+        padding: 0.85rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      #notice-modal > .panel > div:nth-child(2) {
+        min-height: 0;
+        padding-right: 0.25rem;
+        overflow-y: auto;
+      }
+      #close-notice-btn {
+        flex: 0 0 auto;
+        margin-top: 0.55rem;
+      }
+      .desktop-only-copy {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1130,10 +1182,10 @@
       </button>
     </div>
 
-    <p class="hidden sm:block text-xs text-sand-100/80 leading-relaxed mb-3">
+    <p class="desktop-only-copy hidden sm:block text-xs text-sand-100/80 leading-relaxed mb-3">
       地図を動かすと、中央に<strong class="text-gold-400 font-semibold">ナウル共和国</strong>の実寸シルエットが乗ります。都市と比べて「どれくらい小さいか」を体感できます。
     </p>
-    <div class="hidden sm:flex gap-2 text-[10px] text-ocean-300 mb-3">
+    <div class="desktop-only-copy hidden sm:flex gap-2 text-[10px] text-ocean-300 mb-3">
       <span class="px-2 py-1 rounded-md bg-ocean-800/80 border border-ocean-700">直径 ≈ 5–6 km</span>
       <span class="px-2 py-1 rounded-md bg-ocean-800/80 border border-ocean-700">赤道直下 0.5°S</span>
     </div>
@@ -1420,6 +1472,8 @@
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
     const HISTORICAL_1995_DATE = '1995年10月1日時点';
+    const MOBILE_LAYOUT_QUERY = '(max-width: 767.98px), (max-height: 500px) and (orientation: landscape)';
+    const usesMobileLayout = () => window.matchMedia(MOBILE_LAYOUT_QUERY).matches;
     const PREFECTURES = [
       ['01','北海道'], ['02','青森県'], ['03','岩手県'], ['04','宮城県'], ['05','秋田県'], ['06','山形県'], ['07','福島県'], ['08','茨城県'], ['09','栃木県'], ['10','群馬県'],
       ['11','埼玉県'], ['12','千葉県'], ['13','東京都'], ['14','神奈川県'], ['15','新潟県'], ['16','富山県'], ['17','石川県'], ['18','福井県'], ['19','山梨県'], ['20','長野県'],
@@ -2228,7 +2282,7 @@
       setActiveSpot('');
       map.flyTo([lat, lng], Math.max(map.getZoom(), 11), { duration: 1.2 });
       showToast(`移動: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
-      if (window.matchMedia('(max-width: 767.98px)').matches && typeof window.__closeMobileMenu === 'function') {
+      if (usesMobileLayout() && typeof window.__closeMobileMenu === 'function') {
         window.__closeMobileMenu();
       }
     }
@@ -2492,7 +2546,7 @@
     }
 
     function isMobileXShare() {
-      return window.matchMedia('(max-width: 767.98px)').matches ||
+      return usesMobileLayout() ||
         /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
     }
 
@@ -2881,7 +2935,7 @@
           (pos) => {
             setActiveSpot('here');
             map.flyTo([pos.coords.latitude, pos.coords.longitude], spot.zoom, { duration: 1.4 });
-            if (window.matchMedia('(max-width: 767.98px)').matches && typeof window.__closeMobileMenu === 'function') {
+            if (usesMobileLayout() && typeof window.__closeMobileMenu === 'function') {
               window.__closeMobileMenu();
             }
           },
@@ -2891,7 +2945,7 @@
       }
       setActiveSpot(spot.id);
       map.flyTo([spot.lat, spot.lng], spot.zoom || 12, { duration: 1.4 });
-      if (window.matchMedia('(max-width: 767.98px)').matches && typeof window.__closeMobileMenu === 'function') {
+      if (usesMobileLayout() && typeof window.__closeMobileMenu === 'function') {
         window.__closeMobileMenu();
       }
     }
@@ -3676,7 +3730,7 @@
         document.body.style.setProperty('--mobile-tool-height', `${height}px`);
       };
       const setMobileTool = (tool) => {
-        const enabled = !!tool && !!mobileToolTitles[tool] && window.matchMedia('(max-width: 767.98px)').matches;
+        const enabled = !!tool && !!mobileToolTitles[tool] && usesMobileLayout();
         document.body.classList.toggle('m-editing', enabled);
         if (mobileEditDock) mobileEditDock.setAttribute('aria-hidden', enabled ? 'false' : 'true');
         document.querySelectorAll('.mobile-tool-panel').forEach(panel => {
@@ -3710,7 +3764,7 @@
       });
       if (mobileEditDone) mobileEditDone.addEventListener('click', () => setMobileTool(null));
       window.addEventListener('resize', () => {
-        if (!window.matchMedia('(max-width: 767.98px)').matches) {
+        if (!usesMobileLayout()) {
           setMobileTool(null);
           setMobileMenu(false);
         }
