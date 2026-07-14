@@ -1385,6 +1385,7 @@
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
+    const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
     const HISTORICAL_1995_DATE = '1995年10月1日時点';
     const PREFECTURES = [
       ['01','北海道'], ['02','青森県'], ['03','岩手県'], ['04','宮城県'], ['05','秋田県'], ['06','山形県'], ['07','福島県'], ['08','茨城県'], ['09','栃木県'], ['10','群馬県'],
@@ -3243,6 +3244,22 @@
       return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: digits, minimumFractionDigits: 0 }).format(value);
     }
 
+    async function loadHistorical1995Detail(target) {
+      const geoshapeId = String(target.geoshapeId || '').replace(/^gci:/, '');
+      const prefectureCode = String(target.adminCode || geoshapeId).slice(0, 2);
+      if (!/^\d{5}A\d{4}$/.test(geoshapeId) || !/^\d{2}$/.test(prefectureCode)) {
+        throw new Error('高精細境界の識別子が見つかりませんでした');
+      }
+      const response = await fetch(`${HISTORICAL_1995_DETAIL_BASE}/${prefectureCode}/${geoshapeId}.topojson`);
+      if (!response.ok) throw new Error('1995年の高精細境界を取得できませんでした');
+      const topology = await response.json();
+      const city = topology.objects && topology.objects.city;
+      const geometry = city && city.type === 'GeometryCollection' ? city.geometries && city.geometries[0] : city;
+      const decoded = decodeTopologyGeometry(topology, geometry);
+      if (!decoded) throw new Error('1995年の高精細境界を復元できませんでした');
+      return decoded;
+    }
+
     async function getComparisonGeometry(target) {
       const cacheKey = isHistoricalComparisonTarget(target)
         ? `history:1995:${target.geoshapeId || target.topologyIndex}`
@@ -3250,9 +3267,14 @@
       if (comparisonGeometryCache.has(cacheKey)) return comparisonGeometryCache.get(cacheKey);
       let source;
       if (isHistoricalComparisonTarget(target)) {
-        const topology = await loadHistorical1995Topology();
-        const geometries = topology.objects && topology.objects.city && topology.objects.city.geometries || [];
-        source = decodeTopologyGeometry(topology, geometries[target.topologyIndex]);
+        try {
+          source = await loadHistorical1995Detail(target);
+        } catch (error) {
+          console.warn('高精細境界を取得できないため軽量境界を使用します', error);
+          const topology = await loadHistorical1995Topology();
+          const geometries = topology.objects && topology.objects.city && topology.objects.city.geometries || [];
+          source = decodeTopologyGeometry(topology, geometries[target.topologyIndex]);
+        }
       } else if (target.kind === 'prefecture') {
         if (!prefecturesGeojsonPromise) {
           prefecturesGeojsonPromise = fetch(PREFECTURES_GEOJSON_URL)
