@@ -20,7 +20,7 @@
 
 - 地図タイル: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors / CARTO / OpenTopoMap / Esri 等
 - 市区町村境界データ: 国土数値情報（行政区域データ）を加工した Geolonia Japanese Admins
-- 1995年自治体境界データ: 『歴史的行政区域データセットβ版』（CODH作成、CC BY 4.0）
+- 1995年自治体境界データ: [『歴史的行政区域データセットβ版』](https://geoshape.ex.nii.ac.jp/city/)（CODH作成、[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.ja)）を加工して表示
 - 市区町村・都道府県の面積: 国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）
 - ナウルくん © ナウル共和国政府観光局
 - メルカトル図法上の実寸比較という体験は、既存の True Size 系・「どこでも〜マップ」系の着想を参考にしています

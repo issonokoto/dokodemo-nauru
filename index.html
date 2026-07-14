@@ -601,6 +601,7 @@
     .comparison-area { margin: 0.25rem 0 0; color: rgba(255,255,255,0.86); font-size: clamp(0.74rem, 2.3vw, 0.94rem); }
     .comparison-summary { margin: 0.9rem auto 0; max-width: 44rem; padding: 0.75rem 0.9rem; border-radius: 1rem; background: rgba(6, 21, 37, 0.2); color: #fff; text-align: center; font-size: clamp(0.88rem, 2.7vw, 1.08rem); font-weight: 700; line-height: 1.55; }
     .comparison-note { margin: 0.5rem 0 0; color: rgba(255,255,255,0.78); text-align: center; font-size: 10px; }
+    .comparison-note a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
     .comparison-share-actions { display: flex; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
     .comparison-share-actions button { border: 1px solid rgba(255,255,255,0.45); border-radius: 0.75rem; padding: 0.6rem 0.9rem; background: rgba(6,21,37,0.48); color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; }
     .comparison-share-actions .comparison-post { background: #061525; }
@@ -1349,6 +1350,9 @@
         </p>
         <p class="text-xs bg-black/25 border border-white/10 rounded-xl p-3 text-ocean-300">
           メルカトル図法では高緯度ほど見た目が大きくなります。球体近似のため誤差があります。測量・面積計算には使えません。市区町村境界は国土数値情報（行政区域データ）に基づきます。
+        </p>
+        <p class="text-[11px] text-ocean-300 leading-relaxed">
+          1995年の境界は<a class="underline hover:text-sand-50" href="https://geoshape.ex.nii.ac.jp/city/" target="_blank" rel="noopener">『歴史的行政区域データセットβ版』</a>（CODH作成、<a class="underline hover:text-sand-50" href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を加工して表示しています。
         </p>
         <div class="text-xs bg-black/25 border border-white/10 rounded-xl p-3 text-ocean-300 space-y-1">
           <p class="font-semibold text-sand-50">ナウルくんについて</p>
@@ -3342,9 +3346,12 @@
         : '';
       document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
       document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウル約${ratioLabel}個分です。`;
-      document.getElementById('comparison-note').textContent = historical
-        ? '1995年境界：「歴史的行政区域データセットβ版」（CODH作成、CC BY 4.0）。面積は境界データから算出した概算です。'
-        : '面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。';
+      const comparisonNote = document.getElementById('comparison-note');
+      if (historical) {
+        comparisonNote.innerHTML = '1995年境界：<a href="https://geoshape.ex.nii.ac.jp/city/" target="_blank" rel="noopener">「歴史的行政区域データセットβ版」</a>（CODH作成、<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を加工して表示。面積は境界データから算出した概算です。';
+      } else {
+        comparisonNote.textContent = '面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。';
+      }
       activeComparison = { ...result, targetArea, ratio, ratioLabel, targetLabel, targetPeriodLabel };
       document.getElementById('comparison-modal').classList.add('open');
     }
