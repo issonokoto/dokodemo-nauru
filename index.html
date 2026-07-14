@@ -516,6 +516,21 @@
       font-size: 12px;
       outline: none;
     }
+    .comparison-period {
+      width: 6.2rem;
+      height: 2rem;
+      flex: 0 0 6.2rem;
+      border: 1px solid rgba(245, 197, 66, 0.42);
+      border-radius: 0.65rem;
+      background: rgba(6, 21, 37, 0.82);
+      color: #f7f3ea;
+      padding: 0 0.45rem;
+      font-size: 11px;
+      font-weight: 700;
+      outline: none;
+    }
+    .comparison-period:focus { border-color: #f5c542; box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.14); }
+    .comparison-period option { color: #061525; background: #f7f3ea; }
     .comparison-search:focus { border-color: #f5c542; box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.14); }
     .comparison-action {
       height: 2rem;
@@ -1160,6 +1175,10 @@
           <button type="button" id="btn-goto-coord" class="coord-go">移動</button>
         </div>
         <div class="comparison-search-row" role="search" aria-label="自治体・都道府県を検索">
+          <select id="comparison-period" class="comparison-period" aria-label="自治体の時点">
+            <option value="current">現在</option>
+            <option value="1995">1995年</option>
+          </select>
           <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off">
           <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
           <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
@@ -1238,6 +1257,10 @@
         <button type="button" id="mobile-btn-goto-coord" class="coord-go">移動</button>
       </div>
       <div class="comparison-search-row" role="search" aria-label="自治体・都道府県を検索">
+        <select id="mobile-comparison-period" class="comparison-period" aria-label="自治体の時点">
+          <option value="current">現在</option>
+          <option value="1995">1995年</option>
+        </select>
         <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off">
         <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
         <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
@@ -1295,11 +1318,12 @@
         <section class="comparison-figure" aria-label="選択した自治体">
           <svg id="comparison-target-svg" class="comparison-svg" viewBox="0 0 300 270" aria-hidden="true"></svg>
           <p id="comparison-target-name" class="comparison-name"></p>
+          <p id="comparison-target-context" class="comparison-area" hidden></p>
           <p id="comparison-target-area" class="comparison-area"></p>
         </section>
       </div>
       <p id="comparison-summary" class="comparison-summary"></p>
-      <p class="comparison-note">面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。</p>
+      <p id="comparison-note" class="comparison-note">面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。</p>
       <div class="comparison-share-actions">
         <button type="button" id="btn-comparison-save">📷 比較画像を保存</button>
         <button type="button" id="btn-comparison-post" class="comparison-post">𝕏 に投稿</button>
@@ -1360,6 +1384,8 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
+    const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
+    const HISTORICAL_1995_DATE = '1995年10月1日時点';
     const PREFECTURES = [
       ['01','北海道'], ['02','青森県'], ['03','岩手県'], ['04','宮城県'], ['05','秋田県'], ['06','山形県'], ['07','福島県'], ['08','茨城県'], ['09','栃木県'], ['10','群馬県'],
       ['11','埼玉県'], ['12','千葉県'], ['13','東京都'], ['14','神奈川県'], ['15','新潟県'], ['16','富山県'], ['17','石川県'], ['18','福井県'], ['19','山梨県'], ['20','長野県'],
@@ -1519,9 +1545,11 @@
     let lastScreenshotUrl = null;
     let pendingOtherShare = null;
     let comparisonTargets = PREFECTURES.slice();
-    let comparisonCatalogPromise = null;
+    let comparisonPeriod = 'current';
+    const comparisonCatalogPromises = new Map();
     let officialAreaDataPromise = null;
     let prefecturesGeojsonPromise = null;
+    let historical1995TopologyPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
 
@@ -2206,6 +2234,7 @@
           flipX: params.get('flipX') === '1',
           flipY: params.get('flipY') === '1',
           reticle: params.get('reticle') !== '0',
+          comparisonPeriod: params.get('year') === '1995' ? '1995' : 'current',
           userBoundary: (hexColor(fill) && hexColor(stroke))
             ? { fill: hexColor(fill), stroke: hexColor(stroke), outlineOnly: params.get('outline') === '1' }
             : null
@@ -2220,6 +2249,7 @@
       center = { lat: sharedView.lat, lng: sharedView.lng };
       initialMapZoom = sharedView.zoom;
       activeSpot = '';
+      comparisonPeriod = sharedView.comparisonPeriod;
       if (sharedView.hasStyle) {
         if (sharedView.basemap) currentBasemap = sharedView.basemap;
         if (sharedView.swatch) activeSwatchId = sharedView.swatch;
@@ -2247,6 +2277,7 @@
       url.searchParams.set('flipX', currentFlipX ? '1' : '0');
       url.searchParams.set('flipY', currentFlipY ? '1' : '0');
       url.searchParams.set('reticle', showReticle ? '1' : '0');
+      if (comparisonPeriod === '1995') url.searchParams.set('year', '1995');
       if (activeSwatchId === 'b-user') {
         const style = getActiveSwatch();
         url.searchParams.set('fill', style.fill);
@@ -2891,6 +2922,59 @@
       return area;
     }
 
+    function isHistoricalComparisonTarget(target) {
+      return Boolean(target && target.period === '1995');
+    }
+
+    async function loadHistorical1995Topology() {
+      if (historical1995TopologyPromise) return historical1995TopologyPromise;
+      historical1995TopologyPromise = fetch(HISTORICAL_1995_TOPOLOGY_URL)
+        .then(response => {
+          if (!response.ok) throw new Error('1995年の自治体データを取得できませんでした');
+          return response.json();
+        })
+        .catch(error => {
+          historical1995TopologyPromise = null;
+          throw error;
+        });
+      return historical1995TopologyPromise;
+    }
+
+    function historicalTargetFromGeometry(geometry, topologyIndex) {
+      const properties = geometry && geometry.properties || {};
+      const prefecture = String(properties.N03_001 || '');
+      const parent = String(properties.N03_003 || '');
+      const municipality = String(properties.N03_004 || '');
+      if (!prefecture || !municipality || municipality === '所属未定地') return null;
+      const parentLabel = parent && parent !== municipality ? parent : '';
+      const name = `${prefecture}${parentLabel}${municipality}`;
+      return {
+        kind: 'historicalMunicipality',
+        period: '1995',
+        topologyIndex,
+        adminCode: properties.N03_007 || '',
+        geoshapeId: properties.id || geometry.id || `1995-${topologyIndex}`,
+        prefecture,
+        parent: parentLabel,
+        name,
+        shortName: municipality,
+        search: `${name} ${prefecture}${municipality} ${parentLabel}${municipality} ${municipality}`
+      };
+    }
+
+    function renderComparisonCatalogOptions(targets) {
+      const list = document.getElementById('comparison-targets');
+      if (!list) return;
+      list.replaceChildren(...targets.map(target => {
+        const option = document.createElement('option');
+        option.value = target.name;
+        option.label = isHistoricalComparisonTarget(target)
+          ? '旧市区町村・1995年時点'
+          : target.kind === 'prefecture' ? '都道府県' : '市区町村';
+        return option;
+      }));
+    }
+
     function syncComparisonSearch(value) {
       ['comparison-search', 'mobile-comparison-search'].forEach(id => {
         const input = document.getElementById(id);
@@ -2898,41 +2982,77 @@
       });
     }
 
-    async function loadComparisonCatalog() {
-      if (comparisonCatalogPromise) return comparisonCatalogPromise;
-      comparisonCatalogPromise = fetch(MUNICIPALITY_LIST_URL)
-        .then(response => {
-          if (!response.ok) throw new Error('自治体一覧を取得できませんでした');
-          return response.json();
-        })
-        .then(data => {
-          const municipalities = Object.entries(data)
-            .filter(([code, item]) => /^\d{6}$/.test(code) && item && item.prefecture && item.city)
-            .map(([code, item]) => ({
-              kind: 'municipality',
-              prefCode: code.slice(0, 2),
-              adminCode: code.slice(0, -1),
-              name: `${item.prefecture}${item.city}`,
-              shortName: item.city,
-              search: `${item.prefecture}${item.city} ${item.city}`
-            }));
-          comparisonTargets = PREFECTURES.concat(municipalities);
-          const list = document.getElementById('comparison-targets');
-          if (list) {
-            list.replaceChildren(...comparisonTargets.map(target => {
-              const option = document.createElement('option');
-              option.value = target.name;
-              option.label = target.kind === 'prefecture' ? '都道府県' : '市区町村';
-              return option;
-            }));
-          }
-          return comparisonTargets;
-        })
-        .catch(error => {
-          comparisonCatalogPromise = null;
+    function syncComparisonPeriod(value) {
+      ['comparison-period', 'mobile-comparison-period'].forEach(id => {
+        const select = document.getElementById(id);
+        if (select && select.value !== value) select.value = value;
+      });
+    }
+
+    function updateComparisonSearchPresentation() {
+      const historical = comparisonPeriod === '1995';
+      const desktop = document.getElementById('comparison-search');
+      const mobile = document.getElementById('mobile-comparison-search');
+      if (desktop) desktop.placeholder = historical
+        ? '1995年時点の市区町村を検索（例：田無市）'
+        : '市区町村・都道府県を検索（例：千代田区、東京都）';
+      if (mobile) mobile.placeholder = historical ? '1995年の市区町村を検索' : '市区町村・都道府県を検索';
+    }
+
+    async function setComparisonPeriod(value) {
+      comparisonPeriod = value === '1995' ? '1995' : 'current';
+      syncComparisonPeriod(comparisonPeriod);
+      syncComparisonSearch('');
+      updateComparisonSearchPresentation();
+      comparisonTargets = comparisonPeriod === '1995' ? [] : PREFECTURES.slice();
+      renderComparisonCatalogOptions(comparisonTargets);
+      try {
+        await loadComparisonCatalog(comparisonPeriod);
+      } catch (error) {
+        console.warn(error);
+        showToast(comparisonPeriod === '1995'
+          ? '1995年の自治体一覧を読み込めませんでした'
+          : '自治体一覧を読み込めませんでした');
+      }
+    }
+
+    async function loadComparisonCatalog(period = comparisonPeriod) {
+      if (!comparisonCatalogPromises.has(period)) {
+        const promise = period === '1995'
+          ? loadHistorical1995Topology().then(topology => {
+              const geometries = topology.objects && topology.objects.city && topology.objects.city.geometries || [];
+              return geometries.map(historicalTargetFromGeometry).filter(Boolean);
+            })
+          : fetch(MUNICIPALITY_LIST_URL)
+              .then(response => {
+                if (!response.ok) throw new Error('自治体一覧を取得できませんでした');
+                return response.json();
+              })
+              .then(data => {
+                const municipalities = Object.entries(data)
+                  .filter(([code, item]) => /^\d{6}$/.test(code) && item && item.prefecture && item.city)
+                  .map(([code, item]) => ({
+                    kind: 'municipality',
+                    period: 'current',
+                    prefCode: code.slice(0, 2),
+                    adminCode: code.slice(0, -1),
+                    name: `${item.prefecture}${item.city}`,
+                    shortName: item.city,
+                    search: `${item.prefecture}${item.city} ${item.city}`
+                  }));
+                return PREFECTURES.concat(municipalities);
+              });
+        comparisonCatalogPromises.set(period, promise.catch(error => {
+          comparisonCatalogPromises.delete(period);
           throw error;
-        });
-      return comparisonCatalogPromise;
+        }));
+      }
+      const targets = await comparisonCatalogPromises.get(period);
+      if (period === comparisonPeriod) {
+        comparisonTargets = targets;
+        renderComparisonCatalogOptions(targets);
+      }
+      return targets;
     }
 
     async function resolveComparisonTarget(value) {
@@ -2942,23 +3062,74 @@
         return null;
       }
       try {
-        await loadComparisonCatalog();
+        await loadComparisonCatalog(comparisonPeriod);
       } catch (error) {
         console.warn(error);
-        showToast('自治体一覧を読み込めませんでした。通信を確認してください');
+        showToast(comparisonPeriod === '1995'
+          ? '1995年の自治体一覧を読み込めませんでした。通信を確認してください'
+          : '自治体一覧を読み込めませんでした。通信を確認してください');
         return null;
       }
-      const exact = comparisonTargets.find(target =>
-        normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query
-      );
+      const exactMatches = comparisonTargets.filter(target =>
+        normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query);
+      const fullExact = exactMatches.find(target => normalizeComparisonQuery(target.name) === query);
+      if (!fullExact && exactMatches.length > 1) {
+        showToast('同名の自治体があります。都道府県・郡を含む候補を選んでください');
+        return null;
+      }
+      const exact = fullExact || exactMatches[0];
       const partial = comparisonTargets.find(target => normalizeComparisonQuery(target.search || target.name).includes(query));
       const target = exact || partial;
       if (!target) {
-        showToast('一致する市区町村・都道府県が見つかりません');
+        showToast(comparisonPeriod === '1995'
+          ? '1995年時点で一致する市区町村が見つかりません'
+          : '一致する市区町村・都道府県が見つかりません');
         return null;
       }
       syncComparisonSearch(target.name);
       return target;
+    }
+
+    function decodeTopologyGeometry(topology, geometry) {
+      if (!topology || !geometry) return null;
+      const transform = topology.transform || {};
+      const scale = transform.scale || [1, 1];
+      const translate = transform.translate || [0, 0];
+      const cache = new Map();
+      const decodeArc = rawIndex => {
+        const reversed = rawIndex < 0;
+        const index = reversed ? ~rawIndex : rawIndex;
+        if (!cache.has(index)) {
+          let x = 0;
+          let y = 0;
+          const points = (topology.arcs[index] || []).map(([dx, dy]) => {
+            x += Number(dx);
+            y += Number(dy);
+            return [x * scale[0] + translate[0], y * scale[1] + translate[1]];
+          });
+          cache.set(index, points);
+        }
+        const points = cache.get(index);
+        return reversed ? points.slice().reverse() : points;
+      };
+      const decodeRing = arcIndexes => {
+        const ring = [];
+        (arcIndexes || []).forEach(rawIndex => {
+          const points = decodeArc(rawIndex);
+          ring.push(...(ring.length ? points.slice(1) : points));
+        });
+        return ring;
+      };
+      if (geometry.type === 'Polygon') {
+        return { type: 'Polygon', coordinates: (geometry.arcs || []).map(decodeRing) };
+      }
+      if (geometry.type === 'MultiPolygon') {
+        return {
+          type: 'MultiPolygon',
+          coordinates: (geometry.arcs || []).map(polygon => polygon.map(decodeRing))
+        };
+      }
+      return null;
     }
 
     function polygonGroupsFromGeojson(value) {
@@ -2995,6 +3166,29 @@
         minLat = Math.min(minLat, lat); maxLat = Math.max(maxLat, lat);
       });
       return { minLng, minLat, maxLng, maxLat };
+    }
+
+    function ringAreaKm2(ring) {
+      if (!Array.isArray(ring) || ring.length < 3) return 0;
+      const radius = 6378137;
+      const toRadians = value => Number(value) * Math.PI / 180;
+      let total = 0;
+      for (let index = 0; index < ring.length; index++) {
+        const lower = ring[(index + ring.length - 1) % ring.length];
+        const middle = ring[index];
+        const upper = ring[(index + 1) % ring.length];
+        total += (toRadians(upper[0]) - toRadians(lower[0])) * Math.sin(toRadians(middle[1]));
+      }
+      return Math.abs(total * radius * radius / 2) / 1e6;
+    }
+
+    function polygonsAreaKm2(polygons) {
+      return polygons.reduce((sum, polygon) => {
+        if (!polygon || !polygon.length) return sum;
+        const outer = ringAreaKm2(polygon[0]);
+        const holes = polygon.slice(1).reduce((holeSum, ring) => holeSum + ringAreaKm2(ring), 0);
+        return sum + Math.max(0, outer - holes);
+      }, 0);
     }
 
     function geometryMetrics(polygons) {
@@ -3050,10 +3244,16 @@
     }
 
     async function getComparisonGeometry(target) {
-      const cacheKey = target.kind === 'prefecture' ? `pref:${target.code}` : `city:${target.adminCode}`;
+      const cacheKey = isHistoricalComparisonTarget(target)
+        ? `history:1995:${target.geoshapeId || target.topologyIndex}`
+        : target.kind === 'prefecture' ? `pref:${target.code}` : `city:${target.adminCode}`;
       if (comparisonGeometryCache.has(cacheKey)) return comparisonGeometryCache.get(cacheKey);
       let source;
-      if (target.kind === 'prefecture') {
+      if (isHistoricalComparisonTarget(target)) {
+        const topology = await loadHistorical1995Topology();
+        const geometries = topology.objects && topology.objects.city && topology.objects.city.geometries || [];
+        source = decodeTopologyGeometry(topology, geometries[target.topologyIndex]);
+      } else if (target.kind === 'prefecture') {
         if (!prefecturesGeojsonPromise) {
           prefecturesGeojsonPromise = fetch(PREFECTURES_GEOJSON_URL)
             .then(response => {
@@ -3089,9 +3289,13 @@
       const pixelsPerMeter = 226 / commonExtent;
       const targetPath = makeComparisonPath(result.polygons, targetMetrics, pixelsPerMeter);
       const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
-      const targetArea = await getOfficialAreaKm2(result.target);
+      const historical = isHistoricalComparisonTarget(result.target);
+      const targetArea = historical ? polygonsAreaKm2(result.polygons) : await getOfficialAreaKm2(result.target);
+      if (!Number.isFinite(targetArea) || targetArea <= 0) throw new Error('面積を計算できませんでした');
       const ratio = targetArea / NAURU_AREA_KM2;
       const ratioLabel = formatRatio(ratio);
+      const targetLabel = historical ? result.target.shortName : result.target.name;
+      const targetPeriodLabel = historical ? '（1995年時点）' : '';
       const nauruSvg = document.getElementById('comparison-nauru-svg');
       const targetSvg = document.getElementById('comparison-target-svg');
       const style = getActiveSwatch();
@@ -3106,12 +3310,20 @@
         nauruSvg.innerHTML = `<g transform="${transform}"><path d="${nauruPath}" fill="${fill}" stroke="${style.stroke}" stroke-width="2.5" fill-rule="evenodd" /></g>`;
       }
       targetSvg.innerHTML = `<path d="${targetPath}" fill="#8ec31f" stroke="#365c16" stroke-width="2.2" fill-rule="evenodd" />`;
-      document.getElementById('comparison-title').textContent = `ナウル共和国と${result.target.name}の大きさ比較`;
+      document.getElementById('comparison-title').textContent = `ナウル共和国と${targetLabel}${targetPeriodLabel}の大きさ比較`;
       document.getElementById('comparison-nauru-area').textContent = `面積 ${NAURU_AREA_KM2} km²`;
-      document.getElementById('comparison-target-name').textContent = result.target.name;
+      document.getElementById('comparison-target-name').textContent = targetLabel;
+      const context = document.getElementById('comparison-target-context');
+      context.hidden = !historical;
+      context.textContent = historical
+        ? `${result.target.prefecture}${result.target.parent ? `・${result.target.parent}` : ''}／${HISTORICAL_1995_DATE}`
+        : '';
       document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
-      document.getElementById('comparison-summary').textContent = `${result.target.name}の面積は約${formatArea(targetArea)} km²。ナウルの約${ratioLabel}倍、ナウル約${ratioLabel}個分です。`;
-      activeComparison = { ...result, targetArea, ratio, ratioLabel };
+      document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウルの約${ratioLabel}倍、ナウル約${ratioLabel}個分です。`;
+      document.getElementById('comparison-note').textContent = historical
+        ? '1995年境界：「歴史的行政区域データセットβ版」（CODH作成、CC BY 4.0）。面積は境界データから算出した概算です。'
+        : '面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。';
+      activeComparison = { ...result, targetArea, ratio, ratioLabel, targetLabel, targetPeriodLabel };
       document.getElementById('comparison-modal').classList.add('open');
     }
 
@@ -3125,7 +3337,7 @@
         if (action === 'move') {
           const bounds = comparisonBoundsToLeaflet(result.bounds);
           if (bounds && map) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 12, animate: true });
-          showToast(`${target.name}へ移動しました`);
+          showToast(`${isHistoricalComparisonTarget(target) ? target.shortName : target.name}${isHistoricalComparisonTarget(target) ? '（1995年時点）' : ''}へ移動しました`);
           return;
         }
         await renderComparison(result);
@@ -3173,7 +3385,7 @@
       try {
         showToast('比較画像を作成中…');
         const blob = await canvasToBlob(await captureComparisonCanvas());
-        downloadBlob(blob, `nauru-vs-${activeComparison.target.name}.png`);
+        downloadBlob(blob, `nauru-vs-${activeComparison.targetLabel}${activeComparison.targetPeriodLabel}.png`);
         showToast('比較画像を保存しました');
       } catch (error) {
         console.warn(error);
@@ -3183,7 +3395,7 @@
 
     async function postComparisonToX() {
       if (!activeComparison) return;
-      const text = `#どこでもナウル\n${activeComparison.target.name}の面積は約${formatArea(activeComparison.targetArea)} km²。ナウルの約${activeComparison.ratioLabel}倍、ナウル約${activeComparison.ratioLabel}個分です。\n${buildLocationUrl()}`;
+      const text = `#どこでもナウル\n${activeComparison.targetLabel}${activeComparison.targetPeriodLabel}の面積は約${formatArea(activeComparison.targetArea)} km²。ナウルの約${activeComparison.ratioLabel}倍、ナウル約${activeComparison.ratioLabel}個分です。\n${buildLocationUrl()}`;
       const popup = isMobileXShare() ? null : openPendingShareWindow();
       try {
         showToast('比較画像をコピー中…');
@@ -3312,6 +3524,17 @@
         document.getElementById(id).addEventListener('keydown', (e) => {
           if (e.key === 'Enter') flyToMobileCoords();
         });
+      });
+
+      // 自治体の時点を先に選び、その時点の候補だけを検索する。
+      syncComparisonPeriod(comparisonPeriod);
+      updateComparisonSearchPresentation();
+      comparisonTargets = comparisonPeriod === '1995' ? [] : PREFECTURES.slice();
+      renderComparisonCatalogOptions(comparisonTargets);
+      ['comparison-period', 'mobile-comparison-period'].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        select.addEventListener('change', () => setComparisonPeriod(select.value));
       });
 
       // 市区町村・都道府県の検索。候補一覧は必要になったときに読み込む。
