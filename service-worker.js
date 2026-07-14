@@ -1,7 +1,8 @@
-const CACHE_NAME = 'dokodemo-nauru-v1';
+const CACHE_NAME = 'dokodemo-nauru-v2';
 const APP_SHELL = [
   './',
   './index.html',
+  './privacy.html',
   './manifest.webmanifest',
   './nauru_kun_outline.png',
   './data/gsi-area-r8-04.json',
