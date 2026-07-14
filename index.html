@@ -35,7 +35,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root { --map-credit-height: 1.7rem; }
-    html, body { height: 100%; margin: 0; }
+    html, body { width: 100%; max-width: 100%; height: 100%; margin: 0; overflow: hidden; }
     body {
       font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
       background: #061525;
@@ -815,6 +815,9 @@
         opacity: 0;
         pointer-events: none;
         transition: transform 0.24s ease, opacity 0.18s ease;
+        box-sizing: border-box;
+        max-width: calc(100dvw - 1.1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        overflow-x: hidden;
       }
       body.m-editing #mobile-edit-dock {
         transform: translateY(0);
@@ -956,6 +959,32 @@
       .mobile-place-inputs .coord-input {
         width: 100%;
         max-width: none;
+      }
+      #mobile-edit-dock input,
+      #mobile-edit-dock select {
+        font-size: 16px;
+      }
+      #mobile-edit-dock .coord-input,
+      #mobile-edit-dock .comparison-search,
+      #mobile-edit-dock .comparison-period {
+        height: 2.75rem;
+      }
+      #mobile-edit-dock .comparison-search-row {
+        display: grid;
+        grid-template-columns: minmax(5.75rem, 0.7fr) minmax(0, 1.3fr);
+        width: 100%;
+        min-width: 0;
+        gap: 0.4rem;
+      }
+      #mobile-edit-dock .comparison-period {
+        width: 100%;
+        min-width: 0;
+        flex: none;
+      }
+      #mobile-edit-dock .comparison-action {
+        width: 100%;
+        min-width: 0;
+        height: 2.5rem;
       }
       #mobile-btn-add-spot {
         width: 100%;
