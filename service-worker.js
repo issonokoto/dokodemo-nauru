@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v22';
+const CACHE_NAME = 'dokodemo-nauru-v23';
 const APP_SHELL = [
   './',
   './index.html',
@@ -13,6 +13,15 @@ const APP_SHELL = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'
 ];
+const NETWORK_FIRST_PATHS = new Set([
+  './index.html',
+  './privacy.html',
+  './manifest.webmanifest',
+  './data/gsi-area-r8-04.json',
+  './data/natural-features.geojson',
+  './data/countries.geojson',
+  './data/jp-city-1995.topojson'
+].map(path => new URL(path, self.location.href).pathname));
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -33,11 +42,27 @@ self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) return;
 
+  const useNetworkFirst = event.request.mode === 'navigate' || NETWORK_FIRST_PATHS.has(requestUrl.pathname);
+
+  const fetchAndCache = () => fetch(event.request).then(response => {
+    if (!response || !response.ok) return response;
+    const copy = response.clone();
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)));
+    return response;
+  });
+
+  if (useNetworkFirst) {
+    event.respondWith(fetchAndCache().catch(() =>
+      caches.match(event.request).then(cached => cached ||
+        (event.request.mode === 'navigate' ? caches.match('./index.html') : Response.error()))
+    ));
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-      return response;
-    }).catch(() => event.request.mode === 'navigate' ? caches.match('./index.html') : Response.error()))
+    caches.match(event.request).then(cached => cached || fetchAndCache().catch(() => {
+      if (event.request.mode === 'navigate') return caches.match('./index.html');
+      return Response.error();
+    }))
   );
 });
