@@ -3060,6 +3060,7 @@
         shortName: properties.shortName || properties.name,
         context: properties.context || '',
         areaKm2: Number(properties.officialAreaKm2),
+        geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
         search: [properties.name, properties.context, ...aliases].filter(Boolean).join(' '),
         feature
       };
@@ -3441,7 +3442,10 @@
           source = decodeTopologyGeometry(topology, geometries[target.topologyIndex]);
         }
       } else if (isNaturalComparisonTarget(target)) {
-        source = target.feature;
+        if (!target.geometryUrl) throw new Error('高精細輪郭の場所が見つかりませんでした');
+        const response = await fetch(target.geometryUrl);
+        if (!response.ok) throw new Error('高精細輪郭を取得できませんでした');
+        source = await response.json();
       } else if (target.kind === 'prefecture') {
         if (!prefecturesGeojsonPromise) {
           prefecturesGeojsonPromise = fetch(PREFECTURES_GEOJSON_URL)
@@ -3519,8 +3523,8 @@
         comparisonNote.innerHTML = '1995年境界：<a href="https://geoshape.ex.nii.ac.jp/city/" target="_blank" rel="noopener">「歴史的行政区域データセットβ版」</a>（CODH作成、<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を加工して表示。面積は境界データから算出した概算です。';
       } else if (natural) {
         comparisonNote.innerHTML = Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0
-          ? '面積：国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）。輪郭：<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> を軽量化して表示。'
-          : '輪郭：<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> を軽量化して表示。面積は輪郭データから算出した概算です。';
+          ? '面積：国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）。輪郭：<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> の高精細データを表示。'
+          : '輪郭：<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> の高精細データを表示。面積は輪郭データから算出した概算です。';
       } else {
         comparisonNote.textContent = '面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。';
       }
