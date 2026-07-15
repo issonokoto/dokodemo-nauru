@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v13';
+const CACHE_NAME = 'dokodemo-nauru-v14';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const APP_SHELL = [
   './nauru_kun_outline.png',
   './assets/dokodemo-nauru-logo-transparent-v3.png',
   './data/gsi-area-r8-04.json',
+  './data/natural-features.geojson',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'
