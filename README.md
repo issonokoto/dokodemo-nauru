@@ -1,7 +1,7 @@
-# どこでもナウル（β版）
+# どこでもナウル
 
 ナウル共和国の**実寸シルエット**を地図上に重ねて、大きさの感覚を体感するWebアプリです。  
-**現在はβ版**です。機能・表示は予告なく変更されることがあります。
+正式版 v1.0.0 です。
 
 **公開ページ:** [https://issonokoto.github.io/dokodemo-nauru/](https://issonokoto.github.io/dokodemo-nauru/)
 
