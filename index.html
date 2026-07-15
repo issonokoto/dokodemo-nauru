@@ -1260,6 +1260,7 @@
           <select id="comparison-period" class="comparison-period" aria-label="比較対象の種類">
             <option value="current">現在</option>
             <option value="1995">1995年</option>
+            <option value="country">国</option>
             <option value="island">島</option>
             <option value="water">湖・池</option>
           </select>
@@ -1344,6 +1345,7 @@
         <select id="mobile-comparison-period" class="comparison-period" aria-label="比較対象の種類">
           <option value="current">現在</option>
           <option value="1995">1995年</option>
+          <option value="country">国</option>
           <option value="island">島</option>
           <option value="water">湖・池</option>
         </select>
@@ -1474,6 +1476,7 @@
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const NATURAL_FEATURES_URL = './data/natural-features.geojson';
+    const COUNTRIES_URL = './data/countries.geojson';
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
     const HISTORICAL_1995_DATE = '1995年10月1日時点';
@@ -1644,6 +1647,7 @@
     let prefecturesGeojsonPromise = null;
     let historical1995TopologyPromise = null;
     let naturalFeaturesPromise = null;
+    let countriesPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
 
@@ -2328,7 +2332,7 @@
           flipX: params.get('flipX') === '1',
           flipY: params.get('flipY') === '1',
           reticle: params.get('reticle') !== '0',
-          comparisonPeriod: ['island', 'water'].includes(params.get('category'))
+          comparisonPeriod: ['country', 'island', 'water'].includes(params.get('category'))
             ? params.get('category')
             : params.get('year') === '1995' ? '1995' : 'current',
           userBoundary: (hexColor(fill) && hexColor(stroke))
@@ -2374,7 +2378,7 @@
       url.searchParams.set('flipY', currentFlipY ? '1' : '0');
       url.searchParams.set('reticle', showReticle ? '1' : '0');
       if (comparisonPeriod === '1995') url.searchParams.set('year', '1995');
-      if (['island', 'water'].includes(comparisonPeriod)) url.searchParams.set('category', comparisonPeriod);
+      if (['country', 'island', 'water'].includes(comparisonPeriod)) url.searchParams.set('category', comparisonPeriod);
       if (activeSwatchId === 'b-user') {
         const style = getActiveSwatch();
         url.searchParams.set('fill', style.fill);
@@ -3027,8 +3031,13 @@
       return Boolean(target && ['island', 'water'].includes(target.kind));
     }
 
+    function isFileGeometryComparisonTarget(target) {
+      return Boolean(target && ['country', 'island', 'water'].includes(target.kind));
+    }
+
     function comparisonCategoryLabel(period = comparisonPeriod) {
       if (period === '1995') return '1995年の自治体';
+      if (period === 'country') return '国・地域';
       if (period === 'island') return '島';
       if (period === 'water') return '湖・池';
       return '自治体';
@@ -3048,6 +3057,20 @@
       return naturalFeaturesPromise;
     }
 
+    async function loadCountries() {
+      if (countriesPromise) return countriesPromise;
+      countriesPromise = fetch(COUNTRIES_URL)
+        .then(response => {
+          if (!response.ok) throw new Error('国・地域のデータを取得できませんでした');
+          return response.json();
+        })
+        .catch(error => {
+          countriesPromise = null;
+          throw error;
+        });
+      return countriesPromise;
+    }
+
     function naturalTargetFromFeature(feature) {
       const properties = feature && feature.properties || {};
       const kind = properties.kind === 'water' ? 'water' : 'island';
@@ -3063,6 +3086,28 @@
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
         territoryNote: properties.territoryNote || '',
+        geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
+        search: [properties.name, properties.context, ...aliases].filter(Boolean).join(' '),
+        feature
+      };
+    }
+
+    function countryTargetFromFeature(feature) {
+      const properties = feature && feature.properties || {};
+      const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
+      return {
+        kind: 'country',
+        period: 'country',
+        id: properties.id || feature.id,
+        code: properties.code || '',
+        name: properties.name,
+        shortName: properties.shortName || properties.name,
+        context: properties.context || '',
+        areaKm2: Number(properties.officialAreaKm2),
+        areaSourceLabel: properties.areaSourceLabel || '',
+        areaSourceUrl: properties.areaSourceUrl || '',
+        boundarySourceLabel: properties.boundarySourceLabel || '',
+        boundarySourceUrl: properties.boundarySourceUrl || '',
         geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
         search: [properties.name, properties.context, ...aliases].filter(Boolean).join(' '),
         feature
@@ -3109,7 +3154,7 @@
       const list = document.getElementById('comparison-targets');
       if (!list) return;
       const query = normalizeComparisonQuery(value);
-      const minimumLength = ['island', 'water'].includes(comparisonPeriod) ? 1 : 2;
+      const minimumLength = ['country', 'island', 'water'].includes(comparisonPeriod) ? 1 : 2;
       if (query.length < minimumLength) {
         list.replaceChildren();
         return;
@@ -3127,7 +3172,8 @@
         option.label = isHistoricalComparisonTarget(target)
           ? '旧市区町村・1995年時点'
           : target.kind === 'prefecture' ? '都道府県'
-            : target.kind === 'island' ? `島${target.context ? `・${target.context}` : ''}`
+            : target.kind === 'country' ? `国・地域${target.context ? `・${target.context}` : ''}`
+              : target.kind === 'island' ? `島${target.context ? `・${target.context}` : ''}`
               : target.kind === 'water' ? `湖・池${target.context ? `・${target.context}` : ''}`
                 : '市区町村';
         fragment.appendChild(option);
@@ -3151,16 +3197,21 @@
 
     function updateComparisonSearchPresentation() {
       const historical = comparisonPeriod === '1995';
+      const country = comparisonPeriod === 'country';
       const island = comparisonPeriod === 'island';
       const water = comparisonPeriod === 'water';
       const desktop = document.getElementById('comparison-search');
       const mobile = document.getElementById('mobile-comparison-search');
-      if (desktop) desktop.placeholder = island
+      if (desktop) desktop.placeholder = country
+        ? '国・地域を検索（例：台湾、フランス）'
+        : island
         ? '島を検索（例：淡路島、佐渡島）'
         : water ? '湖・池を検索（例：琵琶湖、霞ヶ浦）'
           : historical ? '1995年時点の市区町村を検索（例：田無市）'
             : '市区町村・都道府県を検索（例：千代田区、東京都）';
-      if (mobile) mobile.placeholder = island
+      if (mobile) mobile.placeholder = country
+        ? '国・地域を検索'
+        : island
         ? '島を検索'
         : water ? '湖・池を検索'
           : historical ? '1995年の市区町村を検索'
@@ -3168,7 +3219,7 @@
     }
 
     async function setComparisonPeriod(value) {
-      comparisonPeriod = ['current', '1995', 'island', 'water'].includes(value) ? value : 'current';
+      comparisonPeriod = ['current', '1995', 'country', 'island', 'water'].includes(value) ? value : 'current';
       syncComparisonPeriod(comparisonPeriod);
       syncComparisonSearch('');
       updateComparisonSearchPresentation();
@@ -3184,8 +3235,10 @@
 
     async function loadComparisonCatalog(period = comparisonPeriod) {
       if (!comparisonCatalogPromises.has(period)) {
-        const promise = ['island', 'water'].includes(period)
-          ? loadNaturalFeatures().then(collection => (collection.features || [])
+        const promise = period === 'country'
+          ? loadCountries().then(collection => (collection.features || []).map(countryTargetFromFeature))
+          : ['island', 'water'].includes(period)
+            ? loadNaturalFeatures().then(collection => (collection.features || [])
               .map(naturalTargetFromFeature)
               .filter(target => target.kind === period))
           : period === '1995'
@@ -3244,7 +3297,7 @@
       const exactMatches = comparisonTargets.filter(target =>
         normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query);
       const fullExact = exactMatches.find(target => normalizeComparisonQuery(target.name) === query);
-      if (!fullExact && exactMatches.length > 1 && !['island', 'water'].includes(comparisonPeriod)) {
+      if (!fullExact && exactMatches.length > 1 && !['country', 'island', 'water'].includes(comparisonPeriod)) {
         showToast('同名の自治体があります。都道府県・郡を含む候補を選んでください');
         return null;
       }
@@ -3403,8 +3456,8 @@
     }
 
     function formatArea(area) {
-      const fraction = area < 100 ? 1 : 0;
-      return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: fraction, minimumFractionDigits: area < 100 ? 1 : 0 }).format(area);
+      const fraction = area < 1 ? 2 : area < 100 ? 1 : 0;
+      return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: fraction, minimumFractionDigits: fraction }).format(area);
     }
 
     function formatRatio(value) {
@@ -3431,7 +3484,7 @@
     async function getComparisonGeometry(target) {
       const cacheKey = isHistoricalComparisonTarget(target)
         ? `history:1995:${target.geoshapeId || target.topologyIndex}`
-        : isNaturalComparisonTarget(target) ? `natural:${target.id}`
+        : isFileGeometryComparisonTarget(target) ? `file:${target.kind}:${target.id}`
           : target.kind === 'prefecture' ? `pref:${target.code}` : `city:${target.adminCode}`;
       if (comparisonGeometryCache.has(cacheKey)) return comparisonGeometryCache.get(cacheKey);
       let source;
@@ -3444,7 +3497,7 @@
           const geometries = topology.objects && topology.objects.city && topology.objects.city.geometries || [];
           source = decodeTopologyGeometry(topology, geometries[target.topologyIndex]);
         }
-      } else if (isNaturalComparisonTarget(target)) {
+      } else if (isFileGeometryComparisonTarget(target)) {
         if (!target.geometryUrl) throw new Error('高精細輪郭の場所が見つかりませんでした');
         const response = await fetch(target.geometryUrl);
         if (!response.ok) throw new Error('高精細輪郭を取得できませんでした');
@@ -3487,9 +3540,11 @@
       const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
       const historical = isHistoricalComparisonTarget(result.target);
       const natural = isNaturalComparisonTarget(result.target);
-      const targetArea = natural && Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0
+      const country = result.target.kind === 'country';
+      const fileGeometry = isFileGeometryComparisonTarget(result.target);
+      const targetArea = fileGeometry && Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0
         ? result.target.areaKm2
-        : historical || natural ? polygonsAreaKm2(result.polygons) : await getOfficialAreaKm2(result.target);
+        : historical || fileGeometry ? polygonsAreaKm2(result.polygons) : await getOfficialAreaKm2(result.target);
       if (!Number.isFinite(targetArea) || targetArea <= 0) throw new Error('面積を計算できませんでした');
       const ratio = targetArea / NAURU_AREA_KM2;
       const ratioLabel = formatRatio(ratio);
@@ -3515,15 +3570,36 @@
       document.getElementById('comparison-nauru-area').textContent = `面積 ${NAURU_AREA_KM2} km²`;
       document.getElementById('comparison-target-name').textContent = targetLabel;
       const context = document.getElementById('comparison-target-context');
-      context.hidden = !historical && !natural;
+      context.hidden = !historical && !natural && !country;
       context.textContent = historical
         ? `${result.target.prefecture}${result.target.parent ? `・${result.target.parent}` : ''}／${HISTORICAL_1995_DATE}`
-        : natural ? `${result.target.context}／${result.target.kind === 'island' ? '島' : '湖・池'}` : '';
+        : country ? `${result.target.context}／国・地域`
+          : natural ? `${result.target.context}／${result.target.kind === 'island' ? '島' : '湖・池'}` : '';
       document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
       document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウル約${ratioLabel}個分です。`;
       const comparisonNote = document.getElementById('comparison-note');
       if (historical) {
         comparisonNote.innerHTML = '1995年境界：<a href="https://geoshape.ex.nii.ac.jp/city/" target="_blank" rel="noopener">「歴史的行政区域データセットβ版」</a>（CODH作成、<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を加工して表示。面積は境界データから算出した概算です。';
+      } else if (country) {
+        comparisonNote.replaceChildren();
+        comparisonNote.append('面積：');
+        if (result.target.areaSourceUrl && result.target.areaSourceLabel) {
+          const countryAreaLink = document.createElement('a');
+          countryAreaLink.href = result.target.areaSourceUrl;
+          countryAreaLink.target = '_blank';
+          countryAreaLink.rel = 'noopener';
+          countryAreaLink.textContent = result.target.areaSourceLabel;
+          comparisonNote.append(countryAreaLink);
+        } else {
+          comparisonNote.append('公表値');
+        }
+        comparisonNote.append('。輪郭：');
+        const countryBoundaryLink = document.createElement('a');
+        countryBoundaryLink.href = result.target.boundarySourceUrl || 'https://www.naturalearthdata.com/';
+        countryBoundaryLink.target = '_blank';
+        countryBoundaryLink.rel = 'noopener';
+        countryBoundaryLink.textContent = result.target.boundarySourceLabel || 'Natural Earth';
+        comparisonNote.append(countryBoundaryLink, ' の高精細データを表示。');
       } else if (natural) {
         comparisonNote.replaceChildren();
         const hasOfficialArea = Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0;
@@ -3777,7 +3853,7 @@
           syncComparisonSearch(input.value);
           clearTimeout(catalogTimer);
           const query = normalizeComparisonQuery(input.value);
-          const minimumLength = ['island', 'water'].includes(comparisonPeriod) ? 1 : 2;
+          const minimumLength = ['country', 'island', 'water'].includes(comparisonPeriod) ? 1 : 2;
           if (query.length < minimumLength) {
             renderComparisonCatalogOptions([], '');
             return;
