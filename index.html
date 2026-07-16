@@ -3085,6 +3085,8 @@
         areaKm2: Number(properties.officialAreaKm2),
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
+        boundarySourceLabel: properties.boundarySourceLabel || '',
+        boundarySourceUrl: properties.boundarySourceUrl || '',
         territoryNote: properties.territoryNote || '',
         geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
         search: [properties.name, properties.context, ...aliases].filter(Boolean).join(' '),
@@ -3619,10 +3621,10 @@
         }
         comparisonNote.append('輪郭：');
         const outlineSourceLink = document.createElement('a');
-        outlineSourceLink.href = 'https://www.openstreetmap.org/copyright';
+        outlineSourceLink.href = result.target.boundarySourceUrl || 'https://www.openstreetmap.org/copyright';
         outlineSourceLink.target = '_blank';
         outlineSourceLink.rel = 'noopener';
-        outlineSourceLink.textContent = '© OpenStreetMap contributors';
+        outlineSourceLink.textContent = result.target.boundarySourceLabel || '© OpenStreetMap contributors';
         comparisonNote.append(outlineSourceLink, ' の高精細データを表示。');
         if (!hasOfficialArea) comparisonNote.append('面積は輪郭データから算出した概算です。');
         if (result.target.territoryNote) comparisonNote.append(` ${result.target.territoryNote}`);
