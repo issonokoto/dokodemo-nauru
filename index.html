@@ -1270,7 +1270,7 @@
             <option value="country">国</option>
             <option value="island">島</option>
             <option value="water">湖・池</option>
-            <option value="attraction">観光地・施設</option>
+            <option value="attraction">観光地・施設・スポーツ</option>
           </select>
           <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off">
           <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
@@ -1356,7 +1356,7 @@
           <option value="country">国</option>
           <option value="island">島</option>
           <option value="water">湖・池</option>
-          <option value="attraction">観光地・施設</option>
+          <option value="attraction">観光地・施設・スポーツ</option>
         </select>
         <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off">
         <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
@@ -1485,7 +1485,7 @@
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const NATURAL_FEATURES_URL = './data/natural-features.geojson';
-    const ATTRACTIONS_URL = './data/attractions.geojson';
+    const ATTRACTIONS_URL = './data/attractions.geojson?v=31';
     const COUNTRIES_URL = './data/countries.geojson';
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
@@ -3085,7 +3085,7 @@
 
     async function loadAttractions() {
       if (attractionsPromise) return attractionsPromise;
-      attractionsPromise = fetch(ATTRACTIONS_URL)
+      attractionsPromise = fetch(ATTRACTIONS_URL, { cache: 'no-store' })
         .then(response => {
           if (!response.ok) throw new Error('観光地・施設のデータを取得できませんでした');
           return response.json();
@@ -3275,7 +3275,12 @@
     }
 
     async function setComparisonPeriod(value) {
-      comparisonPeriod = ['current', '1995', 'country', 'island', 'water', 'attraction'].includes(value) ? value : 'current';
+      const nextPeriod = ['current', '1995', 'country', 'island', 'water', 'attraction'].includes(value) ? value : 'current';
+      if (nextPeriod === 'attraction') {
+        attractionsPromise = null;
+        comparisonCatalogPromises.delete('attraction');
+      }
+      comparisonPeriod = nextPeriod;
       syncComparisonPeriod(comparisonPeriod);
       syncComparisonSearch('');
       updateComparisonSearchPresentation();
