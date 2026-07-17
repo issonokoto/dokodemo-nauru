@@ -2,14 +2,6 @@
   "generatedAt": "2026-07-17T12:30:18.137Z",
   "imported": [
     {
-      "name": "エロマンガ島",
-      "query": "existing",
-      "osmType": "relation",
-      "osmId": 4673553,
-      "displayName": "エロマンガ島",
-      "geometryType": "Polygon"
-    },
-    {
       "name": "エロマンガ",
       "query": "existing",
       "osmType": "relation",
@@ -66,27 +58,11 @@
       "geometryType": "Polygon"
     },
     {
-      "name": "クサイ島",
-      "query": "existing",
-      "osmType": "relation",
-      "osmId": 10810878,
-      "displayName": "クサイ島",
-      "geometryType": "Polygon"
-    },
-    {
       "name": "マル・デ・アホ",
       "query": "existing",
       "osmType": "relation",
       "osmId": 3443507,
       "displayName": "マル・デ・アホ",
-      "geometryType": "Polygon"
-    },
-    {
-      "name": "チンコティーグ島",
-      "query": "lookup:relation/206809",
-      "osmType": "relation",
-      "osmId": 206809,
-      "displayName": "Chincoteague, Accomack County, Virginia, 23336, United States",
       "geometryType": "Polygon"
     },
     {

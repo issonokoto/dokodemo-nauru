@@ -1484,8 +1484,8 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
-    const NATURAL_FEATURES_URL = './data/natural-features.geojson';
-    const ATTRACTIONS_URL = './data/attractions.geojson?v=31';
+    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=32';
+    const ATTRACTIONS_URL = './data/attractions.geojson?v=32';
     const COUNTRIES_URL = './data/countries.geojson';
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
@@ -3057,7 +3057,7 @@
 
     async function loadNaturalFeatures() {
       if (naturalFeaturesPromise) return naturalFeaturesPromise;
-      naturalFeaturesPromise = fetch(NATURAL_FEATURES_URL)
+      naturalFeaturesPromise = fetch(NATURAL_FEATURES_URL, { cache: 'no-store' })
         .then(response => {
           if (!response.ok) throw new Error('島・湖のデータを取得できませんでした');
           return response.json();
@@ -3261,7 +3261,7 @@
         : island
         ? '島を検索（例：淡路島、佐渡島）'
         : water ? '湖・池を検索（例：琵琶湖、霞ヶ浦）'
-          : attraction ? '観光地・施設を検索（例：メルヘン村、エロマンガ島、甲子園、国立競技場）'
+          : attraction ? '観光地・施設を検索（例：メルヘン村、エロマンガ、甲子園、国立競技場）'
           : historical ? '1995年時点の市区町村を検索（例：田無市）'
             : '市区町村・都道府県を検索（例：千代田区、東京都）';
       if (mobile) mobile.placeholder = country
@@ -3279,6 +3279,11 @@
       if (nextPeriod === 'attraction') {
         attractionsPromise = null;
         comparisonCatalogPromises.delete('attraction');
+      }
+      if (nextPeriod === 'island' || nextPeriod === 'water') {
+        naturalFeaturesPromise = null;
+        comparisonCatalogPromises.delete('island');
+        comparisonCatalogPromises.delete('water');
       }
       comparisonPeriod = nextPeriod;
       syncComparisonPeriod(comparisonPeriod);

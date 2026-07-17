@@ -12,7 +12,6 @@ const managedSubtypes = new Set([
 
 const entries = [
   // 日本語話者には意外な響きになる海外地名。漫湖は水域データに収録済み。
-  { name: 'エロマンガ島', context: 'バヌアツ・タフェア州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '島', aliases: ['Erromango', 'エロマンゴ島', 'イロマンゴ島'], queries: ['Erromango, Vanuatu'] },
   { name: 'エロマンガ', context: 'オーストラリア・クイーンズランド州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '町', aliases: ['Eromanga'], queries: ['Eromanga, Queensland, Australia'] },
   { name: 'キンタマーニ', context: 'インドネシア・バリ島', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '地区・高原', aliases: ['Kintamani', 'キンタマーニ高原'], queries: ['Kintamani, Bangli, Bali, Indonesia'] },
   { name: 'スケベニンゲン', context: 'オランダ・デン・ハーグ', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '海岸地区', aliases: ['Scheveningen', 'スヘフェニンゲン'], queries: ['Scheveningen, Den Haag, Netherlands'] },
@@ -20,9 +19,7 @@ const entries = [
   { name: 'ボイン川', context: 'アイルランド', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '河川中心線から片側25mの暫定比較範囲', aliases: ['River Boyne', 'Boyne River'], queries: ['River Boyne, Ireland'], referenceBufferMeters: 25 },
   { name: 'パンティ山', context: 'マレーシア・ジョホール州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '山頂から半径1kmの暫定比較範囲', aliases: ['Gunung Panti', 'Mount Panti'], queries: ['Gunung Panti Johor Malaysia'], referenceBufferMeters: 1000 },
   { name: 'オナラスカ', context: 'アメリカ・ウィスコンシン州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '市', aliases: ['Onalaska', 'City of Onalaska'], queries: ['Onalaska, Wisconsin, USA'] },
-  { name: 'クサイ島', context: 'ミクロネシア連邦・コスラエ州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '島（現在のコスラエ島）', aliases: ['Kosrae', 'Kusaie', 'コスラエ島'], queries: ['Kosrae, Federated States of Micronesia'] },
   { name: 'マル・デ・アホ', context: 'アルゼンチン・ブエノスアイレス州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '海岸都市', aliases: ['Mar de Ajó', 'Mar de Ajo'], queries: ['Mar de Ajo, Buenos Aires, Argentina'] },
-  { name: 'チンコティーグ島', context: 'アメリカ・バージニア州', subtype: 'funny-place', subtypeLabel: '海外の印象的な地名', statusLabel: '島上のチンコティーグ町域境界', aliases: ['Chincoteague Island', 'シンコティーグ島'], queries: ['Chincoteague, Virginia, USA'], osmType: 'relation', osmId: 206809 },
 
   // NPB 12球団本拠地（NPB公式の2026年一覧）。
   ...[
