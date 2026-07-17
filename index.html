@@ -1484,8 +1484,8 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
-    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=34';
-    const ATTRACTIONS_URL = './data/attractions.geojson?v=34';
+    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=35';
+    const ATTRACTIONS_URL = './data/attractions.geojson?v=35';
     const COUNTRIES_URL = './data/countries.geojson';
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
@@ -3550,6 +3550,39 @@
       return decoded;
     }
 
+    function municipalityWardsForCity(target) {
+      if (!target || target.kind !== 'municipality' || !String(target.shortName || '').endsWith('市')) return [];
+      return comparisonTargets.filter(candidate =>
+        candidate &&
+        candidate.kind === 'municipality' &&
+        candidate.adminCode !== target.adminCode &&
+        candidate.prefCode === target.prefCode &&
+        String(candidate.shortName || '').startsWith(target.shortName) &&
+        String(candidate.shortName || '').endsWith('区')
+      );
+    }
+
+    async function loadCurrentMunicipalityGeometry(target) {
+      const url = `${MUNICIPALITY_GEOJSON_BASE}/${target.prefCode}/${target.adminCode}.json`;
+      const response = await fetch(url);
+      if (response.ok) return response.json();
+
+      const wards = municipalityWardsForCity(target);
+      if (!wards.length) throw new Error('市区町村の境界を取得できませんでした');
+      const wardSources = await Promise.all(wards.map(async ward => {
+        const wardUrl = `${MUNICIPALITY_GEOJSON_BASE}/${ward.prefCode}/${ward.adminCode}.json`;
+        const wardResponse = await fetch(wardUrl);
+        if (!wardResponse.ok) throw new Error(`${ward.shortName}の境界を取得できませんでした`);
+        return wardResponse.json();
+      }));
+      return {
+        type: 'FeatureCollection',
+        features: wardSources.flatMap(source => source && source.type === 'FeatureCollection'
+          ? source.features || []
+          : source ? [source] : [])
+      };
+    }
+
     async function getComparisonGeometry(target) {
       const cacheKey = isHistoricalComparisonTarget(target)
         ? `history:1995:${target.geoshapeId || target.topologyIndex}`
@@ -3582,10 +3615,7 @@
         const collection = await prefecturesGeojsonPromise;
         source = (collection.features || []).find(feature => String(feature.properties && feature.properties.code).padStart(2, '0') === target.code);
       } else {
-        const url = `${MUNICIPALITY_GEOJSON_BASE}/${target.prefCode}/${target.adminCode}.json`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('市区町村の境界を取得できませんでした');
-        source = await response.json();
+        source = await loadCurrentMunicipalityGeometry(target);
       }
       const polygons = polygonGroupsFromGeojson(source);
       if (!polygons.length) throw new Error('境界データが見つかりませんでした');
