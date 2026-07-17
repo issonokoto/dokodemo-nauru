@@ -1,0 +1,614 @@
+{
+  "generatedAt": "2026-07-17T12:30:18.137Z",
+  "imported": [
+    {
+      "name": "エロマンガ島",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 4673553,
+      "displayName": "エロマンガ島",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "エロマンガ",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 11676702,
+      "displayName": "エロマンガ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "キンタマーニ",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 20447233,
+      "displayName": "キンタマーニ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "スケベニンゲン",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 13751467,
+      "displayName": "スケベニンゲン",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "マンコス",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 18500064,
+      "displayName": "マンコス",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ボイン川",
+      "query": "River Boyne, Ireland",
+      "osmType": "relation",
+      "osmId": 3653599,
+      "displayName": "Boyne, Éire / Ireland",
+      "geometryType": "MultiPolygon"
+    },
+    {
+      "name": "パンティ山",
+      "query": "Gunung Panti Johor Malaysia",
+      "osmType": "node",
+      "osmId": 11166729050,
+      "displayName": "Gunung Panti Timur, Kota Tinggi, Johor, 81900, Malaysia",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "オナラスカ",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 251415,
+      "displayName": "オナラスカ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "クサイ島",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 10810878,
+      "displayName": "クサイ島",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "マル・デ・アホ",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 3443507,
+      "displayName": "マル・デ・アホ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "チンコティーグ島",
+      "query": "lookup:relation/206809",
+      "osmType": "relation",
+      "osmId": 206809,
+      "displayName": "Chincoteague, Accomack County, Virginia, 23336, United States",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "エスコンフィールドHOKKAIDO",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 949639226,
+      "displayName": "エスコンフィールドHOKKAIDO",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "楽天モバイル 最強パーク宮城",
+      "query": "lookup:way/663912122",
+      "osmType": "way",
+      "osmId": 663912122,
+      "displayName": "楽天モバイル 最強パーク宮城, 荒浜原町線, 宮城野一丁目, 西宮城野, 宮城野区, 仙台市, 宮城県, 983-0045, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ベルーナドーム",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 13031204,
+      "displayName": "ベルーナドーム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "東京ドーム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 20028328,
+      "displayName": "東京ドーム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "明治神宮野球場",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 15772082,
+      "displayName": "明治神宮野球場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ZOZOマリンスタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 617646765,
+      "displayName": "ZOZOマリンスタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "横浜スタジアム",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 2958080,
+      "displayName": "横浜スタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "バンテリンドーム ナゴヤ",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 48179162,
+      "displayName": "バンテリンドーム ナゴヤ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "京セラドーム大阪",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 149991212,
+      "displayName": "京セラドーム大阪",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "阪神甲子園球場",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 9845926,
+      "displayName": "阪神甲子園球場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "MAZDA Zoom-Zoom スタジアム広島",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 2116085,
+      "displayName": "MAZDA Zoom-Zoom スタジアム広島",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "みずほPayPayドーム福岡",
+      "query": "lookup:way/28445837",
+      "osmType": "way",
+      "osmId": 28445837,
+      "displayName": "福岡ペイペイドーム, 2, 地行浜二丁目, 伊崎, 中央区, 福岡市, 福岡県, 810-0065, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ほっともっとフィールド神戸",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 712283400,
+      "displayName": "ほっともっとフィールド神戸",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "大和ハウス プレミストドーム",
+      "query": "lookup:way/127094824",
+      "osmType": "way",
+      "osmId": 127094824,
+      "displayName": "大和ハウス　 プレミストドーム, 月寒通, 月寒東1条17, 羊ケ丘, 豊平区, 札幌市, 石狩振興局, 北海道, 北海道地方, 062-0043, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "HARD OFF ECOスタジアム新潟",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 9231951,
+      "displayName": "HARD OFF ECOスタジアム新潟",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "静岡県草薙総合運動場硬式野球場",
+      "query": "lookup:way/701143779",
+      "osmType": "way",
+      "osmId": 701143779,
+      "displayName": "草薙総合運動場, 南幹線, 国吉田四丁目, 栗原, 駿河区, 静岡市, 静岡県, 422-8550, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ひなたサンマリンスタジアム宮崎",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 88515419,
+      "displayName": "ひなたサンマリンスタジアム宮崎",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "沖縄セルラースタジアム那覇",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 53656609,
+      "displayName": "沖縄セルラースタジアム那覇",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "倉敷マスカットスタジアム",
+      "query": "lookup:relation/9469160",
+      "osmType": "relation",
+      "osmId": 9469160,
+      "displayName": "マスカットスタジアム, 1, 中庄, 倉敷市, 岡山県, 710-0016, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "坊っちゃんスタジアム",
+      "query": "lookup:way/109501413",
+      "osmType": "way",
+      "osmId": 109501413,
+      "displayName": "坊ちゃんスタジアム, 松山市道 松山外環状道路線, 市坪南二丁目, 市坪西町, 松山市, 愛媛県, 790-0042, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "長野オリンピックスタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 161847180,
+      "displayName": "長野オリンピックスタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "こまちスタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 253589652,
+      "displayName": "こまちスタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "きたぎんボールパーク",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 1338929834,
+      "displayName": "きたぎんボールパーク",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "荘内銀行・日新製薬スタジアムやまがた",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 290722423,
+      "displayName": "荘内銀行・日新製薬スタジアムやまがた",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "福島県営あづま球場",
+      "query": "lookup:way/967258955",
+      "osmType": "way",
+      "osmId": 967258955,
+      "displayName": "あづま球場, あづま公園橋, 佐原, 福島市, 福島県, 960-2199, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "宇都宮清原球場",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 185497825,
+      "displayName": "宇都宮清原球場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "茨城県立カシマサッカースタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 175922114,
+      "displayName": "茨城県立カシマサッカースタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "埼玉スタジアム2002",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 119665760,
+      "displayName": "埼玉スタジアム2002",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "フクダ電子アリーナ",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 2146987,
+      "displayName": "フクダ電子アリーナ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "味の素スタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 155530939,
+      "displayName": "味の素スタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "日産スタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 119477713,
+      "displayName": "日産スタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ニッパツ三ツ沢球技場",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 9086087,
+      "displayName": "ニッパツ三ツ沢球技場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "IAIスタジアム日本平",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 2375780,
+      "displayName": "IAIスタジアム日本平",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "豊田スタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 170450653,
+      "displayName": "豊田スタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "パナソニック スタジアム 吹田",
+      "query": "lookup:way/685986996",
+      "osmType": "way",
+      "osmId": 685986996,
+      "displayName": "パナソニック スタジアム 吹田, 吹田市, 大阪府, 565-0826, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "エディオンピースウイング広島",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 16285712,
+      "displayName": "エディオンピースウイング広島",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "国立競技場",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 10071391,
+      "displayName": "国立競技場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ノエビアスタジアム神戸",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 1721297,
+      "displayName": "ノエビアスタジアム神戸",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "デンカビッグスワンスタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 42744784,
+      "displayName": "デンカビッグスワンスタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "キューアンドエースタジアムみやぎ",
+      "query": "lookup:way/103894920",
+      "osmType": "way",
+      "osmId": 103894920,
+      "displayName": "キューアンドエースタジアムみやぎ, 利府岩切停車場線, 青葉台二丁目, 神谷沢, 宮城野区, 利府町, 宮城郡, 宮城県, 981-0122, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "静岡スタジアム エコパ",
+      "query": "lookup:way/175920589",
+      "osmType": "way",
+      "osmId": 175920589,
+      "displayName": "エコパスタジアム, 磐田掛川線, 愛野南二丁目, 愛野, 袋井市, 静岡県, 436-0048, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "クラサスドーム大分",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 119673228,
+      "displayName": "クラサスドーム大分",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "サンガスタジアム by KYOCERA",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 10147979,
+      "displayName": "サンガスタジアム by KYOCERA",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "ベスト電器スタジアム",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 104292779,
+      "displayName": "ベスト電器スタジアム",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "駅前不動産スタジアム",
+      "query": "lookup:way/243123619",
+      "osmType": "way",
+      "osmId": 243123619,
+      "displayName": "スタジアム内通路, 東町一丁目, 京町, 鳥栖市, 佐賀県, 841-0026, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "Uvanceとどろきスタジアム by Fujitsu",
+      "query": "lookup:way/87377060",
+      "osmType": "way",
+      "osmId": 87377060,
+      "displayName": "フロンターレロード, 等々力, 中原区, 川崎市, 神奈川県, 211-0068, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "NACK5スタジアム大宮",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 17337961,
+      "displayName": "NACK5スタジアム大宮",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "三協フロンテア柏スタジアム",
+      "query": "lookup:way/463900052",
+      "osmType": "way",
+      "osmId": 463900052,
+      "displayName": "日立柏サッカー場, 市川柏線, 関場町, 柏市, 千葉県, 277-0025, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "東大阪市花園ラグビー場",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 664204657,
+      "displayName": "東大阪市花園ラグビー場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "花園中央公園",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 384656494,
+      "displayName": "花園中央公園",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "秩父宮ラグビー場",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 9080615,
+      "displayName": "秩父宮ラグビー場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "熊谷ラグビー場",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 783029375,
+      "displayName": "熊谷ラグビー場",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "熊谷スポーツ文化公園",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 385185030,
+      "displayName": "熊谷スポーツ文化公園",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "日本武道館",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 43896730,
+      "displayName": "日本武道館",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "国立代々木競技場 第一体育館",
+      "query": "lookup:way/1452614349",
+      "osmType": "way",
+      "osmId": 1452614349,
+      "displayName": "国立代々木競技場, 1, 神南二丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "東京体育館",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 153182207,
+      "displayName": "東京体育館",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "有明アリーナ",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 746064107,
+      "displayName": "有明アリーナ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "さいたまスーパーアリーナ",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 23876795,
+      "displayName": "さいたまスーパーアリーナ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "横浜アリーナ",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 123630243,
+      "displayName": "横浜アリーナ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "大阪城ホール",
+      "query": "lookup:way/176303041",
+      "osmType": "way",
+      "osmId": 176303041,
+      "displayName": "大阪城 ホール, 大阪城新橋, 大阪城, 中央区, 大阪市, 大阪府, 540-8510, 日本",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "Asueアリーナ大阪",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 1720974,
+      "displayName": "Asueアリーナ大阪",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "IGアリーナ",
+      "query": "existing",
+      "osmType": "relation",
+      "osmId": 19120714,
+      "displayName": "IGアリーナ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "マリンメッセ福岡A館",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 186991953,
+      "displayName": "マリンメッセ福岡A館",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "沖縄アリーナ",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 731931802,
+      "displayName": "沖縄アリーナ",
+      "geometryType": "Polygon"
+    },
+    {
+      "name": "両国国技館",
+      "query": "existing",
+      "osmType": "way",
+      "osmId": 76187058,
+      "displayName": "両国国技館",
+      "geometryType": "Polygon"
+    }
+  ],
+  "unresolved": []
+}
