@@ -12,7 +12,7 @@
 - 国の境界 / ナウルくん の切り替え
 - 色・回転・反転
 - 比較スポット（東京・大阪・博多など）と緯度経度ジャンプ
-- 現在または1995年時点の自治体、国・地域199件、島303件、湖・池254件を検索して、ナウルと面積・輪郭を比較
+- 現在または1995年時点の自治体、国・地域199件、島306件、湖・池254件、観光地・施設3件を検索して、ナウルと面積・輪郭を比較
 - マイ地点（最大2件）
 - スクリーンショット保存と X / Instagram / LINE への共有導線
 
@@ -24,9 +24,12 @@
 - 市区町村・都道府県の面積: 国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）
 - 竹島の面積: 外務省「竹島データ」
 - 歯舞群島の面積: e-Stat「統計で用いる標準地域コード」用語の解説
+- 夢洲・舞洲の面積: 大阪市「夢洲の概要」「舞洲地区のまちづくり」（咲洲は輪郭から算出した概算）
+- 観光地・施設の面積: 対象と同じ範囲の公表値がある場合は公表値、ない場合は輪郭データから算出した概算
 - 国・地域の面積: 世界銀行「Land area (sq. km)」および各国政府・統計機関の公表値
 - 国・地域の輪郭: [Natural Earth 1:10m Cultural Vectors](https://www.naturalearthdata.com/) / [geoBoundaries gbOpen](https://www.geoboundaries.org/)
 - 島・湖／池の輪郭: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors / [Natural Earth 1:10m Physical・Cultural Vectors](https://www.naturalearthdata.com/)（加工して表示）
+- 観光地・施設の輪郭: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors（万博会場・大屋根リングは2025年9月1日時点）
 - ナウルくん © ナウル共和国政府観光局
 - メルカトル図法上の実寸比較という体験は、既存の True Size 系・「どこでも〜マップ」系の着想を参考にしています
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v25';
+const CACHE_NAME = 'dokodemo-nauru-v27';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const APP_SHELL = [
   './assets/dokodemo-nauru-logo-transparent-v3.png',
   './data/gsi-area-r8-04.json',
   './data/natural-features.geojson',
+  './data/attractions.geojson',
   './data/countries.geojson',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -19,6 +20,7 @@ const NETWORK_FIRST_PATHS = new Set([
   './manifest.webmanifest',
   './data/gsi-area-r8-04.json',
   './data/natural-features.geojson',
+  './data/attractions.geojson',
   './data/countries.geojson',
   './data/jp-city-1995.topojson'
 ].map(path => new URL(path, self.location.href).pathname));
