@@ -1,0 +1,1492 @@
+{
+  "generatedAt": "2026-07-17T11:03:48.339Z",
+  "source": "OpenStreetMap tourism=theme_park in Japan",
+  "totalCatalogFeatures": 283,
+  "themeParkPolygons": 276,
+  "expoHeritageFeatures": 5,
+  "unresolvedNodeCount": 114,
+  "unresolvedAreaCount": 14,
+  "unresolvedNodes": [
+    {
+      "osmType": "node",
+      "osmId": 530499327,
+      "name": "舞鶴ふるるファーム",
+      "tags": {
+        "name": "舞鶴ふるるファーム",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1068010664,
+      "name": "東南植物楽園＆おきなわスロー風楽風遊の森",
+      "tags": {
+        "KSJ2:AAC": "47211",
+        "KSJ2:AAC_V": "沖縄県沖縄市",
+        "KSJ2:APF": "4",
+        "KSJ2:APF_V": "民間",
+        "KSJ2:PCA": "3",
+        "KSJ2:PCA_V": "建物",
+        "KSJ2:PCI": "03005",
+        "KSJ2:PCI_V": "動植物園",
+        "KSJ2:RCN": "数値地図",
+        "addr:street": "知花2146",
+        "name": "東南植物楽園＆おきなわスロー風楽風遊の森",
+        "name:en": "Okinawa Slow Wind Forest",
+        "name:ja": "東南植物楽園＆おきなわスロー風楽風遊の森",
+        "note": "National-Land Numerical Information 2006, MLIT Japan",
+        "note:ja": "国土数値情報(河川データ)平成18年国土交通省",
+        "source": "MLIT Japan",
+        "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1166143763,
+      "name": "オオムラサキ自然公園",
+      "tags": {
+        "name": "オオムラサキ自然公園",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1177156758,
+      "name": "NHKスタジオパーク",
+      "tags": {
+        "addr:block_number": "2",
+        "addr:city": "渋谷区",
+        "addr:country": "JP",
+        "addr:housename": "NHKスタジオパーク",
+        "addr:housenumber": "1",
+        "addr:neighbourhood": "神南二丁目",
+        "addr:postcode": "150-8001",
+        "addr:province": "東京都",
+        "fax": "+81 3-3485-8204",
+        "name": "NHKスタジオパーク",
+        "name:en": "NHK Studio Park",
+        "name:es": "NHK Studio Park",
+        "name:ja": "NHKスタジオパーク",
+        "name:zh": "NHK攝影棚公園",
+        "phone": "+81 3-3485-8034",
+        "tourism": "theme_park",
+        "website": "https://park.tachikawaonline.jp/themepark/10_nhk.htm",
+        "wheelchair": "yes",
+        "wikidata": "Q10854719",
+        "wikimedia_commons": "Category:NHK Studio Park",
+        "wikipedia": "ja:NHKスタジオパーク"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1420712248,
+      "name": "渋川スカイランドパーク児童遊園地",
+      "tags": {
+        "name": "渋川スカイランドパーク児童遊園地",
+        "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+        "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+        "source": "KSJ2",
+        "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1423948677,
+      "name": "交通児童遊園",
+      "tags": {
+        "name": "交通児童遊園",
+        "note": "National-Land Numerical Information (Public Facility) 2006, MLIT Japan",
+        "note:ja": "国土数値情報（公共施設データ）平成19年　国土交通省",
+        "source": "KSJ2",
+        "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-P02-v2_0.html",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1454650707,
+      "name": "ディスカバリーパーク焼津",
+      "tags": {
+        "name": "ディスカバリーパーク焼津",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1558721639,
+      "name": "花の木総合公園",
+      "tags": {
+        "name": "花の木総合公園",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1675292430,
+      "name": "滑川第砂防公園",
+      "tags": {
+        "name": "滑川第砂防公園",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1842264409,
+      "name": "ハタハタ館",
+      "tags": {
+        "name": "ハタハタ館",
+        "source": "survey;image",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1906505143,
+      "name": "キッズプラザ大阪",
+      "tags": {
+        "addr:block_number": "1",
+        "addr:city": "大阪市",
+        "addr:housenumber": "7",
+        "addr:neighbourhood": "扇町二丁目",
+        "addr:postcode": "530-0025",
+        "addr:province": "大阪府",
+        "addr:suburb": "北区",
+        "level": "0;4",
+        "name": "キッズプラザ大阪",
+        "name:en": "Kids Plaza Osaka",
+        "opening_hours": "Tu-Fr 09:30-17:00; Sa, Su, PH 09:30-19:00; Mo, Dec 28-Jan 02 off",
+        "phone": "+81-6-6311-6601",
+        "source": "local knowledge",
+        "tourism": "theme_park",
+        "website": "https://www.kidsplaza.or.jp/",
+        "wheelchair": "yes",
+        "wikidata": "Q11296794",
+        "wikimedia_commons": "Category:Kids plaza Osaka",
+        "wikipedia": "ja:キッズプラザ大阪"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1907337622,
+      "name": "たけべの森公園　TAKEBEnoMORI PARK",
+      "tags": {
+        "name": "たけべの森公園　TAKEBEnoMORI PARK",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 1960489061,
+      "name": "人吉クラフトパーク",
+      "tags": {
+        "name": "人吉クラフトパーク",
+        "tourism": "theme_park",
+        "website": "https://h-craftpark.com/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2004524869,
+      "name": "ビオスの丘",
+      "tags": {
+        "fee": "yes",
+        "name": "ビオスの丘",
+        "name:en": "Bios no Oka",
+        "name:ko": "비오스의 언덕",
+        "name:zh": "Bios之丘",
+        "source": "survey",
+        "survey:date": "2012-10-01",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2077129029,
+      "name": "芝政ワールド",
+      "tags": {
+        "name": "芝政ワールド",
+        "name:en": "Shibamasa World",
+        "opening_hours:url": "http://shibamasa.com/hours.php",
+        "tourism": "theme_park",
+        "website": "https://shibamasa.com/",
+        "wikidata": "Q11614659",
+        "wikipedia": "ja:芝政ワールド"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2078509079,
+      "name": "舞子海上プロムナード",
+      "tags": {
+        "name": "舞子海上プロムナード",
+        "name:ko": "마이코 해상 산책로",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2089432485,
+      "name": "グリコピア神戸",
+      "tags": {
+        "name": "グリコピア神戸",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2178052685,
+      "name": "ぎょぎょランド",
+      "tags": {
+        "name": "ぎょぎょランド",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2290067398,
+      "name": "富士ミルクランド",
+      "tags": {
+        "addr:city": "富士宮市",
+        "addr:housenumber": "3690",
+        "addr:postcode": "418-0103",
+        "addr:province": "静岡県",
+        "addr:quarter": "上井出",
+        "name": "富士ミルクランド",
+        "phone": "+81 544 54 3690",
+        "tourism": "theme_park",
+        "website": "https://www.fujimilkland.com/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2507738812,
+      "name": "四季の里",
+      "tags": {
+        "fax": "024-593-0104",
+        "name": "四季の里",
+        "opening_hours": "09:00-21:00",
+        "phone": "024-593-0101",
+        "tourism": "theme_park",
+        "website": "https://www.f-shikinosato.com/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 2948915145,
+      "name": "キッザニア東京",
+      "tags": {
+        "addr:block_number": "4",
+        "addr:city": "江東区",
+        "addr:housenumber": "9",
+        "addr:neighbourhood": "豊洲二丁目",
+        "addr:postcode": "135-8614",
+        "addr:province": "東京都",
+        "name": "キッザニア東京",
+        "name:en": "Kidzania Tokyo",
+        "pets": "yes",
+        "tourism": "theme_park",
+        "website": "https://www.kidzania.jp/tokyo/",
+        "wikidata": "Q5363436",
+        "wikimedia_commons": "Category:KidZania Tokyo",
+        "wikipedia": "en:KidZania Tokyo"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3011914238,
+      "name": "花さじき",
+      "tags": {
+        "name": "花さじき",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3093376315,
+      "name": "NHKハートプラザ",
+      "tags": {
+        "name": "NHKハートプラザ",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3093376431,
+      "name": "ホウライの千本松牧場",
+      "tags": {
+        "name": "ホウライの千本松牧場",
+        "name:ja-Hira": "ほうらいのせんぼんまつぼくじょう",
+        "name:ja_rm": "hōrainosenbonmatsubokujō",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3093376436,
+      "name": "田んぼアート",
+      "tags": {
+        "name": "田んぼアート",
+        "name:en": "Rice field art",
+        "name:ja-Hira": "たんぼあーと",
+        "name:ja_rm": "tanboāto",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3103676836,
+      "name": "Dynam amusement park",
+      "tags": {
+        "name": "Dynam amusement park",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3200913833,
+      "name": "ファンタジーキッズリゾート",
+      "tags": {
+        "branch": "稲毛",
+        "contact:phone": "0081433827788",
+        "fee": "yes",
+        "name": "ファンタジーキッズリゾート",
+        "name:en": "Fantasy Kids Resort",
+        "name:ja": "ファンタジーキッズリゾート",
+        "name:ja-Hira": "ふぁんたじーきっずりぞーと",
+        "name:ja_rm": "fantajīkizzurizōto",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3335614557,
+      "name": "レブンアツモリソウ群生地",
+      "tags": {
+        "leisure": "park",
+        "name": "レブンアツモリソウ群生地",
+        "source": "GSImaps/ort",
+        "source_1": "survey",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3358985693,
+      "name": "オレンジパーク串良",
+      "tags": {
+        "name": "オレンジパーク串良",
+        "toilets:wheelchair": "yes",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3359059593,
+      "name": "輝北　星生館",
+      "tags": {
+        "name": "輝北　星生館",
+        "toilets:wheelchair": "yes",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3751127125,
+      "name": "東条湖 おもちゃ王国",
+      "tags": {
+        "name": "東条湖 おもちゃ王国",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3820731268,
+      "name": "北海道グリーンランド",
+      "tags": {
+        "name": "北海道グリーンランド",
+        "operator": "空知リゾートシティ株式会社",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 3840754167,
+      "name": "プレジャーガーデン",
+      "tags": {
+        "name": "プレジャーガーデン",
+        "name:en": "Pleasure Garden",
+        "name:ja": "プレジャーガーデン",
+        "operator": "国営ひたち海浜公園",
+        "phone": "029-265-8185",
+        "tourism": "theme_park",
+        "website": "https://pleasure.hitachikaihin.jp/",
+        "website:en": "http://en.hitachikaihin.jp/pleasure-garden.html"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4019421195,
+      "name": "ドイツの森 入口 (看板)",
+      "tags": {
+        "name": "ドイツの森 入口 (看板)",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4047437782,
+      "name": "登別 伊達 時代村",
+      "tags": {
+        "fax": "+81-143-83-3434",
+        "name": "登別 伊達 時代村",
+        "name:en": "Noboribetsu Date Jidaimura",
+        "name:ja": "登別 伊達 時代村",
+        "name:ko": "노보리베츠 다테 지다이무라",
+        "opening_hours": "Apr-Oct 09:00-17:00; Nov-Mar 09:00-16:00",
+        "phone": "+81-143-83-3311",
+        "tourism": "theme_park",
+        "website": "https://edo-trip.jp/",
+        "wikidata": "Q11579107",
+        "wikipedia": "ja:登別伊達時代村"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4267636073,
+      "name": "ポートホールン長崎",
+      "tags": {
+        "name": "ポートホールン長崎",
+        "tourism": "theme_park",
+        "website": "https://www.phn.jp/",
+        "wikidata": "Q11652324"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4300745989,
+      "name": "忍野 しのびの里",
+      "tags": {
+        "name": "忍野 しのびの里",
+        "name:en": "Oshino Shinobi no Sato",
+        "tourism": "theme_park",
+        "wikidata": "Q59154259",
+        "wikipedia": "ja:忍野 しのびの里"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4330959544,
+      "name": "チビッ子忍者村",
+      "tags": {
+        "addr:full": "〒381-4101 長野県長野市戸隠3193",
+        "email": "info@ninjamura.com",
+        "name": "チビッ子忍者村",
+        "name:en": "Chibikko Ninja Village",
+        "name:ja": "チビッ子忍者村",
+        "phone": "+81 26-254-3723",
+        "tourism": "theme_park",
+        "website": "https://www.ninjamura.com/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4340744063,
+      "name": "Kid's Us Land",
+      "tags": {
+        "addr:block_number": "2",
+        "addr:city": "習志野市",
+        "addr:housenumber": "1",
+        "addr:neighbourhood": "茜浜二丁目",
+        "addr:province": "千葉県",
+        "branch": "新習志野店",
+        "level": "1",
+        "name": "Kid's Us Land",
+        "phone": "+81-47-409-3710",
+        "tourism": "theme_park",
+        "website": "https://usmart.co.jp/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4365845353,
+      "name": "小樽公園こどもの国",
+      "tags": {
+        "name": "小樽公園こどもの国",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4380262126,
+      "name": "足羽山公園遊園地",
+      "tags": {
+        "name": "足羽山公園遊園地",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4404233220,
+      "name": "伊豆ぐらんぱる公園",
+      "tags": {
+        "name": "伊豆ぐらんぱる公園",
+        "name:en": "Izu Granpal Park",
+        "phone": "0557-51-1122",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4574500841,
+      "name": "レッドヒル ヒーサーの森",
+      "tags": {
+        "name": "レッドヒル ヒーサーの森",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4681885486,
+      "name": "ぽんしゅ館",
+      "tags": {
+        "name": "ぽんしゅ館",
+        "name:en": "Sake Museum Ponshu-kan",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4721684956,
+      "name": "神戸　フルーツフラワーパーク",
+      "tags": {
+        "name": "神戸　フルーツフラワーパーク",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4833712459,
+      "name": "ちえのわ館",
+      "tags": {
+        "name": "ちえのわ館",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4837886782,
+      "name": "Energy Land",
+      "tags": {
+        "addr:county": "西牟婁郡",
+        "addr:housenumber": "3083",
+        "addr:province": "和歌山県",
+        "addr:quarter": "白浜町",
+        "name": "Energy Land",
+        "name:ja": "エネルギーランド",
+        "opening_hours": "09:30-15:30",
+        "operator": "白浜エネルギーランド株式会社",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4865921114,
+      "name": "観覧車",
+      "tags": {
+        "name": "観覧車",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 4889041325,
+      "name": "スカイガーデン跡地",
+      "tags": {
+        "name": "スカイガーデン跡地",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5004277424,
+      "name": "かねふく めんたいパーク 神戸三田",
+      "tags": {
+        "addr:housenumber": "兵庫県神戸市北区赤松台1-7",
+        "addr:postcode": "651-1516",
+        "name": "かねふく めんたいパーク 神戸三田",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5158749023,
+      "name": "レゴランド・ディスカバリー・センター",
+      "tags": {
+        "brand": "LEGOLAND Discovery Center",
+        "brand:wikidata": "Q303439",
+        "charge": "3000 JPY",
+        "contact:facebook": "LEGOLANDDiscoveryCenterTokyo",
+        "contact:instagram": "ldctokyo",
+        "contact:tripadvisor": "3169625",
+        "contact:twitter": "LEGOLANDTokyo",
+        "contact:website": "https://www.legolanddiscoverycenter.com/tokyo/",
+        "contact:youtube": "UCYVr25qdp8RhHxmxLR5W7Uw",
+        "fee": "yes",
+        "level": "2",
+        "level:ref": "3F",
+        "name": "レゴランド・ディスカバリー・センター",
+        "name:en": "Legoland Discovery Center",
+        "name:fr": "Legoland Discovery Center",
+        "name:ja-Hira": "レゴランド・ディスカバリー・センター",
+        "name:ja-Latn": "Regorando Desukabarī Sentā",
+        "official_name:en": "Legoland Discovery Center Tokyo",
+        "official_name:fr": "Legoland Discovery Center Tokyo",
+        "official_name:ja-Hira": "レゴランド・ディスカバリー・センターとうきょう",
+        "official_name:ja-Latn": "Regorando Desukabarī Sentā Tōkyō",
+        "opening_hours": "Mo-Fr 10:00-18:00; Sa-Su 10:00-19:00",
+        "operator": "Merlin Entertainments",
+        "operator:wikidata": "Q573278",
+        "start_date": "2012-06-15",
+        "tourism": "theme_park",
+        "wheelchair": "limited",
+        "wikidata": "Q30934236",
+        "wikimedia_commons": "Category:Legoland Discovery Center Tokyo",
+        "wikipedia": "ja:レゴランド・ディスカバリー・センター東京"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5159998871,
+      "name": "盛岡手づくり村",
+      "tags": {
+        "name": "盛岡手づくり村",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5170238946,
+      "name": "ドリームプラザ観覧車",
+      "tags": {
+        "name": "ドリームプラザ観覧車",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5171186315,
+      "name": "ちびまる子ちゃんランド",
+      "tags": {
+        "addr:block_number": "15",
+        "addr:city": "静岡市",
+        "addr:housename": "エスパルスドリームプラザ",
+        "addr:neighbourhood": "入船町13",
+        "addr:postcode": "424-0942",
+        "addr:province": "静岡県",
+        "addr:suburb": "清水区",
+        "level": "3",
+        "name": "ちびまる子ちゃんランド",
+        "name:en": "Chibi Maruko-chan Land",
+        "name:ja": "ちびまる子ちゃんランド",
+        "opening_hours": "Mo-Su 10:00-20:00",
+        "phone": "054-354-3360",
+        "tourism": "theme_park",
+        "website": "https://www.chibimarukochan-land.com/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5255069623,
+      "name": "加夢加夢ランド",
+      "tags": {
+        "name": "加夢加夢ランド",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5268251237,
+      "name": "ハートフルランド",
+      "tags": {
+        "name": "ハートフルランド",
+        "name:en": "Heartful Land",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5271502023,
+      "name": "スマイルグリコパーク",
+      "tags": {
+        "name": "スマイルグリコパーク",
+        "name:en": "Smile Glico Park",
+        "name:ja": "スマイルグリコパーク",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5290853999,
+      "name": "氷見あいやまガーデン",
+      "tags": {
+        "name": "氷見あいやまガーデン",
+        "tourism": "theme_park",
+        "website": "https://www.aiyamagarden.jp/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5334706304,
+      "name": "冒険の森",
+      "tags": {
+        "name": "冒険の森",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5406486602,
+      "name": "ナゾのパラダイス",
+      "tags": {
+        "name": "ナゾのパラダイス",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5719405321,
+      "name": "くじゅう花公園",
+      "tags": {
+        "addr:city": "Taketa",
+        "addr:postcode": "879-1506",
+        "name": "くじゅう花公園",
+        "toilets:wheelchair": "yes",
+        "tourism": "theme_park",
+        "wheelchair": "limited"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5831584403,
+      "name": "アーチェリー",
+      "tags": {
+        "name": "アーチェリー",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5831584404,
+      "name": "ますつかみ取り",
+      "tags": {
+        "name": "ますつかみ取り",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5832159703,
+      "name": "久留米サイクルファミリーパーク",
+      "tags": {
+        "name": "久留米サイクルファミリーパーク",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5832279215,
+      "name": "釣り堀",
+      "tags": {
+        "name": "釣り堀",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5847619975,
+      "name": "遊ぶ果樹園",
+      "tags": {
+        "name": "遊ぶ果樹園",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5847619976,
+      "name": "ゴーカート、バギー",
+      "tags": {
+        "name": "ゴーカート、バギー",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5847619977,
+      "name": "サーキット",
+      "tags": {
+        "name": "サーキット",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 5859884855,
+      "name": "鳥越大日スポーツランド(閉鎖)",
+      "tags": {
+        "name": "鳥越大日スポーツランド(閉鎖)",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6081512720,
+      "name": "Nasu No Megumi Mekke",
+      "tags": {
+        "addr:block_number": "414",
+        "addr:city": "那須町",
+        "addr:county": "那須郡",
+        "addr:housenumber": "2",
+        "addr:neighbourhood": "高久丙",
+        "addr:postcode": "3250397",
+        "addr:province": "栃木県",
+        "amenity": "restaurant",
+        "capacity": "170",
+        "cuisine": "international;steak_house;italian;pizza",
+        "delivery": "no",
+        "description": "りんどう湖畔に佇む日本ビューホテルグループのレストラン“那須の恵みMekke”\nランチタイムは、家族全員で楽しめるビュッフェレストラン！ 栃木県の新鮮な食材をふんだんに使った地産地消のビュッフェメニュー。ディナータイムは、薪グリルでじっくり焼くステーキと食べ放題メニューをお楽しみ頂けるステーキハウス。お誕生日や結婚記念日など大切日のご利用もお待ちしております。お子様も大歓迎です。「那須りんどう湖レイクビュー」と併設しています。 ※テーマパークの入園料金はかかりません。お気軽にお立ち寄り下さい。（駐車場無料",
+        "email": "nasu@rindo.co.jp",
+        "fax": "+81 287 76 3123",
+        "level": "0",
+        "name": "Nasu No Megumi Mekke",
+        "name:en": "Nasu No Megumi Mekke",
+        "name:ja": "那須の恵みメッケ",
+        "name:ko": "나스의 은혜 멧케",
+        "name:zh": "纳苏梅克的恩典",
+        "opening_hours": "Mo-Tu 11:00-15:30,Fr-Su 11:00-20:00",
+        "outdoor_seating": "no",
+        "payment:american_express": "yes",
+        "payment:cash": "yes",
+        "payment:credit_cards": "yes",
+        "payment:diners_club": "yes",
+        "payment:mastercard": "yes",
+        "payment:visa": "yes",
+        "phone": "+81 287 76 3111",
+        "smoking": "no",
+        "start_date": "2016-07",
+        "takeaway": "no",
+        "tourism": "theme_park",
+        "website": "https://www.rindo.co.jp/mekke/",
+        "wheelchair": "yes"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6155026284,
+      "name": "ジャンボ滑り台",
+      "tags": {
+        "name": "ジャンボ滑り台",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6265466342,
+      "name": "自転車の国 サイクルスポーツセンター",
+      "tags": {
+        "addr:block_number": "1826",
+        "addr:city": "伊豆市",
+        "addr:postcode": "410-2402",
+        "addr:province": "静岡県",
+        "addr:quarter": "大野",
+        "name": "自転車の国 サイクルスポーツセンター",
+        "name:en": "Jitensha-no-kuni Cycle Sports Center",
+        "name:ja": "自転車の国 サイクルスポーツセンター",
+        "tourism": "theme_park",
+        "website": "https://www.csc.or.jp/",
+        "wikidata": "Q11506471",
+        "wikipedia": "ja:日本サイクルスポーツセンター"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6370317286,
+      "name": "三田Breakout サバイバルゲームフィールド",
+      "tags": {
+        "name": "三田Breakout サバイバルゲームフィールド",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6457848473,
+      "name": "フォレストアドベンチャー・上野",
+      "tags": {
+        "name": "フォレストアドベンチャー・上野",
+        "opening_hours": "Fr-We 09:00-17:00",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6840967726,
+      "name": "佐渡西三川ゴールドパーク",
+      "tags": {
+        "name": "佐渡西三川ゴールドパーク",
+        "tourism": "theme_park",
+        "wikidata": "Q106242079",
+        "wikipedia": "ja:佐渡西三川ゴールドパーク"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6847855083,
+      "name": "津島プレーランド",
+      "tags": {
+        "name": "津島プレーランド",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 6956981686,
+      "name": "サンメッセ日南",
+      "tags": {
+        "addr:city": "Nichinan City",
+        "addr:housenumber": "2650",
+        "addr:postcode": "887-0101",
+        "addr:province": "Miyazaki",
+        "addr:quarter": "Miyaura",
+        "name:en": "Sunmesse Nichinan",
+        "name:ja": "サンメッセ日南",
+        "phone": "0987-29-1900",
+        "tourism": "theme_park",
+        "website": "https://www.sun-messe.co.jp/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 7263689768,
+      "name": "神崎農村公園ヨーデルの森",
+      "tags": {
+        "name": "神崎農村公園ヨーデルの森",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 7704012645,
+      "name": "オートポリス北ゲート",
+      "tags": {
+        "name": "オートポリス北ゲート",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 7704012890,
+      "name": "オートポリスメインゲート",
+      "tags": {
+        "name": "オートポリスメインゲート",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 8531317315,
+      "name": "スノーワールド喜茂別コース",
+      "tags": {
+        "name": "スノーワールド喜茂別コース",
+        "name:en": "SnowWorld kimobetsu course",
+        "name:ja": "スノーワールド喜茂別コース",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 8780158386,
+      "name": "RC PARK GOJO",
+      "tags": {
+        "name": "RC PARK GOJO",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 9279871152,
+      "name": "うえのドイツ文化村",
+      "tags": {
+        "name:en": "Ueno German Culture Village",
+        "name:ja": "うえのドイツ文化村",
+        "name:ja-Hira": "うえのドイツぶんかむら",
+        "tourism": "theme_park",
+        "website": "https://www.hakuaiueno.com/",
+        "wikidata": "Q10947551",
+        "wikipedia": "ja:うえのドイツ文化村"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 9630667117,
+      "name": "グリーンランド",
+      "tags": {
+        "addr:city": "荒尾市",
+        "addr:neighbourhood": "緑ヶ丘",
+        "addr:postcode": "864-0011",
+        "addr:province": "熊本県",
+        "name": "グリーンランド",
+        "name:en": "Greenland amusement park",
+        "name:ko": "그린란드 놀이공원",
+        "tourism": "theme_park",
+        "website": "https://www.greenland.co.jp/park/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 10132661258,
+      "name": "おさるランド＆アニタウン",
+      "tags": {
+        "name": "おさるランド＆アニタウン",
+        "name:en": "Monkey Park",
+        "name:ja": "おさるランド＆アニタウン",
+        "phone": "0288768036",
+        "tourism": "theme_park",
+        "website": "https://www.osaruland.jp/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 10132665793,
+      "name": "Western village",
+      "tags": {
+        "name": "Western village",
+        "tourism": "theme_park",
+        "wikidata": "Q11288492",
+        "wikipedia": "ja:ウェスタン村"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 10617316565,
+      "name": "日本ドルフィンセンター",
+      "tags": {
+        "name": "日本ドルフィンセンター",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 10750960561,
+      "name": "秋田ふるさと村 Kamakuland",
+      "tags": {
+        "name": "秋田ふるさと村 Kamakuland",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 10820790084,
+      "name": "カンドゥー",
+      "tags": {
+        "addr:block_number": "5",
+        "addr:city": "千葉市",
+        "addr:country": "JP",
+        "addr:housenumber": "イオンモール幕張新都心ファミリーモール",
+        "addr:neighbourhood": "豊砂1",
+        "addr:postcode": "261-0024",
+        "addr:province": "千葉県",
+        "addr:suburb": "美浜区",
+        "name": "カンドゥー",
+        "name:en": "Kandu",
+        "tourism": "theme_park",
+        "website": "https://www.kandu.co.jp/",
+        "wikidata": "Q18701116",
+        "wikipedia": "ja:カンドゥー幕張新都心"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 11894544550,
+      "name": "フローズンキングダム",
+      "tags": {
+        "name": "フローズンキングダム",
+        "name:en": "Frozen Kingdom",
+        "name:ja": "フローズンキングダム",
+        "name:zh": "魔雪奇緣世界",
+        "tourism": "theme_park",
+        "wikidata": "Q65044325",
+        "wikipedia": "en:World of Frozen"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 11894544551,
+      "name": "ラプンツェルの森",
+      "tags": {
+        "name": "ラプンツェルの森",
+        "name:en": "Rapunzel's Forest",
+        "name:ja": "ラプンツェルの森",
+        "tourism": "theme_park",
+        "wikidata": "Q65046459",
+        "wikipedia": "ja:ファンタジースプリングス"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 11894544552,
+      "name": "ピーターパンのネバーランド",
+      "tags": {
+        "name": "ピーターパンのネバーランド",
+        "name:en": "Peter Pan's Neverland",
+        "name:ja": "ピーターパンのネバーランド",
+        "tourism": "theme_park",
+        "wikidata": "Q65046459",
+        "wikipedia": "ja:ファンタジースプリングス"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 11964428149,
+      "name": "さすてな京都",
+      "tags": {
+        "name": "さすてな京都",
+        "operator": "京都市",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12052335568,
+      "name": "Palazzo Canals",
+      "tags": {
+        "name": "Palazzo Canals",
+        "name:en": "Palazzo Canals",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12052377070,
+      "name": "トイビル・トロリーパーク",
+      "tags": {
+        "name": "トイビル・トロリーパーク",
+        "name:en": "Toyville Trolley Park",
+        "name:ja": "トイビル・トロリーパーク",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12103755989,
+      "name": "那須バギーワールド",
+      "tags": {
+        "name": "那須バギーワールド",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12133366646,
+      "name": "Katsuyama Dino Park",
+      "tags": {
+        "name": "Katsuyama Dino Park",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12193590953,
+      "name": "ジブリパーク",
+      "tags": {
+        "alt_name:en": "Studio Ghibli Park",
+        "alt_name:fr": "Parc du Studio Ghibli",
+        "contact:tripadvisor": "25181540",
+        "contact:twitter": "ghibliparkjp",
+        "contact:website": "https://ghibli-park.jp",
+        "name": "ジブリパーク",
+        "name:en": "Ghibli Park",
+        "name:fr": "Parc Ghibli",
+        "name:ja-Latn": "Jiburi pāku",
+        "name:zh": "吉卜力公園",
+        "not:name": "Ghibli Museum",
+        "start_date": "2022-11-01",
+        "subject": "スタジオジブリ",
+        "subject:wikidata": "Q182950",
+        "tourism": "theme_park",
+        "wikidata": "Q97125735",
+        "wikimedia_commons": "Category:Ghibli_Park",
+        "wikipedia": "ja:ジブリパーク"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12259090150,
+      "name": "kiond ひろしま",
+      "tags": {
+        "name": "kiond ひろしま",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12592407091,
+      "name": "ドラえもん　ワクワク　スカイ・パーク",
+      "tags": {
+        "level": "2",
+        "name": "ドラえもん　ワクワク　スカイ・パーク",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12592457792,
+      "name": "ドラえもん わくわく スカイ・パーク",
+      "tags": {
+        "addr:floor": "3",
+        "check_date": "2025-02-16",
+        "level": "2",
+        "name": "ドラえもん わくわく スカイ・パーク",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12592477564,
+      "name": "HELLO KITTY HAPPY FLIGHT",
+      "tags": {
+        "level": "2",
+        "name": "HELLO KITTY HAPPY FLIGHT",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12592515217,
+      "name": "ハローキティハッピーフライト",
+      "tags": {
+        "addr:floor": "3",
+        "check_date": "2025-02-16",
+        "level": "2",
+        "name": "ハローキティハッピーフライト",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12600056481,
+      "name": "ルスツリゾート遊園地",
+      "tags": {
+        "contact:phone": "+81 136-46-3111",
+        "contact:website": "https://rusutsu.com/amusement-park/",
+        "kids_area:fee": "yes",
+        "name": "ルスツリゾート遊園地",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12690713178,
+      "name": "かまたえん",
+      "tags": {
+        "name": "かまたえん",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 12758816601,
+      "name": "おやつタウン",
+      "tags": {
+        "addr:postcode": "514-1254",
+        "name": "おやつタウン",
+        "opening_hours": "Tu-Fr 10:00-15:00; Mo, Sa 10:00-16:00; Su 10:00-17:00",
+        "phone": "0592551082",
+        "tourism": "theme_park",
+        "website": "https://oyatsu-town.com/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13284237301,
+      "name": "豊田市交通安全学習センター",
+      "tags": {
+        "addr:housenumber": "４９４−２４",
+        "addr:postcode": "〒471-0001",
+        "name": "豊田市交通安全学習センター",
+        "opening_hours": "Tu-Su 09:00-17:00",
+        "phone": "0565-88-5055",
+        "tourism": "theme_park",
+        "website": "https://www.kotsuanzen.jp/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13321786436,
+      "name": "ちいかわパーク",
+      "tags": {
+        "level": "0;-1",
+        "name": "ちいかわパーク",
+        "name:en": "Chiikawa Park",
+        "name:ja": "ちいかわパーク",
+        "opening_hours": "Mo-Su 10:00-21:00",
+        "tourism": "theme_park",
+        "website": "https://chiikawapark-tokyo.jp/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13340657801,
+      "name": "うんこミュージアムOKINAWA",
+      "tags": {
+        "instagram": "unkomuseum_oknw",
+        "level": "5",
+        "name": "うんこミュージアムOKINAWA",
+        "name:en": "UNKO MUSEUM OKINAWA",
+        "name:zh-Hans": "便便博物馆冲绳",
+        "operator": "株式会社たのしいミュージアム",
+        "tourism": "theme_park",
+        "twitter": "unkomuseum_oknw",
+        "website": "https://unkomuseum.com/okinawa/"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13417990601,
+      "name": "クレーン横丁道頓堀",
+      "tags": {
+        "name": "クレーン横丁道頓堀",
+        "name:en": "Crane Yokocho",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13473346996,
+      "name": "台場一丁目商店街",
+      "tags": {
+        "addr:block_number": "6",
+        "addr:city": "港区",
+        "addr:floor": "4F",
+        "addr:housenumber": "1",
+        "addr:neighbourhood": "台場一丁目",
+        "addr:province": "東京都",
+        "alt_name:en": "Daiba 1-chōme Shopping Street",
+        "alt_name:fr": "Rue commerçante de Daiba 1-chōme",
+        "contact:facebook": "daibaretro",
+        "contact:phone": "+81 3-3599-6500",
+        "contact:website": "https://www.odaiba-decks.com/news/event/daiba1chome.html",
+        "level": "3",
+        "name": "台場一丁目商店街",
+        "name:en": "Daiba 1-chōme Shōtengai",
+        "name:fr": "Daiba 1-chōme Shōtengai",
+        "name:ja-Hira": "だいばいっちょうめしょうてんがい",
+        "name:ja-Latn": "Daiba 1-chōme Shōtengai",
+        "opening_hours": "Mo-Fr 11:00-20:00; Sa-Su 11:00-21:00",
+        "tourism": "theme_park",
+        "wikidata": "Q11411934",
+        "wikipedia": "ja:台場一丁目商店街"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13648873012,
+      "name": "（名称なし）",
+      "tags": {
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13677665401,
+      "name": "PokéPark Kanto",
+      "tags": {
+        "check_date": "2026-03-25",
+        "name": "PokéPark Kanto",
+        "tourism": "theme_park"
+      }
+    },
+    {
+      "osmType": "node",
+      "osmId": 13894989092,
+      "name": "フォレストアドベンチャー・米原",
+      "tags": {
+        "check_date": "2026-05-30",
+        "name": "フォレストアドベンチャー・米原",
+        "tourism": "theme_park"
+      }
+    }
+  ],
+  "unresolvedAreas": [
+    {
+      "osmType": "way",
+      "osmId": 207542283,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 240599572,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 240599581,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 276434593,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 361861273,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 361861391,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 399574002,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 551530690,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 603482915,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 603482916,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 744275443,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 744275444,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "way",
+      "osmId": 1436162328,
+      "name": "（名称なし）"
+    },
+    {
+      "osmType": "relation",
+      "osmId": 7709853,
+      "name": "万博記念公園"
+    }
+  ]
+}
