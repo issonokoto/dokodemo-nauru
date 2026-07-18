@@ -9,7 +9,7 @@ const cachePath = path.join(root, '.world-heritage-nominatim-cache.json');
 // 日本の世界遺産のうち、構成資産の自動抽出だけでは代表名称で検索できない物件。
 const missingSites = [
   { id: 775, name: '原爆ドーム', context: '広島県広島市中区', query: '原爆ドーム, 広島市', aliases: ['広島平和記念碑', '広島平和記念公園', 'Hiroshima Peace Memorial', 'Genbaku Dome'], area: 0.004 },
-  { id: 661, name: '姫路城', context: '兵庫県姫路市', query: '姫路城, 姫路市', aliases: ['白鷺城', 'Himeji-jo'] },
+  { id: 661, name: '姫路城', context: '兵庫県姫路市・姫路公園', query: ['姫路公園, 姫路市', '姫路城, 姫路市'], cacheKey: '661-park', aliases: ['白鷺城', '姫路公園', 'Himeji-jo'], area: 1.07 },
   { id: 734, name: '白川郷・五箇山の合掌造り集落', context: '岐阜県・富山県', query: ['荻町, 白川村', '白川郷, 岐阜県', '白川村, 岐阜県'], aliases: ['白川郷', '五箇山', '荻町', 'Historic Villages of Shirakawa-go and Gokayama'] },
   { id: 776, name: '厳島神社', context: '広島県廿日市市宮島町', query: '厳島神社, 廿日市市', aliases: ['宮島', 'Itsukushima Shinto Shrine'] },
   { id: 972, name: '琉球王国のグスク及び関連遺産群', context: '沖縄県', query: ['首里城公園, 那覇市', '今帰仁城, 沖縄県'], aliases: ['首里城', 'グスク', '今帰仁城', 'Gusuku Sites and Related Properties of the Kingdom of Ryukyu'] },
@@ -28,7 +28,8 @@ const missingSites = [
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchGeometry(site, cache) {
-  if (cache[site.id]) return cache[site.id];
+  const cacheKey = site.cacheKey || site.id;
+  if (cache[cacheKey]) return cache[cacheKey];
   let selected = null;
   for (const query of Array.isArray(site.query) ? site.query : [site.query]) {
     const url = new URL('https://nominatim.openstreetmap.org/search');
@@ -44,7 +45,7 @@ async function fetchGeometry(site, cache) {
     await sleep(1100);
   }
   if (!selected) throw new Error(`${site.name}: 面境界が見つかりません`);
-  cache[site.id] = selected;
+  cache[cacheKey] = selected;
   fs.writeFileSync(cachePath, JSON.stringify(cache));
   await sleep(1100);
   return selected;
