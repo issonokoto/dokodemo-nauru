@@ -1207,6 +1207,12 @@
         <option value="satellite">衛星写真</option>
         <option value="dark">ダーク</option>
       </select>
+      <label for="map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
+      <select id="map-text-scale-select" class="basemap-select" aria-label="地図の文字サイズ">
+        <option value="normal">標準</option>
+        <option value="large">大きい（2倍）</option>
+        <option value="xlarge">特大（4倍）</option>
+      </select>
     </div>
 
     <!-- 見た目（形＋色をスウォッチで一括選択） -->
@@ -1308,6 +1314,7 @@
 
     <div class="mobile-tool-panel" data-mobile-panel="map">
       <p class="mobile-tool-copy">地図の見え方を切り替えます。</p>
+      <label for="mobile-basemap-select" class="block text-[10px] text-ocean-300 mb-1 tracking-wide">地図の種類</label>
       <select id="mobile-basemap-select" class="basemap-select" aria-label="スマホ用の地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="voyager">カラー地図</option>
@@ -1315,6 +1322,13 @@
         <option value="satellite">衛星写真</option>
         <option value="dark">ダーク</option>
       </select>
+      <label for="mobile-map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
+      <select id="mobile-map-text-scale-select" class="basemap-select" aria-label="スマホ用の地図の文字サイズ">
+        <option value="normal">標準</option>
+        <option value="large">大きい（2倍）</option>
+        <option value="xlarge">特大（4倍）</option>
+      </select>
+      <p class="mobile-tool-copy mt-2">衛星写真には文字サイズ設定は反映されません。</p>
     </div>
 
     <div class="mobile-tool-panel" data-mobile-panel="style">
@@ -1565,6 +1579,11 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         }
       }
     };
+    const MAP_TEXT_SCALES = {
+      normal: { level: 0, label: '標準' },
+      large: { level: 1, label: '大きい' },
+      xlarge: { level: 2, label: '特大' }
+    };
 
     // ナウル本体の実寸（境界 bbox から）
     const NAURU_SIZE_M = { w: 5618, h: 5744 };
@@ -1771,6 +1790,8 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
     let L_lat = NAURU_CENTER.lat;
     let activeSpot = 'tokyo';
     let currentBasemap = 'osm';
+    let mapTextScale = usesMobileLayout() ? 'large' : 'normal';
+    let activeBasemapTextLevel = 0;
     let activeSwatchId = 'k-original';
     const lastSwatchByGroup = { boundary: 'b-gold', kun: 'k-original' };
     let silhouetteOpacity = 1;
@@ -1838,8 +1859,18 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
     function setBasemap(key) {
       if (!map || !BASEMAPS[key]) return;
       const cfg = BASEMAPS[key];
+      const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
+      const safeLevel = Math.min(selectedLevel, Math.max(0, Math.floor(map.getZoom())));
+      const textLevel = key === 'satellite' ? 0 : safeLevel;
+      const tileScale = Math.pow(2, textLevel);
       if (baseLayer) map.removeLayer(baseLayer);
-      baseLayer = L.tileLayer(cfg.url, { ...cfg.options, crossOrigin: 'anonymous' }).addTo(map);
+      baseLayer = L.tileLayer(cfg.url, {
+        ...cfg.options,
+        tileSize: 256 * tileScale,
+        zoomOffset: -textLevel,
+        crossOrigin: 'anonymous'
+      }).addTo(map);
+      activeBasemapTextLevel = textLevel;
       if (polygonLayer) polygonLayer.bringToFront();
       if (imageLayer) imageLayer.bringToFront();
       currentBasemap = key;
@@ -1850,9 +1881,23 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       const mapSummary = document.getElementById('mobile-map-summary');
       if (mapSummary && sel) {
         const option = Array.from(sel.options).find(o => o.value === key);
-        if (option) mapSummary.textContent = option.textContent;
+        const sizeLabel = MAP_TEXT_SCALES[mapTextScale]?.label || '標準';
+        if (option) mapSummary.textContent = `${option.textContent}・文字 ${sizeLabel}`;
       }
       try { localStorage.setItem('nauru_basemap', key); } catch (_) {}
+    }
+
+    function setMapTextScale(value, persist = true, refresh = true) {
+      if (!MAP_TEXT_SCALES[value]) return;
+      mapTextScale = value;
+      const desktopSelect = document.getElementById('map-text-scale-select');
+      const mobileSelect = document.getElementById('mobile-map-text-scale-select');
+      if (desktopSelect && desktopSelect.value !== value) desktopSelect.value = value;
+      if (mobileSelect && mobileSelect.value !== value) mobileSelect.value = value;
+      if (persist) {
+        try { localStorage.setItem('nauru_map_text_scale', value); } catch (_) {}
+      }
+      if (map && refresh) setBasemap(currentBasemap);
     }
 
     function getColorStyle() {
@@ -2334,7 +2379,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         const zoom = Number.isFinite(zoomValue)
           ? Math.max(2, Math.min(18, Math.round(zoomValue)))
           : 12;
-        const styleKeys = ['map', 'style', 'opacity', 'rotation', 'flipX', 'flipY', 'reticle'];
+        const styleKeys = ['map', 'labels', 'style', 'opacity', 'rotation', 'flipX', 'flipY', 'reticle'];
         const hasStyle = styleKeys.some(key => params.has(key));
         const mapKey = params.get('map');
         const swatchId = params.get('style');
@@ -2349,6 +2394,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
           zoom,
           hasStyle,
           basemap: BASEMAPS[mapKey] ? mapKey : null,
+          mapTextScale: MAP_TEXT_SCALES[params.get('labels')] ? params.get('labels') : null,
           swatch: SWATCH_BY_ID[swatchId] ? swatchId : null,
           opacity: Number.isFinite(opacityValue) ? Math.max(0, Math.min(100, Math.round(opacityValue))) : null,
           rotation: Number.isFinite(rotationValue) ? Math.max(-180, Math.min(180, Math.round(rotationValue))) : null,
@@ -2375,6 +2421,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       comparisonPeriod = sharedView.comparisonPeriod;
       if (sharedView.hasStyle) {
         if (sharedView.basemap) currentBasemap = sharedView.basemap;
+        if (sharedView.mapTextScale) mapTextScale = sharedView.mapTextScale;
         if (sharedView.swatch) activeSwatchId = sharedView.swatch;
         if (sharedView.opacity !== null) silhouetteOpacity = sharedView.opacity / 100;
         if (sharedView.rotation !== null) currentRotation = sharedView.rotation;
@@ -2394,6 +2441,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       url.searchParams.set('lng', lng.toFixed(5));
       url.searchParams.set('z', String(map ? map.getZoom() : initialMapZoom));
       url.searchParams.set('map', currentBasemap);
+      url.searchParams.set('labels', mapTextScale);
       url.searchParams.set('style', activeSwatchId);
       url.searchParams.set('opacity', String(Math.round(silhouetteOpacity * 100)));
       url.searchParams.set('rotation', String(currentRotation));
@@ -3892,8 +3940,11 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         try {
           const saved = localStorage.getItem('nauru_basemap');
           if (saved && BASEMAPS[saved]) initialBasemap = saved;
+          const savedTextScale = localStorage.getItem('nauru_map_text_scale');
+          if (savedTextScale && MAP_TEXT_SCALES[savedTextScale]) mapTextScale = savedTextScale;
         } catch (_) {}
       }
+      setMapTextScale(mapTextScale, false, false);
       setBasemap(initialBasemap);
 
       document.getElementById('basemap-select').addEventListener('change', (e) => {
@@ -3901,6 +3952,19 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       });
       document.getElementById('mobile-basemap-select').addEventListener('change', (e) => {
         setBasemap(e.target.value);
+      });
+      document.getElementById('map-text-scale-select').addEventListener('change', (e) => {
+        setMapTextScale(e.target.value);
+      });
+      document.getElementById('mobile-map-text-scale-select').addEventListener('change', (e) => {
+        setMapTextScale(e.target.value);
+      });
+      map.on('zoomend', () => {
+        const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
+        const safeLevel = currentBasemap === 'satellite'
+          ? 0
+          : Math.min(selectedLevel, Math.max(0, Math.floor(map.getZoom())));
+        if (safeLevel !== activeBasemapTextLevel) setBasemap(currentBasemap);
       });
 
       // 見た目スウォッチの復元
