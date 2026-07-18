@@ -4,3 +4,4 @@ __pycache__/
 Thumbs.db
 build_html.py
 .large-place-cache-*.json
+.world-heritage-nominatim-cache.json
