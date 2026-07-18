@@ -1495,7 +1495,7 @@
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=36';
-const ATTRACTIONS_URL = './data/attractions.geojson?v=39';
+const ATTRACTIONS_URL = './data/attractions.geojson?v=40';
     const COUNTRIES_URL = './data/countries.geojson';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
     const COMPARISON_PERIODS = ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
@@ -3238,14 +3238,19 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=39';
         list.replaceChildren();
         return;
       }
-      const matches = [];
-      for (const target of targets) {
-        if (!normalizeComparisonQuery(target.search || target.name).includes(query)) continue;
-        matches.push(target);
-        if (matches.length >= 20) break;
+      const matches = targets.filter(target => normalizeComparisonQuery(target.search || target.name).includes(query));
+      if (comparisonPeriod === 'heritage') {
+        matches.sort((a, b) => {
+          const officialA = String(a.id || '').startsWith('attraction-unesco-') ? 1 : 0;
+          const officialB = String(b.id || '').startsWith('attraction-unesco-') ? 1 : 0;
+          if (officialA !== officialB) return officialB - officialA;
+          const exactA = normalizeComparisonQuery(a.name) === query ? 1 : 0;
+          const exactB = normalizeComparisonQuery(b.name) === query ? 1 : 0;
+          return exactB - exactA;
+        });
       }
       const fragment = document.createDocumentFragment();
-      matches.forEach(target => {
+      matches.slice(0, 20).forEach(target => {
         const option = document.createElement('option');
         option.value = target.name;
         option.label = isHistoricalComparisonTarget(target)
