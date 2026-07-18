@@ -15,6 +15,7 @@ const missingSites = [
   { id: 972, name: '琉球王国のグスク及び関連遺産群', context: '沖縄県', query: ['首里城公園, 那覇市', '今帰仁城, 沖縄県'], aliases: ['首里城', 'グスク', '今帰仁城', 'Gusuku Sites and Related Properties of the Kingdom of Ryukyu'] },
   { id: 1246, name: '石見銀山遺跡とその文化的景観', context: '島根県大田市', query: '石見銀山, 大田市', aliases: ['石見銀山', 'Iwami Ginzan Silver Mine and its Cultural Landscape'] },
   { id: 1362, name: '小笠原諸島', context: '東京都小笠原村', query: '小笠原諸島, 東京都', aliases: ['Bonin Islands'] },
+  { id: 1418, name: '富士山－信仰の対象と芸術の源泉', context: '山梨県・静岡県', geometryFileSource: 'attractions/large-world-heritage-R9442691.geojson', osmType: 'relation', osmId: 9442691, aliases: ['富士山', '富士山域', '富士山世界遺産', 'Fujisan', 'Mount Fuji', 'Fujisan, sacred place and source of artistic inspiration'], area: 207.021 },
   { id: 1484, name: '明治日本の産業革命遺産', context: '九州・山口ほか', query: '端島, 長崎県', aliases: ['軍艦島', '端島', "Sites of Japan's Meiji Industrial Revolution"] },
   { id: 1321, name: '国立西洋美術館', context: '東京都台東区上野公園', query: '国立西洋美術館, 台東区', aliases: ['ル・コルビュジエの建築作品', 'The Architectural Work of Le Corbusier'] },
   { id: 1535, name: '「神宿る島」宗像・沖ノ島と関連遺産群', context: '福岡県宗像市', query: '宗像大社辺津宮, 宗像市', aliases: ['宗像大社', '沖ノ島', 'Sacred Island of Okinoshima'] },
@@ -58,7 +59,13 @@ async function main() {
   catalog.features = catalog.features.filter(feature => !siteIds.has(feature.id));
 
   for (const site of missingSites) {
-    const result = await fetchGeometry(site, cache);
+    const result = site.geometryFileSource
+      ? {
+          geojson: JSON.parse(fs.readFileSync(path.join(root, 'data', site.geometryFileSource), 'utf8')).geometry,
+          osm_type: site.osmType,
+          osm_id: site.osmId
+        }
+      : await fetchGeometry(site, cache);
     const geometryFile = `attractions/unesco-${site.id}.geojson`;
     const id = `attraction-unesco-${site.id}`;
     const properties = {
