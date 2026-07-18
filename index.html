@@ -1271,6 +1271,11 @@
             <option value="island">島</option>
             <option value="water">湖・池</option>
             <option value="attraction">観光地・施設・スポーツ</option>
+            <option value="airport">空港・飛行場</option>
+            <option value="military">基地・駐屯地・演習場</option>
+            <option value="heritage">世界遺産</option>
+            <option value="infrastructure">港湾・工業地帯</option>
+            <option value="land">農場・牧場・鉱山</option>
           </select>
           <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off">
           <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
@@ -1357,6 +1362,11 @@
           <option value="island">島</option>
           <option value="water">湖・池</option>
           <option value="attraction">観光地・施設・スポーツ</option>
+          <option value="airport">空港・飛行場</option>
+          <option value="military">基地・駐屯地・演習場</option>
+          <option value="heritage">世界遺産</option>
+          <option value="infrastructure">港湾・工業地帯</option>
+          <option value="land">農場・牧場・鉱山</option>
         </select>
         <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off">
         <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
@@ -1484,9 +1494,11 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
-    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=35';
-    const ATTRACTIONS_URL = './data/attractions.geojson?v=35';
+    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=36';
+    const ATTRACTIONS_URL = './data/attractions.geojson?v=36';
     const COUNTRIES_URL = './data/countries.geojson';
+    const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
+    const COMPARISON_PERIODS = ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
     const HISTORICAL_1995_DATE = '1995年10月1日時点';
@@ -2343,7 +2355,7 @@
           flipX: params.get('flipX') === '1',
           flipY: params.get('flipY') === '1',
           reticle: params.get('reticle') !== '0',
-          comparisonPeriod: ['country', 'island', 'water', 'attraction'].includes(params.get('category'))
+          comparisonPeriod: COMPARISON_PERIODS.includes(params.get('category')) && params.get('category') !== 'current'
             ? params.get('category')
             : params.get('year') === '1995' ? '1995' : 'current',
           userBoundary: (hexColor(fill) && hexColor(stroke))
@@ -2389,7 +2401,7 @@
       url.searchParams.set('flipY', currentFlipY ? '1' : '0');
       url.searchParams.set('reticle', showReticle ? '1' : '0');
       if (comparisonPeriod === '1995') url.searchParams.set('year', '1995');
-      if (['country', 'island', 'water', 'attraction'].includes(comparisonPeriod)) url.searchParams.set('category', comparisonPeriod);
+      if (COMPARISON_PERIODS.includes(comparisonPeriod) && !['current', '1995'].includes(comparisonPeriod)) url.searchParams.set('category', comparisonPeriod);
       if (activeSwatchId === 'b-user') {
         const style = getActiveSwatch();
         url.searchParams.set('fill', style.fill);
@@ -3053,6 +3065,11 @@
       if (period === 'island') return '島';
       if (period === 'water') return '湖・池';
       if (period === 'attraction') return '観光地・施設';
+      if (period === 'airport') return '空港・飛行場';
+      if (period === 'military') return '基地・駐屯地・演習場';
+      if (period === 'heritage') return '世界遺産';
+      if (period === 'infrastructure') return '港湾・工業地帯';
+      if (period === 'land') return '農場・牧場・鉱山';
       return '自治体';
     }
 
@@ -3143,12 +3160,21 @@
       };
     }
 
+    function attractionPeriodFromSubtype(subtype) {
+      if (subtype === 'airport') return 'airport';
+      if (subtype === 'military-base') return 'military';
+      if (subtype === 'world-heritage') return 'heritage';
+      if (['large-port', 'industrial-complex'].includes(subtype)) return 'infrastructure';
+      if (['large-farm', 'large-mine'].includes(subtype)) return 'land';
+      return 'attraction';
+    }
+
     function attractionTargetFromFeature(feature) {
       const properties = feature && feature.properties || {};
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
       return {
         kind: 'attraction',
-        period: 'attraction',
+        period: attractionPeriodFromSubtype(properties.subtype),
         id: properties.id || feature.id,
         name: properties.name,
         shortName: properties.shortName || properties.name,
@@ -3207,7 +3233,7 @@
       const list = document.getElementById('comparison-targets');
       if (!list) return;
       const query = normalizeComparisonQuery(value);
-      const minimumLength = ['country', 'island', 'water', 'attraction'].includes(comparisonPeriod) ? 1 : 2;
+      const minimumLength = ['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod) ? 1 : 2;
       if (query.length < minimumLength) {
         list.replaceChildren();
         return;
@@ -3255,6 +3281,11 @@
       const island = comparisonPeriod === 'island';
       const water = comparisonPeriod === 'water';
       const attraction = comparisonPeriod === 'attraction';
+      const airport = comparisonPeriod === 'airport';
+      const military = comparisonPeriod === 'military';
+      const heritage = comparisonPeriod === 'heritage';
+      const infrastructure = comparisonPeriod === 'infrastructure';
+      const land = comparisonPeriod === 'land';
       const desktop = document.getElementById('comparison-search');
       const mobile = document.getElementById('mobile-comparison-search');
       if (desktop) desktop.placeholder = country
@@ -3263,6 +3294,11 @@
         ? '島を検索（例：淡路島、佐渡島）'
         : water ? '湖・池を検索（例：琵琶湖、霞ヶ浦）'
           : attraction ? '観光地・施設を検索（例：メルヘン村、甲子園、国立競技場）'
+          : airport ? '空港・飛行場を検索（例：羽田空港、嘉手納飛行場）'
+          : military ? '基地・演習場を検索（例：嘉手納飛行場、岩手山演習場）'
+          : heritage ? '世界遺産を検索（例：富士山、原爆ドーム）'
+          : infrastructure ? '港湾・工業地帯を検索'
+          : land ? '農場・牧場・鉱山を検索'
           : historical ? '1995年時点の市区町村を検索（例：田無市）'
             : '市区町村・都道府県を検索（例：千代田区、東京都）';
       if (mobile) mobile.placeholder = country
@@ -3271,15 +3307,20 @@
         ? '島を検索'
         : water ? '湖・池を検索'
           : attraction ? '観光地・施設を検索'
+          : airport ? '空港・飛行場を検索'
+          : military ? '基地・演習場を検索'
+          : heritage ? '世界遺産を検索'
+          : infrastructure ? '港湾・工業地帯を検索'
+          : land ? '農場・牧場・鉱山を検索'
           : historical ? '1995年の市区町村を検索'
             : '市区町村・都道府県を検索';
     }
 
     async function setComparisonPeriod(value) {
-      const nextPeriod = ['current', '1995', 'country', 'island', 'water', 'attraction'].includes(value) ? value : 'current';
-      if (nextPeriod === 'attraction') {
+      const nextPeriod = COMPARISON_PERIODS.includes(value) ? value : 'current';
+      if (ATTRACTION_PERIODS.includes(nextPeriod)) {
         attractionsPromise = null;
-        comparisonCatalogPromises.delete('attraction');
+        ATTRACTION_PERIODS.forEach(period => comparisonCatalogPromises.delete(period));
       }
       if (nextPeriod === 'island' || nextPeriod === 'water') {
         naturalFeaturesPromise = null;
@@ -3304,8 +3345,10 @@
       if (!comparisonCatalogPromises.has(period)) {
         const promise = period === 'country'
           ? loadCountries().then(collection => (collection.features || []).map(countryTargetFromFeature))
-          : period === 'attraction'
-            ? loadAttractions().then(collection => (collection.features || []).map(attractionTargetFromFeature))
+          : ATTRACTION_PERIODS.includes(period)
+            ? loadAttractions().then(collection => (collection.features || [])
+              .map(attractionTargetFromFeature)
+              .filter(target => target.period === period))
           : ['island', 'water'].includes(period)
             ? loadNaturalFeatures().then(collection => (collection.features || [])
               .map(naturalTargetFromFeature)
@@ -3366,7 +3409,7 @@
       const exactMatches = comparisonTargets.filter(target =>
         normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query);
       const fullExact = exactMatches.find(target => normalizeComparisonQuery(target.name) === query);
-      if (!fullExact && exactMatches.length > 1 && !['country', 'island', 'water', 'attraction'].includes(comparisonPeriod)) {
+      if (!fullExact && exactMatches.length > 1 && !['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod)) {
         showToast('同名の自治体があります。都道府県・郡を含む候補を選んでください');
         return null;
       }
@@ -3821,6 +3864,7 @@
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
+          .then(registration => registration.update())
           .catch(error => console.warn('Service Worker registration failed:', error));
       });
     }
@@ -3954,7 +3998,7 @@
           syncComparisonSearch(input.value);
           clearTimeout(catalogTimer);
           const query = normalizeComparisonQuery(input.value);
-          const minimumLength = ['country', 'island', 'water', 'attraction'].includes(comparisonPeriod) ? 1 : 2;
+          const minimumLength = ['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod) ? 1 : 2;
           if (query.length < minimumLength) {
             renderComparisonCatalogOptions([], '');
             return;
