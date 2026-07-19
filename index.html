@@ -1144,10 +1144,18 @@
     <div class="flex items-center gap-2 mb-2">
       <div class="min-w-0">
         <h1 class="text-sm sm:text-base font-bold text-sand-50 tracking-tight leading-tight truncate">どこでもナウル</h1>
-        <p class="text-[10px] sm:text-[11px] text-ocean-300 tracking-wide">実寸シルエット比較 · 21 km²</p>
+        <p class="whitespace-nowrap text-[10px] sm:text-[11px] text-ocean-300 tracking-wide">実寸比較 · 21 km²</p>
       </div>
+      <button
+        type="button"
+        id="btn-help"
+        class="ml-auto shrink-0 rounded-lg border border-ocean-300/30 bg-ocean-900/80 px-2 py-1 text-[10px] font-semibold text-ocean-300 transition-colors hover:border-gold-500/40 hover:text-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/70"
+        aria-controls="notice-modal"
+        aria-expanded="false"
+        aria-label="使い方を開く"
+      >使い方</button>
       <a
-        class="ml-auto shrink-0 rounded-lg border border-gold-500/40 bg-ocean-900/80 px-2 py-1 text-[10px] font-semibold text-gold-400 transition-colors hover:bg-gold-500/10 hover:text-sand-50 focus:outline-none focus:ring-2 focus:ring-gold-400/70"
+        class="shrink-0 rounded-lg border border-gold-500/40 bg-ocean-900/80 px-2 py-1 text-[10px] font-semibold text-gold-400 transition-colors hover:bg-gold-500/10 hover:text-sand-50 focus:outline-none focus:ring-2 focus:ring-gold-400/70"
         href="https://x.com/TarouKim10504"
         target="_blank"
         rel="noopener noreferrer"
@@ -1464,11 +1472,11 @@
   </div>
 
   <!-- Notice modal -->
-  <div id="notice-modal" class="fixed inset-0 z-[3000] flex items-center justify-center bg-ocean-950/70 backdrop-blur-sm p-4 transition-opacity duration-300">
+  <div id="notice-modal" class="fixed inset-0 z-[3000] flex items-center justify-center bg-ocean-950/70 backdrop-blur-sm p-4 transition-opacity duration-300 hidden-modal" role="dialog" aria-modal="true" aria-labelledby="notice-title" aria-hidden="true">
     <div class="panel rounded-2xl max-w-md w-full p-5 sm:p-6">
       <div class="flex items-center gap-2 mb-3">
         <span class="text-gold-400 text-xl">★</span>
-        <h2 class="text-base sm:text-lg font-bold text-sand-50">つかう前に</h2>
+        <h2 id="notice-title" class="text-base sm:text-lg font-bold text-sand-50">つかう前に</h2>
       </div>
       <div class="text-sm text-sand-100/85 leading-relaxed space-y-3">
         <p>
@@ -4309,14 +4317,41 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       });
 
       const noticeModal = document.getElementById('notice-modal');
-      const closeModal = () => {
-        noticeModal.classList.add('fade-out');
-        setTimeout(() => noticeModal.classList.add('hidden-modal'), 280);
+      const helpButton = document.getElementById('btn-help');
+      const closeNoticeButton = document.getElementById('close-notice-btn');
+      const NOTICE_STORAGE_KEY = 'nauru_notice_v1_seen';
+      let noticeReturnFocus = null;
+      let noticeCloseTimer = 0;
+      const openModal = (trigger = null) => {
+        clearTimeout(noticeCloseTimer);
+        noticeReturnFocus = trigger || document.activeElement;
+        noticeModal.classList.remove('hidden-modal');
+        requestAnimationFrame(() => noticeModal.classList.remove('fade-out'));
+        noticeModal.setAttribute('aria-hidden', 'false');
+        helpButton.setAttribute('aria-expanded', 'true');
+        closeNoticeButton.focus();
       };
-      document.getElementById('close-notice-btn').addEventListener('click', closeModal);
+      const closeModal = () => {
+        try { localStorage.setItem(NOTICE_STORAGE_KEY, '1'); } catch (_) {}
+        noticeModal.classList.add('fade-out');
+        noticeModal.setAttribute('aria-hidden', 'true');
+        helpButton.setAttribute('aria-expanded', 'false');
+        noticeCloseTimer = setTimeout(() => {
+          noticeModal.classList.add('hidden-modal');
+          if (noticeReturnFocus && typeof noticeReturnFocus.focus === 'function') noticeReturnFocus.focus();
+        }, 280);
+      };
+      helpButton.addEventListener('click', () => openModal(helpButton));
+      closeNoticeButton.addEventListener('click', closeModal);
       noticeModal.addEventListener('click', (e) => {
         if (e.target === noticeModal) closeModal();
       });
+      noticeModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+      let noticeSeen = false;
+      try { noticeSeen = localStorage.getItem(NOTICE_STORAGE_KEY) === '1'; } catch (_) {}
+      if (!noticeSeen) openModal();
 
       buildCityBar();
       updatePolygon();
