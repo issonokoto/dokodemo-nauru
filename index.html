@@ -1212,6 +1212,7 @@
       <label for="map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
       <select id="map-text-scale-select" class="basemap-select" aria-label="地図の文字サイズ">
         <option value="normal">標準</option>
+        <option value="small">小さい（高解像度向け）</option>
         <option value="large">大きい（2倍）</option>
         <option value="xlarge">特大（4倍）</option>
       </select>
@@ -1329,6 +1330,7 @@
       <label for="mobile-map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
       <select id="mobile-map-text-scale-select" class="basemap-select" aria-label="スマホ用の地図の文字サイズ">
         <option value="normal">標準</option>
+        <option value="small">小さい（高解像度向け）</option>
         <option value="large">大きい（2倍）</option>
         <option value="xlarge">特大（4倍）</option>
       </select>
@@ -1604,6 +1606,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
     };
     const MAP_TEXT_SCALES = {
       normal: { level: 0, label: '標準' },
+      small: { level: -1, label: '小さい' },
       large: { level: 1, label: '大きい' },
       xlarge: { level: 2, label: '特大' }
     };
@@ -1884,7 +1887,12 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
       const mapZoom = Math.max(0, Math.floor(map.getZoom()));
       const minSourceZoom = BASEMAPS[key].minSourceZoom || 0;
-      return Math.min(selectedLevel, Math.max(0, mapZoom - minSourceZoom));
+      const maxSourceZoom = BASEMAPS[key].options.maxNativeZoom
+        || BASEMAPS[key].options.maxZoom
+        || Infinity;
+      const largestLevel = Math.max(0, mapZoom - minSourceZoom);
+      const smallestLevel = Math.min(0, mapZoom - maxSourceZoom);
+      return Math.max(smallestLevel, Math.min(selectedLevel, largestLevel));
     }
 
     function createBasemapTileLayer(cfg, textLevel) {
