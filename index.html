@@ -1202,6 +1202,7 @@
       <label for="basemap-select" class="block text-[10px] text-ocean-300 mb-1 tracking-wide">地図の種類</label>
       <select id="basemap-select" class="basemap-select" aria-label="地図の種類">
         <option value="osm">標準（明るい）</option>
+        <option value="gsiPale">地理院・淡色（日本）</option>
         <option value="voyager">カラー地図</option>
         <option value="voyagerHd">高精細（英字・文字くっきり）</option>
         <option value="topo">地形図</option>
@@ -1318,6 +1319,7 @@
       <label for="mobile-basemap-select" class="block text-[10px] text-ocean-300 mb-1 tracking-wide">地図の種類</label>
       <select id="mobile-basemap-select" class="basemap-select" aria-label="スマホ用の地図の種類">
         <option value="osm">標準（明るい）</option>
+        <option value="gsiPale">地理院・淡色（日本）</option>
         <option value="voyager">カラー地図</option>
         <option value="voyagerHd">高精細（英字・文字くっきり）</option>
         <option value="topo">地形図</option>
@@ -1547,6 +1549,17 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         options: {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
+          maxZoom: 19
+        }
+      },
+      gsiPale: {
+        url: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',
+        fallback: 'osm',
+        minSourceZoom: 9,
+        options: {
+          attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院（淡色地図）</a>',
+          minZoom: 9,
+          maxNativeZoom: 18,
           maxZoom: 19
         }
       },
@@ -1866,20 +1879,36 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       return getActiveSwatch().mode;
     }
 
-    function setBasemap(key) {
-      if (!map || !BASEMAPS[key]) return;
-      const cfg = BASEMAPS[key];
+    function getBasemapTextLevel(key) {
+      if (!map || !BASEMAPS[key] || key === 'satellite') return 0;
       const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
-      const safeLevel = Math.min(selectedLevel, Math.max(0, Math.floor(map.getZoom())));
-      const textLevel = key === 'satellite' ? 0 : safeLevel;
+      const mapZoom = Math.max(0, Math.floor(map.getZoom()));
+      const minSourceZoom = BASEMAPS[key].minSourceZoom || 0;
+      return Math.min(selectedLevel, Math.max(0, mapZoom - minSourceZoom));
+    }
+
+    function createBasemapTileLayer(cfg, textLevel) {
       const tileScale = Math.pow(2, textLevel);
-      if (baseLayer) map.removeLayer(baseLayer);
-      baseLayer = L.tileLayer(cfg.url, {
+      return L.tileLayer(cfg.url, {
         ...cfg.options,
         tileSize: 256 * tileScale,
         zoomOffset: -textLevel,
         crossOrigin: 'anonymous'
-      }).addTo(map);
+      });
+    }
+
+    function setBasemap(key) {
+      if (!map || !BASEMAPS[key]) return;
+      const cfg = BASEMAPS[key];
+      const textLevel = getBasemapTextLevel(key);
+      if (baseLayer) map.removeLayer(baseLayer);
+      const primaryLayer = createBasemapTileLayer(cfg, textLevel);
+      if (cfg.fallback && BASEMAPS[cfg.fallback]) {
+        const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel);
+        baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
+      } else {
+        baseLayer = primaryLayer.addTo(map);
+      }
       activeBasemapTextLevel = textLevel;
       if (polygonLayer) polygonLayer.bringToFront();
       if (imageLayer) imageLayer.bringToFront();
@@ -3970,10 +3999,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         setMapTextScale(e.target.value);
       });
       map.on('zoomend', () => {
-        const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
-        const safeLevel = currentBasemap === 'satellite'
-          ? 0
-          : Math.min(selectedLevel, Math.max(0, Math.floor(map.getZoom())));
+        const safeLevel = getBasemapTextLevel(currentBasemap);
         if (safeLevel !== activeBasemapTextLevel) setBasemap(currentBasemap);
       });
 
