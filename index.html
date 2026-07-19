@@ -1203,6 +1203,7 @@
       <select id="basemap-select" class="basemap-select" aria-label="地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="voyager">カラー地図</option>
+        <option value="voyagerHd">高精細（英字・文字くっきり）</option>
         <option value="topo">地形図</option>
         <option value="satellite">衛星写真</option>
         <option value="dark">ダーク</option>
@@ -1318,6 +1319,7 @@
       <select id="mobile-basemap-select" class="basemap-select" aria-label="スマホ用の地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="voyager">カラー地図</option>
+        <option value="voyagerHd">高精細（英字・文字くっきり）</option>
         <option value="topo">地形図</option>
         <option value="satellite">衛星写真</option>
         <option value="dark">ダーク</option>
@@ -1550,6 +1552,14 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       },
       voyager: {
         url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        options: {
+          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }
+      },
+      voyagerHd: {
+        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
         options: {
           attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           subdomains: 'abcd',
