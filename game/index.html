@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061525">
+  <meta name="description" content="市区町村・島・湖や池の面積が、ナウルより大きいか小さいかを当てる10問クイズ。">
+  <title>ナウルより大きい？小さい？ | どこでもナウル</title>
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="stylesheet" href="./game.css">
+</head>
+<body>
+  <div class="ocean-texture" aria-hidden="true"></div>
+  <header class="game-header">
+    <a class="brand" href="../index.html" aria-label="どこでもナウルの地図へ戻る">
+      <span class="brand-star" aria-hidden="true">✹</span>
+      <span class="brand-name">どこでもナウル</span>
+    </a>
+    <div class="header-actions">
+      <button id="sound-toggle" class="icon-button" type="button" aria-pressed="true" aria-label="効果音をオフにする">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5 3a4.5 4.5 0 0 0-2.1-3.8v7.6a4.5 4.5 0 0 0 2.1-3.8Zm-2.1-8.6v2.2a7 7 0 0 1 0 12.8v2.2a9 9 0 0 0 0-17.2Z"/></svg>
+      </button>
+      <a class="map-link" href="../index.html">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 6 5-3 8 3 5-3v15l-5 3-8-3-5 3V6Zm5-.7-3 1.8v10.4l3-1.8V5.3Zm2 .2v10.7l5 1.9V7.4l-5-1.9Zm7 1.8V18l2-1.2V6.1l-2 1.2Z"/></svg>
+        地図へ戻る
+      </a>
+    </div>
+  </header>
+
+  <main class="game-shell">
+    <section id="loading-screen" class="screen loading-screen" aria-live="polite">
+      <div class="loading-star" aria-hidden="true">✹</div>
+      <p>問題を準備しています…</p>
+    </section>
+
+    <section id="start-screen" class="screen start-screen" hidden>
+      <div class="start-copy">
+        <h1>ナウルより<br><span>大きい？ 小さい？</span></h1>
+        <p class="start-lead">市区町村・島・湖や池の面積を、<strong>21 km²のナウル</strong>と比べる10問クイズ。</p>
+        <div class="rules" aria-label="ゲームのルール">
+          <div><strong>10</strong><span>全10問</span></div>
+          <div><strong>12</strong><span>1問12秒</span></div>
+          <div><strong>15,000</strong><span>最高得点</span></div>
+        </div>
+        <p class="same-rule">ナウルとの差が±5%以内なら「ほぼ同じ」です。</p>
+        <button id="start-button" class="primary-button" type="button">ゲームスタート</button>
+        <p id="best-score-start" class="best-score" hidden></p>
+      </div>
+      <div class="start-visual" aria-hidden="true">
+        <div class="nauru-orbit">
+          <span class="orbit-label top">市区町村</span>
+          <span class="orbit-label right">島</span>
+          <span class="orbit-label bottom">湖・池</span>
+          <div class="nauru-area">
+            <strong>21</strong><span>km²</span>
+          </div>
+        </div>
+        <img class="mascot mascot-start" src="../nauru_kun_outline.png" alt="">
+      </div>
+    </section>
+
+    <section id="quiz-screen" class="screen quiz-screen" hidden aria-labelledby="question-title">
+      <div class="hud">
+        <div class="progress-wrap">
+          <span id="question-count" class="question-count">1 / 10</span>
+          <div class="progress-track" aria-hidden="true"><div id="progress-bar"></div></div>
+        </div>
+        <div class="score-wrap"><span>SCORE</span><strong id="score-display">0</strong></div>
+        <div id="timer" class="timer" aria-label="残り12秒">
+          <svg aria-hidden="true" viewBox="0 0 56 56">
+            <circle class="timer-bg" cx="28" cy="28" r="24"></circle>
+            <circle id="timer-ring" class="timer-ring" cx="28" cy="28" r="24"></circle>
+          </svg>
+          <strong id="timer-number">12</strong>
+        </div>
+      </div>
+
+      <div class="question-stage">
+        <div id="category-label" class="category-label">島</div>
+        <h2 id="question-title"><span id="place-name">宮古島</span>は<br class="mobile-break"> ナウルより…？</h2>
+        <div class="reference-line">
+          <span class="place-dot" aria-hidden="true"></span>
+          <div class="nauru-reference"><span>ナウル</span><strong>21</strong><span>km²</span></div>
+          <img class="mascot mascot-quiz" src="../nauru_kun_outline.png" alt="" aria-hidden="true">
+        </div>
+      </div>
+
+      <div id="answer-grid" class="answer-grid" aria-label="答えを選択">
+        <button class="answer-button" type="button" data-answer="larger">
+          <span class="key">1</span><span>大きい</span>
+        </button>
+        <button class="answer-button same" type="button" data-answer="same">
+          <span class="key">2</span><span>ほぼ同じ</span>
+        </button>
+        <button class="answer-button" type="button" data-answer="smaller">
+          <span class="key">3</span><span>小さい</span>
+        </button>
+      </div>
+      <p class="keyboard-hint">数字キー 1・2・3 でも回答できます</p>
+
+      <div id="answer-feedback" class="answer-feedback" hidden aria-live="assertive">
+        <div id="feedback-mark" class="feedback-mark">○</div>
+        <div>
+          <strong id="feedback-title">正解！</strong>
+          <p id="feedback-detail"></p>
+        </div>
+        <span id="earned-score" class="earned-score">+1,420</span>
+      </div>
+    </section>
+
+    <section id="result-screen" class="screen result-screen" hidden aria-labelledby="result-heading">
+      <div class="result-hero">
+        <div class="result-copy">
+          <h1 id="result-heading">結果発表</h1>
+          <div class="final-score"><strong id="final-score">0</strong><span>点</span></div>
+          <h2 id="result-rank">ナウル研究員</h2>
+        </div>
+        <img class="mascot mascot-result" src="../nauru_kun_outline.png" alt="" aria-hidden="true">
+      </div>
+
+      <div class="result-summary">
+        <div><strong id="correct-summary">0 / 10</strong><span>正解</span></div>
+        <div><strong id="average-summary">0.0秒</strong><span>平均回答</span></div>
+        <div id="best-summary"><strong>自己ベスト</strong><span id="best-summary-value">0点</span></div>
+      </div>
+
+      <div class="review-wrap">
+        <div class="review-heading">
+          <h3>答え合わせ</h3>
+          <span>各項目から地図で実寸比較できます</span>
+        </div>
+        <ol id="review-list" class="review-list"></ol>
+      </div>
+
+      <div class="result-actions">
+        <button id="retry-button" class="primary-button" type="button">もう一度あそぶ</button>
+        <button id="share-button" class="secondary-button" type="button">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4a3 3 0 1 0-.9-1.8l-6.7 3.4a3 3 0 1 0 0 5.2l6.7 3.4A3 3 0 1 0 18 16Z"/></svg>
+          結果をシェア
+        </button>
+        <a id="result-map-link" class="text-action" href="../index.html">地図で比べる <span aria-hidden="true">›</span></a>
+      </div>
+    </section>
+
+    <section id="error-screen" class="screen error-screen" hidden>
+      <div class="error-star" aria-hidden="true">✹</div>
+      <h1>問題を読み込めませんでした</h1>
+      <p>通信を確認して、もう一度お試しください。</p>
+      <button id="reload-button" class="primary-button" type="button">再読み込み</button>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="./game.js" defer></script>
+</body>
+</html>

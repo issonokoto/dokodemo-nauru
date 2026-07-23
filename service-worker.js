@@ -1,8 +1,12 @@
-const CACHE_NAME = 'dokodemo-nauru-v46';
+const CACHE_NAME = 'dokodemo-nauru-v47';
 const STATIC_SHELL = [
   './index.html',
+  './game/index.html',
+  './game/game.css',
+  './game/game.js',
   './privacy.html',
   './manifest.webmanifest',
+  './data/game-places.json',
   './nauru_kun_outline.png',
   './assets/dokodemo-nauru-logo-transparent-v3.png',
   './icons/icon-192.png',
@@ -12,8 +16,10 @@ const STATIC_SHELL = [
 
 const NETWORK_FIRST_PATHS = new Set([
   './index.html',
+  './game/index.html',
   './privacy.html',
   './manifest.webmanifest',
+  './data/game-places.json',
   './data/gsi-area-r8-04.json',
   './data/natural-features.geojson',
   './data/attractions.geojson',
@@ -22,9 +28,15 @@ const NETWORK_FIRST_PATHS = new Set([
 ].map(path => new URL(path, self.registration.scope).pathname));
 
 function stableCacheRequest(requestUrl, navigation) {
-  const url = navigation
-    ? new URL('./index.html', self.registration.scope)
-    : new URL(requestUrl.pathname, requestUrl.origin);
+  let url;
+  if (navigation) {
+    const scopePath = new URL(self.registration.scope).pathname;
+    const relativePath = requestUrl.pathname.slice(scopePath.length);
+    const gameNavigation = relativePath === 'game' || relativePath === 'game/' || relativePath === 'game/index.html';
+    url = new URL(gameNavigation ? './game/index.html' : './index.html', self.registration.scope);
+  } else {
+    url = new URL(requestUrl.pathname, requestUrl.origin);
+  }
   return new Request(url.toString(), { method: 'GET' });
 }
 

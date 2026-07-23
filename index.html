@@ -493,6 +493,59 @@
     #mobile-edit-dock {
       display: none;
     }
+    .game-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+      margin: 0 0 0.75rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid rgba(245, 197, 66, 0.58);
+      border-radius: 0.8rem;
+      color: #fff7e7;
+      background:
+        radial-gradient(circle at 90% 20%, rgba(145, 201, 22, 0.22), transparent 35%),
+        linear-gradient(135deg, rgba(16, 74, 105, 0.94), rgba(7, 34, 60, 0.96));
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+      text-decoration: none;
+      transition: transform 0.16s ease, border-color 0.16s ease, filter 0.16s ease;
+    }
+    .game-entry:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 224, 126, 0.92);
+      filter: brightness(1.08);
+    }
+    .game-entry-copy {
+      min-width: 0;
+    }
+    .game-entry strong,
+    .game-entry small {
+      display: block;
+    }
+    .game-entry strong {
+      color: #f5c542;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+    .game-entry small {
+      margin-top: 0.18rem;
+      color: #9dd6e8;
+      font-size: 9px;
+      line-height: 1.35;
+    }
+    .game-entry-icon {
+      flex: 0 0 auto;
+      width: 2.15rem;
+      height: 2.15rem;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(245, 197, 66, 0.5);
+      border-radius: 50%;
+      color: #07182a;
+      background: #f5c542;
+      font-size: 15px;
+      font-weight: 900;
+    }
     #city-bar {
       max-width: 100%;
       min-width: 0;
@@ -798,6 +851,17 @@
         margin-top: 0.18rem;
         color: #7ec8e3;
         font-size: 9px;
+      }
+      .game-entry {
+        display: none;
+      }
+      .mobile-launcher.game-launcher {
+        grid-column: 1 / -1;
+        border-color: rgba(245, 197, 66, 0.58);
+        background:
+          radial-gradient(circle at 92% 18%, rgba(145, 201, 22, 0.2), transparent 36%),
+          linear-gradient(135deg, rgba(18, 83, 112, 0.94), rgba(10, 43, 70, 0.96));
+        text-decoration: none;
       }
       #mobile-edit-dock {
         display: block;
@@ -1181,8 +1245,19 @@
       <p class="text-[9px] text-ocean-300/80 mt-1 leading-snug">実寸は一定 · 高緯度ほど地図上では大きく見える</p>
     </div>
 
+    <a class="game-entry" href="./game/" aria-label="面積クイズ、ナウルより大きいか小さいかを当てるゲームを開く">
+      <span class="game-entry-copy">
+        <strong>面積クイズに挑戦</strong>
+        <small>大きい？ 小さい？ 全10問</small>
+      </span>
+      <span class="game-entry-icon" aria-hidden="true">?</span>
+    </a>
+
     <!-- スマホ: 操作カテゴリだけを表示 -->
     <div id="mobile-launchers" aria-label="操作を選択">
+      <a class="mobile-launcher game-launcher" href="./game/">
+        <strong>面積クイズ</strong><small>大きい？ 小さい？ 全10問</small>
+      </a>
       <button type="button" class="mobile-launcher" data-mobile-tool="map">
         <strong>地図</strong><small id="mobile-map-summary">標準（明るい）</small>
       </button>
@@ -2422,6 +2497,19 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
 
     const SITE_URL = 'https://issonokoto.github.io/dokodemo-nauru/';
 
+    function readRequestedComparisonFromUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const query = String(params.get('compare') || '').trim().slice(0, 120);
+        if (!query) return null;
+        const category = params.get('category');
+        const period = COMPARISON_PERIODS.includes(category) ? category : 'current';
+        return { query, period };
+      } catch (_) {
+        return null;
+      }
+    }
+
     function readSharedViewFromUrl() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -2468,6 +2556,8 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       }
     }
 
+    const requestedComparison = readRequestedComparisonFromUrl();
+    if (requestedComparison) comparisonPeriod = requestedComparison.period;
     const sharedView = readSharedViewFromUrl();
     if (sharedView) {
       center = { lat: sharedView.lat, lng: sharedView.lng };
@@ -4144,6 +4234,14 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       });
       document.getElementById('btn-comparison-save').addEventListener('click', saveComparisonImage);
       document.getElementById('btn-comparison-post').addEventListener('click', postComparisonToX);
+      if (requestedComparison) {
+        setComparisonPeriod(requestedComparison.period)
+          .then(() => {
+            syncComparisonSearch(requestedComparison.query);
+            return handleComparisonAction('compare', 'comparison-search');
+          })
+          .catch(error => console.warn('比較リンクを開けませんでした', error));
+      }
 
       // スクショ & SNS
       document.getElementById('btn-screenshot').addEventListener('click', () => takeScreenshot(true));
