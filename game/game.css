@@ -555,19 +555,46 @@ a:focus-visible {
   text-align: center;
 }
 
-.category-label {
+.question-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.category-label,
+.location-label {
   display: inline-flex;
-  min-width: 118px;
   min-height: 42px;
   align-items: center;
   justify-content: center;
   padding: 8px 24px;
-  border: 1px solid rgba(100, 201, 205, 0.26);
   border-radius: 999px;
-  color: var(--sand-50);
-  background: linear-gradient(180deg, rgba(31, 105, 126, 0.9), rgba(19, 73, 91, 0.9));
   font-size: 16px;
   font-weight: 800;
+}
+
+.category-label {
+  min-width: 118px;
+  border: 1px solid rgba(100, 201, 205, 0.26);
+  color: var(--sand-50);
+  background: linear-gradient(180deg, rgba(31, 105, 126, 0.9), rgba(19, 73, 91, 0.9));
+}
+
+.location-label {
+  max-width: min(520px, 72vw);
+  border: 1px solid rgba(255, 220, 133, 0.34);
+  color: var(--gold-100);
+  background: rgba(32, 47, 53, 0.82);
+}
+
+.location-label::before {
+  content: "所在地";
+  margin-right: 9px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  letter-spacing: 0.08em;
 }
 
 .question-stage h2 {
@@ -1148,11 +1175,19 @@ a:focus-visible {
   .timer { width: 56px; height: 56px; }
   .timer strong { font-size: 20px; }
   .question-stage { padding: 20px 0 8px; }
-  .category-label {
+  .category-label,
+  .location-label {
     min-width: 86px;
     min-height: 32px;
     padding: 5px 17px;
     font-size: 12px;
+  }
+  .location-label {
+    max-width: 76vw;
+  }
+  .location-label::before {
+    margin-right: 6px;
+    font-size: 9px;
   }
   .question-stage h2 {
     margin: 16px 0 15px;

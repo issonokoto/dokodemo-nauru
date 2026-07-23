@@ -51,7 +51,7 @@
       'loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'error-screen',
       'start-button', 'retry-button', 'share-button', 'reload-button', 'sound-toggle',
       'best-score-start', 'question-count', 'progress-bar', 'score-display', 'timer',
-      'timer-ring', 'timer-number', 'category-label', 'place-name', 'answer-grid',
+      'timer-ring', 'timer-number', 'category-label', 'location-label', 'place-name', 'answer-grid',
       'answer-feedback', 'feedback-mark', 'feedback-title', 'feedback-detail', 'earned-score',
       'final-score', 'result-rank', 'correct-summary', 'average-summary', 'best-summary',
       'best-summary-value', 'review-list', 'result-map-link', 'toast'
@@ -237,6 +237,7 @@
     elements['question-count'].textContent = `${state.currentIndex + 1} / ${QUESTION_COUNT}`;
     elements['progress-bar'].style.width = `${((state.currentIndex + 1) / QUESTION_COUNT) * 100}%`;
     elements['category-label'].textContent = CATEGORY_LABELS[question.category];
+    elements['location-label'].textContent = question.location || '所在地不明';
     elements['place-name'].textContent = question.shortName || question.name;
     elements['timer'].classList.remove('warning');
     elements['timer-ring'].style.strokeDashoffset = '0';

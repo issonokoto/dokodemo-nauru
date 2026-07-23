@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v47';
+const CACHE_NAME = 'dokodemo-nauru-v50';
 const STATIC_SHELL = [
   './index.html',
   './game/index.html',
@@ -7,6 +7,7 @@ const STATIC_SHELL = [
   './privacy.html',
   './manifest.webmanifest',
   './data/game-places.json',
+  './data/place-administrative-areas.json',
   './nauru_kun_outline.png',
   './assets/dokodemo-nauru-logo-transparent-v3.png',
   './icons/icon-192.png',
@@ -20,6 +21,7 @@ const NETWORK_FIRST_PATHS = new Set([
   './privacy.html',
   './manifest.webmanifest',
   './data/game-places.json',
+  './data/place-administrative-areas.json',
   './data/gsi-area-r8-04.json',
   './data/natural-features.geojson',
   './data/attractions.geojson',

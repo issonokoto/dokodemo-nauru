@@ -1599,6 +1599,7 @@
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=38';
 const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
+    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=1';
     const COUNTRIES_URL = './data/countries.geojson?v=42';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
     const COMPARISON_PERIODS = ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
@@ -1798,6 +1799,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
     let historical1995TopologyPromise = null;
     let naturalFeaturesPromise = null;
     let attractionsPromise = null;
+    let placeAdministrativeAreasPromise = null;
     let countriesPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
@@ -3308,10 +3310,38 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       return attractionsPromise;
     }
 
-    function naturalTargetFromFeature(feature) {
+    async function loadPlaceAdministrativeAreas() {
+      if (placeAdministrativeAreasPromise) return placeAdministrativeAreasPromise;
+      placeAdministrativeAreasPromise = fetch(PLACE_ADMINISTRATIVE_AREAS_URL, { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error('行政所属データを取得できませんでした');
+          return response.json();
+        })
+        .catch(error => {
+          placeAdministrativeAreasPromise = null;
+          throw error;
+        });
+      return placeAdministrativeAreasPromise;
+    }
+
+    function administrativeMetadata(feature, index) {
+      const properties = feature && feature.properties || {};
+      const id = properties.id || feature.id;
+      const item = index && index.places && index.places[id] || {};
+      const prefectures = Array.isArray(item.prefectures) ? item.prefectures : [];
+      const municipalities = Array.isArray(item.municipalities) ? item.municipalities : [];
+      const groups = Array.isArray(item.groups) ? item.groups : [];
+      const locationLabel = municipalities.length
+        ? municipalities.join('・')
+        : prefectures.length ? prefectures.join('・') : properties.context || '';
+      return { prefectures, municipalities, groups, locationLabel };
+    }
+
+    function naturalTargetFromFeature(feature, administrativeIndex) {
       const properties = feature && feature.properties || {};
       const kind = properties.kind === 'water' ? 'water' : 'island';
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
+      const administrative = administrativeMetadata(feature, administrativeIndex);
       return {
         kind,
         period: kind,
@@ -3319,6 +3349,10 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         name: properties.name,
         shortName: properties.shortName || properties.name,
         context: properties.context || '',
+        prefectures: administrative.prefectures,
+        municipalities: administrative.municipalities,
+        groups: administrative.groups,
+        locationLabel: administrative.locationLabel,
         areaKm2: Number(properties.officialAreaKm2),
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
@@ -3326,7 +3360,14 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         boundarySourceUrl: properties.boundarySourceUrl || '',
         territoryNote: properties.territoryNote || '',
         geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
-        search: [properties.name, properties.context, ...aliases].filter(Boolean).join(' '),
+        search: [
+          properties.name,
+          properties.context,
+          ...administrative.prefectures,
+          ...administrative.municipalities,
+          ...administrative.groups,
+          ...aliases
+        ].filter(Boolean).join(' '),
         feature
       };
     }
@@ -3362,9 +3403,10 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       return 'attraction';
     }
 
-    function attractionTargetFromFeature(feature) {
+    function attractionTargetFromFeature(feature, administrativeIndex) {
       const properties = feature && feature.properties || {};
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
+      const administrative = administrativeMetadata(feature, administrativeIndex);
       return {
         kind: 'attraction',
         period: attractionPeriodFromSubtype(properties.subtype),
@@ -3372,6 +3414,10 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         name: properties.name,
         shortName: properties.shortName || properties.name,
         context: properties.context || '',
+        prefectures: administrative.prefectures,
+        municipalities: administrative.municipalities,
+        groups: administrative.groups,
+        locationLabel: administrative.locationLabel,
         subtype: properties.subtype || '',
         subtypeLabel: properties.subtypeLabel || '観光地・施設',
         statusLabel: properties.statusLabel || '',
@@ -3381,7 +3427,16 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         boundarySourceLabel: properties.boundarySourceLabel || '',
         boundarySourceUrl: properties.boundarySourceUrl || '',
         geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
-        search: [properties.name, properties.shortName, properties.context, properties.subtypeLabel, ...aliases].filter(Boolean).join(' '),
+        search: [
+          properties.name,
+          properties.shortName,
+          properties.context,
+          properties.subtypeLabel,
+          ...administrative.prefectures,
+          ...administrative.municipalities,
+          ...administrative.groups,
+          ...aliases
+        ].filter(Boolean).join(' '),
         feature
       };
     }
@@ -3443,16 +3498,23 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         });
       }
       const fragment = document.createDocumentFragment();
-      matches.slice(0, 20).forEach(target => {
+      matches.slice(0, 100).forEach(target => {
         const option = document.createElement('option');
         option.value = target.name;
+        const administrativeLabel = target.locationLabel || target.context || '';
+        const groupLabel = Array.isArray(target.groups) && target.groups.length
+          ? target.groups.join('・')
+          : '';
+        const locationSuffix = [administrativeLabel, groupLabel]
+          .filter((label, index, labels) => label && labels.indexOf(label) === index)
+          .join('／');
         option.label = isHistoricalComparisonTarget(target)
           ? '旧市区町村・1995年時点'
           : target.kind === 'prefecture' ? '都道府県'
             : target.kind === 'country' ? `国・地域${target.context ? `・${target.context}` : ''}`
-              : target.kind === 'island' ? `島${target.context ? `・${target.context}` : ''}`
-              : target.kind === 'water' ? `湖・池${target.context ? `・${target.context}` : ''}`
-              : target.kind === 'attraction' ? `${target.subtypeLabel}${target.context ? `・${target.context}` : ''}`
+              : target.kind === 'island' ? `島${locationSuffix ? `・${locationSuffix}` : ''}`
+              : target.kind === 'water' ? `湖・池${locationSuffix ? `・${locationSuffix}` : ''}`
+              : target.kind === 'attraction' ? `${target.subtypeLabel}${locationSuffix ? `・${locationSuffix}` : ''}`
                 : '市区町村';
         fragment.appendChild(option);
       });
@@ -3489,27 +3551,27 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       if (desktop) desktop.placeholder = country
         ? '国・地域を検索（例：台湾、フランス）'
         : island
-        ? '島を検索（例：淡路島、佐渡島）'
-        : water ? '湖・池を検索（例：琵琶湖、霞ヶ浦）'
-          : attraction ? '観光地・施設を検索（例：メルヘン村、甲子園、国立競技場）'
-          : airport ? '空港・飛行場を検索（例：羽田空港、嘉手納飛行場）'
-          : military ? '基地・演習場を検索（例：嘉手納飛行場、岩手山演習場）'
-          : heritage ? '世界遺産を検索（例：富士山、原爆ドーム）'
-          : infrastructure ? '港湾・工業地帯を検索'
-          : land ? '農場・牧場・鉱山を検索'
+        ? '島名・都道府県・市区町村・諸島名を検索'
+        : water ? '湖・池名・都道府県・市区町村を検索'
+          : attraction ? '観光地・施設・都道府県・市区町村を検索'
+          : airport ? '空港・飛行場・都道府県・市区町村を検索'
+          : military ? '基地・演習場・都道府県・市区町村を検索'
+          : heritage ? '世界遺産・都道府県・市区町村を検索'
+          : infrastructure ? '港湾・工業地帯・都道府県・市区町村を検索'
+          : land ? '農場・牧場・鉱山・都道府県・市区町村を検索'
           : historical ? '1995年時点の市区町村を検索（例：田無市）'
             : '市区町村・都道府県を検索（例：千代田区、東京都）';
       if (mobile) mobile.placeholder = country
         ? '国・地域を検索'
         : island
-        ? '島を検索'
-        : water ? '湖・池を検索'
-          : attraction ? '観光地・施設を検索'
-          : airport ? '空港・飛行場を検索'
-          : military ? '基地・演習場を検索'
-          : heritage ? '世界遺産を検索'
-          : infrastructure ? '港湾・工業地帯を検索'
-          : land ? '農場・牧場・鉱山を検索'
+        ? '島名・地域名を検索'
+        : water ? '湖・池名・地域名を検索'
+          : attraction ? '施設名・地域名を検索'
+          : airport ? '空港名・地域名を検索'
+          : military ? '基地名・地域名を検索'
+          : heritage ? '世界遺産・地域名を検索'
+          : infrastructure ? '港湾・工業地帯・地域名を検索'
+          : land ? '農場・鉱山・地域名を検索'
           : historical ? '1995年の市区町村を検索'
             : '市区町村・都道府県を検索';
     }
@@ -3544,12 +3606,12 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
         const promise = period === 'country'
           ? loadCountries().then(collection => (collection.features || []).map(countryTargetFromFeature))
           : ATTRACTION_PERIODS.includes(period)
-            ? loadAttractions().then(collection => (collection.features || [])
-              .map(attractionTargetFromFeature)
+            ? Promise.all([loadAttractions(), loadPlaceAdministrativeAreas()]).then(([collection, administrativeIndex]) => (collection.features || [])
+              .map(feature => attractionTargetFromFeature(feature, administrativeIndex))
               .filter(target => target.period === period))
           : ['island', 'water'].includes(period)
-            ? loadNaturalFeatures().then(collection => (collection.features || [])
-              .map(naturalTargetFromFeature)
+            ? Promise.all([loadNaturalFeatures(), loadPlaceAdministrativeAreas()]).then(([collection, administrativeIndex]) => (collection.features || [])
+              .map(feature => naturalTargetFromFeature(feature, administrativeIndex))
               .filter(target => target.kind === period))
           : period === '1995'
             ? loadHistorical1995Topology().then(topology => {
@@ -3912,11 +3974,15 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       document.getElementById('comparison-target-name').textContent = targetLabel;
       const context = document.getElementById('comparison-target-context');
       context.hidden = !historical && !natural && !country && !attraction;
+      const administrativeContext = result.target.locationLabel || result.target.context || '';
+      const groupContext = Array.isArray(result.target.groups) && result.target.groups.length
+        ? `／${result.target.groups.join('・')}`
+        : '';
       context.textContent = historical
         ? `${result.target.prefecture}${result.target.parent ? `・${result.target.parent}` : ''}／${HISTORICAL_1995_DATE}`
         : country ? `${result.target.context}／国・地域`
-          : natural ? `${result.target.context}／${result.target.kind === 'island' ? '島' : '湖・池'}`
-            : attraction ? `${result.target.context}／${result.target.subtypeLabel}${result.target.statusLabel ? `／${result.target.statusLabel}` : ''}` : '';
+          : natural ? `${administrativeContext}${groupContext}／${result.target.kind === 'island' ? '島' : '湖・池'}`
+            : attraction ? `${administrativeContext}${groupContext}／${result.target.subtypeLabel}${result.target.statusLabel ? `／${result.target.statusLabel}` : ''}` : '';
       document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
       document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウル約${ratioLabel}個分です。`;
       const comparisonNote = document.getElementById('comparison-note');

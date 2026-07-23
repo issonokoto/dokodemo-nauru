@@ -4,6 +4,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const AREA_PATH = path.join(ROOT, 'data', 'gsi-area-r8-04.json');
 const NATURAL_PATH = path.join(ROOT, 'data', 'natural-features.geojson');
+const ADMINISTRATIVE_AREAS_PATH = path.join(ROOT, 'data', 'place-administrative-areas.json');
 const OUTPUT_PATH = path.join(ROOT, 'data', 'game-places.json');
 const MUNICIPALITY_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
 const NAURU_AREA_KM2 = 21;
@@ -32,6 +33,7 @@ async function loadMunicipalityCatalog() {
 async function main() {
   const officialAreas = JSON.parse(fs.readFileSync(AREA_PATH, 'utf8'));
   const naturalFeatures = JSON.parse(fs.readFileSync(NATURAL_PATH, 'utf8'));
+  const administrativeAreas = JSON.parse(fs.readFileSync(ADMINISTRATIVE_AREAS_PATH, 'utf8')).places || {};
   const municipalityCatalog = await loadMunicipalityCatalog();
 
   const municipalities = Object.entries(municipalityCatalog)
@@ -45,6 +47,7 @@ async function main() {
         category: 'municipality',
         name: `${cleanText(item.prefecture)}${cleanText(item.city)}`,
         shortName: cleanText(item.city),
+        location: cleanText(item.prefecture),
         areaKm2,
         outcome: outcomeFor(areaKm2)
       };
@@ -57,11 +60,15 @@ async function main() {
       const category = properties.kind === 'water' ? 'water' : properties.kind === 'island' ? 'island' : null;
       const areaKm2 = Number(properties.officialAreaKm2);
       if (!category || !cleanText(properties.name) || !Number.isFinite(areaKm2) || areaKm2 <= 0) return null;
+      const administrative = administrativeAreas[properties.id || feature.id] || {};
+      const prefectures = Array.isArray(administrative.prefectures) ? administrative.prefectures : [];
+      const municipalities = Array.isArray(administrative.municipalities) ? administrative.municipalities : [];
       return {
         id: `${category}-${cleanText(properties.id || feature.id || properties.name)}`,
         category,
         name: cleanText(properties.name),
         shortName: cleanText(properties.shortName || properties.name),
+        location: cleanText(prefectures.join('・') || municipalities.join('・') || properties.context),
         areaKm2,
         outcome: outcomeFor(areaKm2)
       };
@@ -77,7 +84,7 @@ async function main() {
   }, {});
 
   const payload = {
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     nauruAreaKm2: NAURU_AREA_KM2,
     sameRatio: SAME_RATIO,
