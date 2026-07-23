@@ -7,7 +7,7 @@
   <meta name="description" content="市区町村・島・湖や池の面積が、ナウルより大きいか小さいかを当てる10問クイズ。">
   <title>ナウルより大きい？小さい？ | どこでもナウル</title>
   <link rel="icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="./game.css?v=51">
+  <link rel="stylesheet" href="./game.css?v=52">
 </head>
 <body>
   <div class="ocean-texture" aria-hidden="true"></div>
@@ -127,6 +127,11 @@
         <div id="best-summary"><strong>自己ベスト</strong><span id="best-summary-value">0点</span></div>
       </div>
 
+      <figure id="result-share-preview" class="result-share-preview" hidden>
+        <img id="share-preview" alt="得点と正答率を含むクイズ結果のシェア画像">
+        <figcaption id="share-preview-caption">得点と正答率入りのシェア画像</figcaption>
+      </figure>
+
       <div class="review-wrap">
         <div class="review-heading">
           <h3>答え合わせ</h3>
@@ -137,9 +142,13 @@
 
       <div class="result-actions">
         <button id="retry-button" class="primary-button" type="button">もう一度あそぶ</button>
+        <button id="x-share-button" class="secondary-button x-share-button" type="button">
+          <span class="x-mark" aria-hidden="true">X</span>
+          Xでシェア
+        </button>
         <button id="share-button" class="secondary-button" type="button">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4a3 3 0 1 0-.9-1.8l-6.7 3.4a3 3 0 1 0 0 5.2l6.7 3.4A3 3 0 1 0 18 16Z"/></svg>
-          結果をシェア
+          その他の共有
         </button>
         <a id="result-map-link" class="text-action" href="../index.html">地図で比べる <span aria-hidden="true">›</span></a>
       </div>
@@ -154,6 +163,6 @@
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-  <script src="./game.js?v=51" defer></script>
+  <script src="./game.js?v=52" defer></script>
 </body>
 </html>

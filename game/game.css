@@ -1008,6 +1008,33 @@ a:focus-visible {
   text-underline-offset: 3px;
 }
 
+.result-share-preview {
+  width: min(520px, 100%);
+  margin: 18px auto 4px;
+  padding: 7px;
+  border: 1px solid rgba(245, 197, 66, 0.38);
+  border-radius: 15px;
+  background: rgba(5, 22, 39, 0.72);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.24);
+}
+
+.result-share-preview img {
+  width: 100%;
+  aspect-ratio: 1200 / 630;
+  display: block;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(5, 22, 39, 0.82);
+}
+
+.result-share-preview figcaption {
+  padding: 7px 5px 2px;
+  color: var(--sand-300);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .result-actions {
   width: min(960px, 100%);
   margin: 20px auto 0;
@@ -1026,6 +1053,16 @@ a:focus-visible {
   color: var(--sand-50);
   background: linear-gradient(180deg, rgba(24, 116, 126, 0.92), rgba(12, 68, 82, 0.96));
   box-shadow: inset 0 0 0 4px rgba(56, 206, 197, 0.06);
+}
+
+.x-share-button {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: linear-gradient(180deg, rgba(31, 39, 48, 0.98), rgba(7, 12, 18, 0.98));
+}
+
+.x-mark {
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .text-action {
@@ -1290,6 +1327,9 @@ a:focus-visible {
     padding: 0 12px;
     justify-content: center;
     font-size: 14px;
+  }
+  .result-actions #share-button {
+    grid-column: 1 / -1;
   }
   .result-actions .text-action {
     grid-column: 1 / -1;

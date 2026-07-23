@@ -8,6 +8,9 @@
   const NAURU_AREA_KM2 = 21;
   const BEST_SCORE_KEY = 'nauru_area_game_best_v1';
   const SOUND_KEY = 'nauru_area_game_sound';
+  const TOP_PAGE_URL = 'https://issonokoto.github.io/dokodemo-nauru/';
+  const SHARE_LOGO_URL = '../assets/dokodemo-nauru-logo-transparent-v3.png';
+  const SHARE_MASCOT_URL = '../nauru_kun_outline.png';
   const CATEGORY_LABELS = {
     municipality: '市区町村',
     island: '島',
@@ -45,6 +48,11 @@
   };
 
   const elements = {};
+  const shareImageCache = new Map();
+  let shareImagePromise = null;
+  let shareImageBlob = null;
+  let shareImageUrl = '';
+  let pendingOtherShareFile = null;
 
   function cacheElements() {
     [
@@ -54,7 +62,8 @@
       'timer-ring', 'timer-number', 'category-label', 'location-label', 'place-name', 'answer-grid',
       'answer-feedback', 'feedback-mark', 'feedback-title', 'feedback-detail', 'earned-score',
       'final-score', 'result-rank', 'correct-summary', 'average-summary', 'best-summary',
-      'best-summary-value', 'review-list', 'result-map-link', 'toast'
+      'best-summary-value', 'review-list', 'result-map-link', 'result-share-preview',
+      'share-preview', 'share-preview-caption', 'x-share-button', 'share-button', 'toast'
     ].forEach(id => {
       elements[id] = document.getElementById(id);
     });
@@ -217,6 +226,7 @@
     state.currentIndex = 0;
     state.score = 0;
     state.locked = false;
+    resetShareImage();
     elements['score-display'].textContent = '0';
     playTone('start');
     showScreen('quiz-screen');
@@ -335,6 +345,7 @@
     const lastPlace = state.results[state.results.length - 1].question;
     elements['result-map-link'].href = buildMapUrl(lastPlace);
     showScreen('result-screen');
+    renderSharePreview();
     playTone('finish');
     elements['retry-button'].focus({ preventScroll: true });
   }
@@ -370,39 +381,330 @@
     })[character]);
   }
 
-  function shareResult() {
+  function getResultShareData() {
     const correctCount = state.results.filter(result => result.isCorrect).length;
+    const accuracy = Math.round(correctCount / QUESTION_COUNT * 100);
     const rank = getRank(state.score, correctCount);
     const text = [
       'ナウルより大きい？小さい？',
-      `${correctCount}/10問正解・${formatScore(state.score)}点`,
+      `${formatScore(state.score)}点・正答率${accuracy}%（${correctCount}/${QUESTION_COUNT}問正解）`,
       `称号：${rank}`,
       '#どこでもナウル'
     ].join('\n');
-    const url = new URL('./', window.location.href).href;
+    return {
+      correctCount,
+      accuracy,
+      rank,
+      text,
+      xText: `${text}\n${TOP_PAGE_URL}`
+    };
+  }
 
-    if (navigator.share) {
-      navigator.share({ title: document.title, text, url }).catch(error => {
-        if (error && error.name !== 'AbortError') copyShareText(`${text}\n${url}`);
+  function loadShareImage(source) {
+    if (shareImageCache.has(source)) return shareImageCache.get(source);
+    const promise = new Promise((resolve, reject) => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error(`画像を読み込めませんでした: ${source}`));
+      image.src = source;
+    });
+    shareImageCache.set(source, promise);
+    return promise;
+  }
+
+  function fillRoundedRect(context, x, y, width, height, radius, fillStyle) {
+    context.beginPath();
+    if (typeof context.roundRect === 'function') {
+      context.roundRect(x, y, width, height, radius);
+    } else {
+      const r = Math.min(radius, width / 2, height / 2);
+      context.moveTo(x + r, y);
+      context.arcTo(x + width, y, x + width, y + height, r);
+      context.arcTo(x + width, y + height, x, y + height, r);
+      context.arcTo(x, y + height, x, y, r);
+      context.arcTo(x, y, x + width, y, r);
+    }
+    context.closePath();
+    context.fillStyle = fillStyle;
+    context.fill();
+  }
+
+  function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (blob) resolve(blob);
+        else reject(new Error('シェア画像を作成できませんでした'));
+      }, 'image/png');
+    });
+  }
+
+  async function createResultShareImageBlob() {
+    const [logo, mascot] = await Promise.all([
+      loadShareImage(SHARE_LOGO_URL),
+      loadShareImage(SHARE_MASCOT_URL)
+    ]);
+    const share = getResultShareData();
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 630;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#7ea6cf';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    fillRoundedRect(context, 45, 42, 1110, 546, 30, 'rgba(255, 255, 255, 0.13)');
+    context.strokeStyle = 'rgba(255, 255, 255, 0.58)';
+    context.lineWidth = 3;
+    context.strokeRect(64, 61, 1072, 508);
+
+    const family = '"Yu Gothic", "Hiragino Sans", "Noto Sans JP", sans-serif';
+    context.textAlign = 'left';
+    context.textBaseline = 'alphabetic';
+    context.fillStyle = 'rgba(255, 255, 255, 0.84)';
+    context.font = `800 19px ${family}`;
+    context.fillText('全10問の結果', 96, 111);
+    context.fillStyle = '#061525';
+    context.font = `900 40px ${family}`;
+    context.fillText('ナウルより大きい？小さい？', 96, 163);
+    const logoWidth = 245;
+    const logoHeight = logo.naturalHeight / logo.naturalWidth * logoWidth;
+    context.drawImage(logo, 866, 80, logoWidth, logoHeight);
+
+    context.fillStyle = 'rgba(6, 21, 37, 0.65)';
+    context.font = `800 18px ${family}`;
+    context.fillText('SCORE', 99, 244);
+    context.fillStyle = '#061525';
+    context.font = `900 112px ${family}`;
+    context.fillText(formatScore(state.score), 92, 358);
+    const scoreWidth = context.measureText(formatScore(state.score)).width;
+    context.fillStyle = '#061525';
+    context.font = `900 31px ${family}`;
+    context.fillText('点', 108 + scoreWidth, 352);
+
+    fillRoundedRect(context, 91, 395, 600, 116, 18, 'rgba(6, 21, 37, 0.82)');
+    context.fillStyle = 'rgba(255, 255, 255, 0.76)';
+    context.font = `800 18px ${family}`;
+    context.fillText('正答率', 122, 434);
+    context.fillStyle = '#f5c542';
+    context.font = `900 54px ${family}`;
+    context.fillText(`${share.accuracy}%`, 119, 491);
+    context.fillStyle = '#ffffff';
+    context.font = `800 24px ${family}`;
+    context.fillText(`${share.correctCount} / ${QUESTION_COUNT}問正解`, 309, 484);
+    context.fillStyle = 'rgba(255, 255, 255, 0.68)';
+    context.font = `800 16px ${family}`;
+    context.fillText('称号', 512, 430);
+    context.fillStyle = '#ffffff';
+    context.font = `900 ${share.rank.length > 7 ? 25 : 29}px ${family}`;
+    context.fillText(share.rank, 509, 471);
+
+    context.fillStyle = '#061525';
+    context.font = `800 18px ${family}`;
+    context.fillText('#どこでもナウル', 96, 552);
+
+    const mascotHeight = 320;
+    const mascotWidth = mascot.naturalWidth / mascot.naturalHeight * mascotHeight;
+    context.save();
+    context.shadowColor = 'rgba(6, 21, 37, 0.24)';
+    context.shadowBlur = 20;
+    context.drawImage(mascot, 792, 218, mascotWidth, mascotHeight);
+    context.restore();
+
+    return canvasToBlob(canvas);
+  }
+
+  function ensureShareImageBlob() {
+    if (shareImageBlob) return Promise.resolve(shareImageBlob);
+    if (shareImagePromise) return shareImagePromise;
+    const promise = createResultShareImageBlob()
+      .then(blob => {
+        if (shareImagePromise === promise) shareImageBlob = blob;
+        return blob;
+      })
+      .finally(() => {
+        if (shareImagePromise === promise && !shareImageBlob) shareImagePromise = null;
+      });
+    shareImagePromise = promise;
+    return promise;
+  }
+
+  function resetShareImage() {
+    shareImagePromise = null;
+    shareImageBlob = null;
+    pendingOtherShareFile = null;
+    if (shareImageUrl) {
+      URL.revokeObjectURL(shareImageUrl);
+      shareImageUrl = '';
+    }
+    if (elements['result-share-preview']) elements['result-share-preview'].hidden = true;
+    if (elements['share-preview']) elements['share-preview'].removeAttribute('src');
+    if (elements['share-button']) elements['share-button'].textContent = 'その他の共有';
+  }
+
+  function renderSharePreview() {
+    const figure = elements['result-share-preview'];
+    const preview = elements['share-preview'];
+    const caption = elements['share-preview-caption'];
+    figure.hidden = false;
+    caption.textContent = '得点と正答率入りのシェア画像を作成中…';
+    const previewPromise = ensureShareImageBlob();
+    previewPromise
+      .then(blob => {
+        if (shareImagePromise !== previewPromise) return;
+        if (shareImageUrl) URL.revokeObjectURL(shareImageUrl);
+        shareImageUrl = URL.createObjectURL(blob);
+        preview.src = shareImageUrl;
+        caption.textContent = '得点と正答率入り・Xではコピーした画像を貼り付け';
+      })
+      .catch(error => {
+        console.warn(error);
+        figure.hidden = true;
+      });
+  }
+
+  async function copyImageToClipboard(blobOrPromise) {
+    if (!navigator.clipboard || !window.ClipboardItem) return false;
+    const pngPromise = Promise.resolve(blobOrPromise).then(blob => {
+      if (!blob) throw new Error('コピーする画像がありません');
+      return blob.type === 'image/png'
+        ? blob
+        : blob.arrayBuffer().then(buffer => new Blob([buffer], { type: 'image/png' }));
+    });
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': pngPromise })
+      ]);
+      return true;
+    } catch (firstError) {
+      try {
+        const pngBlob = await pngPromise;
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': pngBlob })
+        ]);
+        return true;
+      } catch (error) {
+        console.warn('clipboard image failed', firstError, error);
+        return false;
+      }
+    }
+  }
+
+  function downloadShareImage(blob) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `dokodemo-nauru-quiz-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function openPendingShareWindow() {
+    const popup = window.open('about:blank', '_blank');
+    if (!popup) return null;
+    try {
+      popup.opener = null;
+      popup.document.title = '共有を準備中';
+      popup.document.body.textContent = '共有画像を準備しています…';
+    } catch (_) {}
+    return popup;
+  }
+
+  function isMobileXShare() {
+    return window.matchMedia('(max-width: 820px)').matches ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  }
+
+  function buildXIntentUrl(text) {
+    return `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  }
+
+  function openXComposer(popup, url) {
+    if (isMobileXShare()) {
+      window.location.assign(url);
+      return;
+    }
+    if (popup && !popup.closed) popup.location.replace(url);
+    else window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  async function shareResultToX() {
+    const share = getResultShareData();
+    const popup = isMobileXShare() ? null : openPendingShareWindow();
+    showToast('得点入り画像を準備中…');
+    const blobPromise = ensureShareImageBlob();
+    const copyPromise = copyImageToClipboard(blobPromise);
+    try {
+      const [blob, copied] = await Promise.all([blobPromise, copyPromise]);
+      if (!copied) downloadShareImage(blob);
+      openXComposer(popup, buildXIntentUrl(share.xText));
+      showToast(copied
+        ? '画像をコピーしました。Xで貼り付けてください'
+        : '画像を保存しました。Xで添付してください');
+    } catch (error) {
+      console.warn(error);
+      openXComposer(popup, buildXIntentUrl(share.xText));
+      showToast('Xの投稿画面を開きました');
+    }
+  }
+
+  function shareOtherResult() {
+    const share = getResultShareData();
+    const shareFile = pendingOtherShareFile || (shareImageBlob
+      ? new File([shareImageBlob], 'dokodemo-nauru-quiz-result.png', { type: 'image/png' })
+      : null);
+    const canShareFile = shareFile && (
+      typeof navigator.canShare !== 'function' ||
+      navigator.canShare({ files: [shareFile] })
+    );
+    if (shareFile && typeof navigator.share === 'function') {
+      const payload = {
+        title: 'どこでもナウル｜クイズ結果',
+        text: share.text,
+        url: TOP_PAGE_URL
+      };
+      if (canShareFile) payload.files = [shareFile];
+      navigator.share(payload).then(() => {
+        pendingOtherShareFile = null;
+        elements['share-button'].textContent = 'その他の共有';
+      }).catch(error => {
+        if (error && error.name !== 'AbortError') console.warn(error);
       });
       return;
     }
-    copyShareText(`${text}\n${url}`);
+
+    showToast('共有画像を準備中…');
+    ensureShareImageBlob()
+      .then(blob => {
+        pendingOtherShareFile = new File(
+          [blob],
+          'dokodemo-nauru-quiz-result.png',
+          { type: 'image/png' }
+        );
+        if (typeof navigator.share === 'function') {
+          elements['share-button'].textContent = '共有画面を開く';
+          showToast('準備できました。もう一度押してください');
+          return;
+        }
+        return copyImageToClipboard(blob).then(copied => {
+          if (!copied) downloadShareImage(blob);
+          showToast(copied ? '画像をコピーしました' : '画像を保存しました');
+        });
+      })
+      .catch(error => {
+        console.warn(error);
+        copyShareText(share.xText);
+      });
   }
 
   function copyShareText(text) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text)
         .then(() => showToast('結果をコピーしました'))
-        .catch(() => openXShare(text));
+        .catch(() => showToast('結果をコピーできませんでした'));
       return;
     }
-    openXShare(text);
-  }
-
-  function openXShare(text) {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    showToast('このブラウザでは共有できません');
   }
 
   let toastTimer = 0;
@@ -427,7 +729,8 @@
   function bindEvents() {
     elements['start-button'].addEventListener('click', startGame);
     elements['retry-button'].addEventListener('click', startGame);
-    elements['share-button'].addEventListener('click', shareResult);
+    elements['x-share-button'].addEventListener('click', shareResultToX);
+    elements['share-button'].addEventListener('click', shareOtherResult);
     elements['reload-button'].addEventListener('click', () => window.location.reload());
     elements['sound-toggle'].addEventListener('click', toggleSound);
     elements.answerButtons.forEach(button => {
