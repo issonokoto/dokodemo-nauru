@@ -1,9 +1,10 @@
-const CACHE_NAME = 'dokodemo-nauru-v52';
+const CACHE_NAME = 'dokodemo-nauru-v53';
 const STATIC_SHELL = [
   './index.html',
   './game/index.html',
   './game/game.css',
   './game/game.js',
+  './game/ranking-config.js',
   './privacy.html',
   './manifest.webmanifest',
   './data/game-places.json',
@@ -20,6 +21,7 @@ const NETWORK_FIRST_PATHS = new Set([
   './game/index.html',
   './game/game.css',
   './game/game.js',
+  './game/ranking-config.js',
   './privacy.html',
   './manifest.webmanifest',
   './data/game-places.json',

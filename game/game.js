@@ -8,6 +8,8 @@
   const NAURU_AREA_KM2 = 21;
   const BEST_SCORE_KEY = 'nauru_area_game_best_v1';
   const SOUND_KEY = 'nauru_area_game_sound';
+  const PLAYER_NAME_KEY = 'nauru_area_game_player_name_v1';
+  const CLIENT_ID_KEY = 'nauru_area_game_client_id_v1';
   const TOP_PAGE_URL = 'https://issonokoto.github.io/dokodemo-nauru/';
   const SHARE_LOGO_URL = '../assets/dokodemo-nauru-logo-transparent-v3.png';
   const SHARE_MASCOT_URL = '../nauru_kun_outline.png';
@@ -21,6 +23,16 @@
     same: 'ほぼ同じ',
     smaller: '小さい'
   };
+  const RANKING_PERIOD_NOTES = {
+    all: 'これまでの自己最高記録',
+    weekly: '今週月曜日からの自己最高記録',
+    daily: '今日0時からの自己最高記録'
+  };
+  const BLOCKED_NAME_TERMS = [
+    'しね', '死ね', 'ころす', '殺す', 'くたばれ', 'きえろ',
+    'ちんこ', 'ちんぽ', 'まんこ', 'せっくす', 'おまんこ',
+    'fuck', 'shit', 'cunt', 'nigger', 'nigga', 'retard', 'kike', 'chink', 'spic'
+  ];
   const QUESTION_BLUEPRINT = [
     ['municipality', 'larger'],
     ['municipality', 'larger'],
@@ -44,7 +56,11 @@
     timerFrame: 0,
     locked: false,
     soundEnabled: true,
-    audioContext: null
+    audioContext: null,
+    finishedRound: null,
+    rankingPeriod: 'all',
+    rankingReturnScreen: 'start-screen',
+    rankingRequestId: 0
   };
 
   const elements = {};
@@ -56,14 +72,18 @@
 
   function cacheElements() {
     [
-      'loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'error-screen',
+      'loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'ranking-screen', 'error-screen',
       'start-button', 'retry-button', 'share-button', 'reload-button', 'sound-toggle',
       'best-score-start', 'question-count', 'progress-bar', 'score-display', 'timer',
       'timer-ring', 'timer-number', 'category-label', 'location-label', 'place-name', 'answer-grid',
       'answer-feedback', 'feedback-mark', 'feedback-title', 'feedback-detail', 'earned-score',
       'final-score', 'result-rank', 'correct-summary', 'average-summary', 'best-summary',
       'best-summary-value', 'review-list', 'result-map-link', 'result-share-preview',
-      'share-preview', 'share-preview-caption', 'x-share-button', 'share-button', 'toast'
+      'share-preview', 'share-preview-caption', 'x-share-button', 'share-button', 'toast',
+      'ranking-open-button', 'ranking-submit-open-button', 'ranking-close-button',
+      'ranking-form', 'ranking-score-value', 'ranking-name', 'ranking-name-count',
+      'ranking-form-message', 'ranking-submit-button', 'ranking-period-note',
+      'ranking-loading', 'ranking-list', 'ranking-reload-button'
     ].forEach(id => {
       elements[id] = document.getElementById(id);
     });
@@ -71,7 +91,7 @@
   }
 
   function showScreen(id) {
-    ['loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'error-screen'].forEach(screenId => {
+    ['loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'ranking-screen', 'error-screen'].forEach(screenId => {
       elements[screenId].hidden = screenId !== id;
     });
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -118,6 +138,192 @@
     try {
       localStorage.setItem(BEST_SCORE_KEY, String(score));
     } catch (_) {}
+  }
+
+  function getStoredPlayerName() {
+    try {
+      return localStorage.getItem(PLAYER_NAME_KEY) || '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function getClientId() {
+    try {
+      const stored = localStorage.getItem(CLIENT_ID_KEY);
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(stored || '')) {
+        return stored;
+      }
+      const generated = crypto.randomUUID();
+      localStorage.setItem(CLIENT_ID_KEY, generated);
+      return generated;
+    } catch (_) {
+      return crypto.randomUUID();
+    }
+  }
+
+  function normalizePlayerName(value) {
+    return String(value || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
+  }
+
+  function compactPlayerName(value) {
+    return normalizePlayerName(value)
+      .toLowerCase()
+      .replace(/[\sー・_.-]+/g, '')
+      .replace(/[013457]/g, digit => ({ 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't' })[digit]);
+  }
+
+  function validatePlayerName(value) {
+    const name = normalizePlayerName(value);
+    const length = Array.from(name).length;
+    if (length < 1) return '名前を入力してください';
+    if (length > 10) return '名前は10文字以内にしてください';
+    if (!/^[\p{L}\p{N}々〆ヵヶー・ _.\-]+$/u.test(name)) {
+      return '名前に使えない文字が含まれています';
+    }
+    if (/(https?:\/\/|www\.|@|[<>])/i.test(name)) return '名前を確認してください';
+    const compact = compactPlayerName(name);
+    if (BLOCKED_NAME_TERMS.some(term => compact.includes(compactPlayerName(term)))) {
+      return 'その名前は登録できません';
+    }
+    return '';
+  }
+
+  function getRankingConfig() {
+    const config = window.DOKODEMO_RANKING_CONFIG || {};
+    const supabaseUrl = String(config.supabaseUrl || '').replace(/\/+$/, '');
+    const supabaseAnonKey = String(config.supabaseAnonKey || '');
+    if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(supabaseUrl) || !supabaseAnonKey) return null;
+    return { supabaseUrl, supabaseAnonKey };
+  }
+
+  async function rankingRpc(functionName, body) {
+    const config = getRankingConfig();
+    if (!config) throw new Error('ランキングは準備中です');
+    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/${functionName}`, {
+      method: 'POST',
+      headers: {
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${config.supabaseAnonKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) throw new Error(`ランキング通信エラー (${response.status})`);
+    return response.json();
+  }
+
+  function renderLeaderboard(entries) {
+    const fragment = document.createDocumentFragment();
+    entries.forEach(entry => {
+      const item = document.createElement('li');
+      item.className = 'ranking-entry';
+      const position = Number(entry.rank);
+      item.innerHTML = `
+        <span class="ranking-position">${position <= 3 ? ['🥇', '🥈', '🥉'][position - 1] : position}</span>
+        <strong class="ranking-player">${escapeHtml(entry.player_name)}</strong>
+        <span class="ranking-entry-score">${escapeHtml(formatScore(entry.score))}点</span>
+        <span class="ranking-entry-detail">${escapeHtml(`${entry.correct_count}/10正解・平均${(entry.average_ms / 1000).toFixed(1)}秒`)}</span>
+      `;
+      fragment.appendChild(item);
+    });
+    elements['ranking-list'].replaceChildren(fragment);
+    if (!entries.length) {
+      const empty = document.createElement('li');
+      empty.className = 'ranking-empty';
+      empty.textContent = 'まだ記録がありません。最初の挑戦者になろう！';
+      elements['ranking-list'].appendChild(empty);
+    }
+  }
+
+  async function loadLeaderboard(period = state.rankingPeriod) {
+    state.rankingPeriod = period;
+    const requestId = ++state.rankingRequestId;
+    elements['ranking-loading'].textContent = 'ランキングを読み込んでいます…';
+    elements['ranking-loading'].hidden = false;
+    elements['ranking-list'].replaceChildren();
+    elements['ranking-reload-button'].hidden = true;
+    elements['ranking-period-note'].textContent = RANKING_PERIOD_NOTES[period];
+    document.querySelectorAll('.ranking-tab').forEach(button => {
+      const isActive = button.dataset.period === period;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-selected', String(isActive));
+    });
+    try {
+      const entries = await rankingRpc('get_quiz_leaderboard', { p_period: period });
+      if (requestId !== state.rankingRequestId) return;
+      elements['ranking-loading'].hidden = true;
+      renderLeaderboard(Array.isArray(entries) ? entries : []);
+    } catch (error) {
+      if (requestId !== state.rankingRequestId) return;
+      console.warn(error);
+      elements['ranking-loading'].textContent = error.message || 'ランキングを読み込めませんでした';
+      elements['ranking-reload-button'].hidden = false;
+    }
+  }
+
+  function openRanking(allowSubmit, returnScreen) {
+    state.rankingReturnScreen = returnScreen;
+    elements['ranking-form'].hidden = !allowSubmit;
+    elements['ranking-form-message'].textContent = '';
+    elements['ranking-submit-button'].disabled = false;
+    elements['ranking-submit-button'].textContent = '登録する';
+    if (allowSubmit && state.finishedRound) {
+      elements['ranking-score-value'].textContent = `${formatScore(state.finishedRound.score)}点`;
+      elements['ranking-name'].value = getStoredPlayerName();
+      updateRankingNameCount();
+    }
+    showScreen('ranking-screen');
+    loadLeaderboard(state.rankingPeriod);
+    (allowSubmit ? elements['ranking-name'] : elements['ranking-close-button']).focus({ preventScroll: true });
+  }
+
+  function closeRanking() {
+    showScreen(state.rankingReturnScreen);
+    const focusTarget = state.rankingReturnScreen === 'result-screen'
+      ? elements['ranking-submit-open-button']
+      : elements['ranking-open-button'];
+    focusTarget.focus({ preventScroll: true });
+  }
+
+  function updateRankingNameCount() {
+    const length = Array.from(normalizePlayerName(elements['ranking-name'].value)).length;
+    elements['ranking-name-count'].textContent = `${length} / 10`;
+  }
+
+  async function submitRanking(event) {
+    event.preventDefault();
+    if (!state.finishedRound) return;
+    const playerName = normalizePlayerName(elements['ranking-name'].value);
+    const validationError = validatePlayerName(playerName);
+    if (validationError) {
+      elements['ranking-form-message'].textContent = validationError;
+      elements['ranking-name'].focus();
+      return;
+    }
+    elements['ranking-submit-button'].disabled = true;
+    elements['ranking-form-message'].textContent = '登録しています…';
+    try {
+      const result = await rankingRpc('submit_quiz_score', {
+        p_player_name: playerName,
+        p_score: state.finishedRound.score,
+        p_correct_count: state.finishedRound.correctCount,
+        p_average_ms: state.finishedRound.averageMs,
+        p_client_id: getClientId()
+      });
+      const outcome = Array.isArray(result) ? result[0] : null;
+      if (!outcome || !outcome.accepted) throw new Error(outcome?.message || '登録できませんでした');
+      try {
+        localStorage.setItem(PLAYER_NAME_KEY, playerName);
+      } catch (_) {}
+      elements['ranking-form-message'].textContent = outcome.message;
+      elements['ranking-submit-button'].textContent = '登録済み';
+      await loadLeaderboard(state.rankingPeriod);
+    } catch (error) {
+      console.warn(error);
+      elements['ranking-form-message'].textContent = error.message || '登録できませんでした';
+      elements['ranking-submit-button'].disabled = false;
+    }
   }
 
   function readSoundSetting() {
@@ -226,6 +432,7 @@
     state.currentIndex = 0;
     state.score = 0;
     state.locked = false;
+    state.finishedRound = null;
     resetShareImage();
     elements['score-display'].textContent = '0';
     playTone('start');
@@ -340,6 +547,11 @@
     elements['best-summary'].classList.toggle('is-new', isNewBest);
     elements['best-summary'].querySelector('strong').textContent = isNewBest ? '自己ベスト更新！' : '自己ベスト';
     elements['best-summary-value'].textContent = `${formatScore(best)}点`;
+    state.finishedRound = {
+      score: state.score,
+      correctCount,
+      averageMs: Math.round(totalElapsed / state.results.length)
+    };
 
     renderReview();
     const lastPlace = state.results[state.results.length - 1].question;
@@ -729,6 +941,15 @@
   function bindEvents() {
     elements['start-button'].addEventListener('click', startGame);
     elements['retry-button'].addEventListener('click', startGame);
+    elements['ranking-open-button'].addEventListener('click', () => openRanking(false, 'start-screen'));
+    elements['ranking-submit-open-button'].addEventListener('click', () => openRanking(true, 'result-screen'));
+    elements['ranking-close-button'].addEventListener('click', closeRanking);
+    elements['ranking-form'].addEventListener('submit', submitRanking);
+    elements['ranking-name'].addEventListener('input', updateRankingNameCount);
+    elements['ranking-reload-button'].addEventListener('click', () => loadLeaderboard(state.rankingPeriod));
+    document.querySelectorAll('.ranking-tab').forEach(button => {
+      button.addEventListener('click', () => loadLeaderboard(button.dataset.period));
+    });
     elements['x-share-button'].addEventListener('click', shareResultToX);
     elements['share-button'].addEventListener('click', shareOtherResult);
     elements['reload-button'].addEventListener('click', () => window.location.reload());

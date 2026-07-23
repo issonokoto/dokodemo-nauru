@@ -7,7 +7,7 @@
   <meta name="description" content="市区町村・島・湖や池の面積が、ナウルより大きいか小さいかを当てる10問クイズ。">
   <title>ナウルより大きい？小さい？ | どこでもナウル</title>
   <link rel="icon" href="../icons/icon-192.png">
-  <link rel="stylesheet" href="./game.css?v=52">
+  <link rel="stylesheet" href="./game.css?v=53">
 </head>
 <body>
   <div class="ocean-texture" aria-hidden="true"></div>
@@ -44,6 +44,7 @@
         </div>
         <p class="same-rule">ナウルとの差が±5%以内なら「ほぼ同じ」です。</p>
         <button id="start-button" class="primary-button" type="button">ゲームスタート</button>
+        <button id="ranking-open-button" class="ranking-link-button" type="button">🏆 ランキングを見る</button>
         <p id="best-score-start" class="best-score" hidden></p>
       </div>
       <div class="start-visual" aria-hidden="true">
@@ -141,6 +142,9 @@
       </div>
 
       <div class="result-actions">
+        <button id="ranking-submit-open-button" class="secondary-button ranking-action-button" type="button">
+          🏆 ランキングに登録
+        </button>
         <button id="retry-button" class="primary-button" type="button">もう一度あそぶ</button>
         <button id="x-share-button" class="secondary-button x-share-button" type="button">
           <span class="x-mark" aria-hidden="true">X</span>
@@ -154,6 +158,46 @@
       </div>
     </section>
 
+    <section id="ranking-screen" class="screen ranking-screen" hidden aria-labelledby="ranking-heading">
+      <div class="ranking-header">
+        <div>
+          <p>AREA QUIZ LEADERBOARD</p>
+          <h1 id="ranking-heading">ランキング</h1>
+        </div>
+        <button id="ranking-close-button" class="ranking-close-button" type="button">戻る</button>
+      </div>
+
+      <form id="ranking-form" class="ranking-form" hidden novalidate>
+        <div class="ranking-score-preview">
+          <span>今回のスコア</span>
+          <strong id="ranking-score-value">0点</strong>
+        </div>
+        <label for="ranking-name">ランキング名</label>
+        <div class="ranking-input-row">
+          <input id="ranking-name" name="ranking-name" type="text" maxlength="10"
+            autocomplete="nickname" enterkeyhint="done" placeholder="10文字以内" aria-describedby="ranking-name-help">
+          <button id="ranking-submit-button" class="primary-button" type="submit">登録する</button>
+        </div>
+        <div class="ranking-name-meta">
+          <span id="ranking-name-help">不適切な名前は登録できません</span>
+          <span id="ranking-name-count">0 / 10</span>
+        </div>
+        <p id="ranking-form-message" class="ranking-form-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="ranking-board">
+        <div class="ranking-tabs" role="tablist" aria-label="ランキング期間">
+          <button class="ranking-tab is-active" type="button" role="tab" aria-selected="true" data-period="all">全期間</button>
+          <button class="ranking-tab" type="button" role="tab" aria-selected="false" data-period="weekly">週間</button>
+          <button class="ranking-tab" type="button" role="tab" aria-selected="false" data-period="daily">日間</button>
+        </div>
+        <p id="ranking-period-note" class="ranking-period-note">これまでの自己最高記録</p>
+        <div id="ranking-loading" class="ranking-loading" role="status">ランキングを読み込んでいます…</div>
+        <ol id="ranking-list" class="ranking-list" aria-live="polite"></ol>
+        <button id="ranking-reload-button" class="ranking-reload-button" type="button" hidden>もう一度読み込む</button>
+      </div>
+    </section>
+
     <section id="error-screen" class="screen error-screen" hidden>
       <div class="error-star" aria-hidden="true">✹</div>
       <h1>問題を読み込めませんでした</h1>
@@ -163,6 +207,7 @@
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-  <script src="./game.js?v=52" defer></script>
+  <script src="./ranking-config.js?v=53"></script>
+  <script src="./game.js?v=53" defer></script>
 </body>
 </html>
