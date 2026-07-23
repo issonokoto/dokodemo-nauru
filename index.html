@@ -1522,7 +1522,7 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
-    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=37';
+    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=38';
 const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
     const COUNTRIES_URL = './data/countries.geojson?v=42';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
@@ -3676,12 +3676,12 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
     }
 
     function formatArea(area) {
-      const fraction = area < 1 ? 2 : area < 100 ? 1 : 0;
+      const fraction = area < 0.001 ? 6 : area < 0.01 ? 4 : area < 1 ? 2 : area < 100 ? 1 : 0;
       return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: fraction, minimumFractionDigits: fraction }).format(area);
     }
 
     function formatRatio(value) {
-      const digits = value < 0.01 ? 3 : value < 1 ? 2 : value < 10 ? 1 : 0;
+      const digits = value < 0.001 ? 5 : value < 0.01 ? 4 : value < 1 ? 2 : value < 10 ? 1 : 0;
       return new Intl.NumberFormat('ja-JP', { maximumFractionDigits: digits, minimumFractionDigits: 0 }).format(value);
     }
 
