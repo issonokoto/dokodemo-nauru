@@ -17,7 +17,7 @@ create table if not exists public.quiz_scores (
     or (
       correct_count > 0
       and score >= correct_count * 1000
-      and score < correct_count * 1500
+      and score <= correct_count * 1500
     )
   )
 );
@@ -112,7 +112,7 @@ begin
       or (
         p_correct_count > 0
         and p_score >= p_correct_count * 1000
-        and p_score < p_correct_count * 1500
+        and p_score <= p_correct_count * 1500
       )
     ) then
     return query select false, 'スコアを確認できませんでした';

@@ -60,7 +60,10 @@
     finishedRound: null,
     rankingPeriod: 'all',
     rankingReturnScreen: 'start-screen',
-    rankingRequestId: 0
+    rankingRequestId: 0,
+    serverSessionId: null,
+    serverClientId: null,
+    serverCompleted: false
   };
 
   const elements = {};
@@ -213,6 +216,10 @@
     return response.json();
   }
 
+  function firstRpcRow(result) {
+    return Array.isArray(result) ? result[0] : null;
+  }
+
   function renderLeaderboard(entries) {
     const fragment = document.createDocumentFragment();
     entries.forEach(entry => {
@@ -294,6 +301,10 @@
   async function submitRanking(event) {
     event.preventDefault();
     if (!state.finishedRound) return;
+    if (!state.finishedRound.sessionId || !state.finishedRound.clientId || !state.serverCompleted) {
+      elements['ranking-form-message'].textContent = 'この記録はランキングに登録できません';
+      return;
+    }
     const playerName = normalizePlayerName(elements['ranking-name'].value);
     const validationError = validatePlayerName(playerName);
     if (validationError) {
@@ -304,14 +315,12 @@
     elements['ranking-submit-button'].disabled = true;
     elements['ranking-form-message'].textContent = '登録しています…';
     try {
-      const result = await rankingRpc('submit_quiz_score', {
+      const result = await rankingRpc('register_quiz_session_score', {
+        p_session_id: state.finishedRound.sessionId,
+        p_client_id: state.finishedRound.clientId,
         p_player_name: playerName,
-        p_score: state.finishedRound.score,
-        p_correct_count: state.finishedRound.correctCount,
-        p_average_ms: state.finishedRound.averageMs,
-        p_client_id: getClientId()
       });
-      const outcome = Array.isArray(result) ? result[0] : null;
+      const outcome = firstRpcRow(result);
       if (!outcome || !outcome.accepted) throw new Error(outcome?.message || '登録できませんでした');
       try {
         localStorage.setItem(PLAYER_NAME_KEY, playerName);
@@ -420,13 +429,43 @@
     elements['start-button'].focus({ preventScroll: true });
   }
 
-  function startGame() {
+  async function startGame() {
+    elements['start-button'].disabled = true;
+    elements['retry-button'].disabled = true;
+    elements['start-button'].textContent = '準備中…';
+    elements['retry-button'].textContent = '準備中…';
+    state.serverSessionId = null;
+    state.serverClientId = null;
+    state.serverCompleted = false;
     try {
-      state.questions = pickQuestions();
+      const clientId = getClientId();
+      const result = await rankingRpc('start_quiz_game', { p_client_id: clientId });
+      const session = firstRpcRow(result);
+      if (!session?.session_id || !Array.isArray(session.question_ids) || session.question_ids.length !== QUESTION_COUNT) {
+        throw new Error('ゲームセッションを開始できませんでした');
+      }
+      const placesById = new Map(state.data.places.map(place => [place.id, place]));
+      state.questions = session.question_ids.map(id => placesById.get(id));
+      if (state.questions.some(question => !question)) {
+        throw new Error('出題データを確認できませんでした');
+      }
+      state.serverSessionId = session.session_id;
+      state.serverClientId = clientId;
     } catch (error) {
-      console.error(error);
-      showScreen('error-screen');
-      return;
+      console.warn('ランキング対象セッションを開始できませんでした', error);
+      try {
+        state.questions = pickQuestions();
+        showToast('通信できないため、ランキング対象外で開始します');
+      } catch (questionError) {
+        console.error(questionError);
+        showScreen('error-screen');
+        return;
+      }
+    } finally {
+      elements['start-button'].disabled = false;
+      elements['retry-button'].disabled = false;
+      elements['start-button'].textContent = 'ゲームスタート';
+      elements['retry-button'].textContent = 'もう一度あそぶ';
     }
     state.results = [];
     state.currentIndex = 0;
@@ -440,13 +479,13 @@
     renderQuestion();
   }
 
-  function renderQuestion() {
+  async function renderQuestion() {
     cancelAnimationFrame(state.timerFrame);
-    state.locked = false;
+    state.locked = true;
     elements['answer-feedback'].hidden = true;
     elements['answer-feedback'].classList.remove('wrong-feedback');
     elements.answerButtons.forEach(button => {
-      button.disabled = false;
+      button.disabled = true;
       button.classList.remove('correct', 'wrong', 'dimmed');
     });
 
@@ -460,6 +499,31 @@
     elements['timer-ring'].style.strokeDashoffset = '0';
     elements['timer-number'].textContent = '12';
     elements['timer'].setAttribute('aria-label', '残り12秒');
+
+    if (state.serverSessionId) {
+      try {
+        const result = await rankingRpc('open_quiz_question', {
+          p_session_id: state.serverSessionId,
+          p_client_id: state.serverClientId,
+          p_question_index: state.currentIndex
+        });
+        const opened = firstRpcRow(result);
+        if (!opened?.opened || opened.question_id !== question.id) {
+          throw new Error('問題を開始できませんでした');
+        }
+      } catch (error) {
+        console.warn('サーバー計測を継続できませんでした', error);
+        state.serverSessionId = null;
+        state.serverClientId = null;
+        state.serverCompleted = false;
+        showToast('通信が切れたため、この記録はランキング対象外です');
+      }
+    }
+
+    state.locked = false;
+    elements.answerButtons.forEach(button => {
+      button.disabled = false;
+    });
     state.questionStartedAt = performance.now();
     tickTimer(state.questionStartedAt);
     elements.answerButtons[0].focus({ preventScroll: true });
@@ -483,29 +547,70 @@
     state.timerFrame = requestAnimationFrame(tickTimer);
   }
 
-  function answerQuestion(answer, timedOut = false) {
+  async function answerQuestion(answer, timedOut = false) {
     if (state.locked) return;
     state.locked = true;
     cancelAnimationFrame(state.timerFrame);
     const question = state.questions[state.currentIndex];
-    const elapsedMs = Math.min(QUESTION_TIME_MS, Math.max(0, performance.now() - state.questionStartedAt));
-    const isCorrect = answer === question.outcome;
-    const earned = isCorrect
+    const clientElapsedMs = Math.min(QUESTION_TIME_MS, Math.max(0, performance.now() - state.questionStartedAt));
+    let correctOutcome = question.outcome;
+    let elapsedMs = clientElapsedMs;
+    let isCorrect = answer === correctOutcome;
+    let earned = isCorrect
       ? 1000 + Math.floor(500 * Math.max(0, QUESTION_TIME_MS - elapsedMs) / QUESTION_TIME_MS)
       : 0;
-    state.score += earned;
-    state.results.push({ question, answer, isCorrect, elapsedMs, earned, timedOut });
+
+    if (state.serverSessionId) {
+      try {
+        const result = await rankingRpc('answer_quiz_question', {
+          p_session_id: state.serverSessionId,
+          p_client_id: state.serverClientId,
+          p_question_index: state.currentIndex,
+          p_answer: timedOut ? null : answer
+        });
+        const authoritative = firstRpcRow(result);
+        if (!authoritative || !OUTCOME_LABELS[authoritative.correct_outcome]) {
+          throw new Error('回答結果を確認できませんでした');
+        }
+        const serverElapsedMs = Number(authoritative.elapsed_ms);
+        const serverEarned = Number(authoritative.earned);
+        const serverTotalScore = Number(authoritative.total_score);
+        if (!Number.isInteger(serverElapsedMs) || serverElapsedMs < 0 || serverElapsedMs > QUESTION_TIME_MS
+          || !Number.isInteger(serverEarned) || serverEarned < 0 || serverEarned > 1500
+          || !Number.isInteger(serverTotalScore) || serverTotalScore < 0 || serverTotalScore > 15000) {
+          throw new Error('回答結果の値を確認できませんでした');
+        }
+        correctOutcome = authoritative.correct_outcome;
+        elapsedMs = serverElapsedMs;
+        isCorrect = Boolean(authoritative.is_correct);
+        earned = serverEarned;
+        state.score = serverTotalScore;
+        state.serverCompleted = Boolean(authoritative.completed);
+        timedOut = timedOut || elapsedMs >= QUESTION_TIME_MS;
+      } catch (error) {
+        console.warn('サーバー回答の記録に失敗しました', error);
+        state.serverSessionId = null;
+        state.serverClientId = null;
+        state.serverCompleted = false;
+        state.score += earned;
+        showToast('通信が切れたため、この記録はランキング対象外です');
+      }
+    } else {
+      state.score += earned;
+    }
+
+    state.results.push({ question, answer, correctOutcome, isCorrect, elapsedMs, earned, timedOut });
     elements['score-display'].textContent = formatScore(state.score);
 
     elements.answerButtons.forEach(button => {
       button.disabled = true;
       const buttonAnswer = button.dataset.answer;
-      if (buttonAnswer === question.outcome) button.classList.add('correct');
+      if (buttonAnswer === correctOutcome) button.classList.add('correct');
       else if (buttonAnswer === answer) button.classList.add('wrong');
       else button.classList.add('dimmed');
     });
 
-    const answerLabel = OUTCOME_LABELS[question.outcome];
+    const answerLabel = OUTCOME_LABELS[correctOutcome];
     elements['answer-feedback'].hidden = false;
     elements['answer-feedback'].classList.toggle('wrong-feedback', !isCorrect);
     elements['feedback-mark'].textContent = isCorrect ? '○' : '×';
@@ -550,7 +655,9 @@
     state.finishedRound = {
       score: state.score,
       correctCount,
-      averageMs: Math.round(totalElapsed / state.results.length)
+      averageMs: Math.round(totalElapsed / state.results.length),
+      sessionId: state.serverCompleted ? state.serverSessionId : null,
+      clientId: state.serverCompleted ? state.serverClientId : null
     };
 
     renderReview();
@@ -574,7 +681,7 @@
           <strong>${escapeHtml(result.question.shortName || result.question.name)}</strong>
           <small>${escapeHtml(CATEGORY_LABELS[result.question.category])}</small>
         </a>
-        <span class="review-answer">${escapeHtml(OUTCOME_LABELS[result.question.outcome])}</span>
+        <span class="review-answer">${escapeHtml(OUTCOME_LABELS[result.correctOutcome || result.question.outcome])}</span>
         <span class="review-area">${escapeHtml(formatArea(result.question.areaKm2))} km²</span>
         <span class="review-result ${result.isCorrect ? 'correct-result' : 'wrong-result'}" aria-label="${result.isCorrect ? '正解' : '不正解'}">${result.isCorrect ? '○' : '×'}</span>
       `;

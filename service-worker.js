@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v53';
+const CACHE_NAME = 'dokodemo-nauru-v54';
 const STATIC_SHELL = [
   './index.html',
   './game/index.html',
