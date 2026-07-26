@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-26T01:46:42.501Z",
+  "generatedAt": "2026-07-26T03:06:31.160Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 2709,
-    "withPrefectures": 2553,
-    "withMunicipalities": 2520,
+    "total": 2711,
+    "withPrefectures": 2580,
+    "withMunicipalities": 2561,
     "multiPrefecture": 16,
-    "multiMunicipality": 84,
+    "multiMunicipality": 88,
     "withGroups": 158
   },
   "places": {
@@ -339,7 +339,10 @@
       "prefectures": [
         "宮城県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "宮城県蔵王町",
+        "宮城県川崎町"
+      ],
       "groups": []
     },
     "water-wikipedia-W61981499": {
@@ -373,7 +376,9 @@
       "prefectures": [
         "山形県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "山形県鶴岡市"
+      ],
       "groups": []
     },
     "water-wikipedia-W91550845": {
@@ -2173,7 +2178,9 @@
       "prefectures": [
         "北海道"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "北海道鹿追町"
+      ],
       "groups": []
     },
     "water-パンケ沼": {
@@ -2426,16 +2433,20 @@
     },
     "water-長沼": {
       "prefectures": [
-        "青森県"
+        "宮城県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "宮城県登米市"
+      ],
       "groups": []
     },
     "water-鳥の海": {
       "prefectures": [
         "宮城県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "宮城県亘理町"
+      ],
       "groups": []
     },
     "water-長面浦": {
@@ -2496,7 +2507,9 @@
       "prefectures": [
         "福島県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "福島県相馬市"
+      ],
       "groups": []
     },
     "water-秋元湖": {
@@ -2674,7 +2687,10 @@
       "prefectures": [
         "山梨県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "山梨県富士河口湖町",
+        "山梨県身延町"
+      ],
       "groups": []
     },
     "water-西湖": {
@@ -2717,14 +2733,18 @@
       "prefectures": [
         "静岡県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "water-猪鼻湖": {
       "prefectures": [
         "静岡県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "island-沖島": {
@@ -2815,7 +2835,10 @@
       "prefectures": [
         "京都府"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "京都府宮津市",
+        "京都府与謝野町"
+      ],
       "groups": []
     },
     "island-島後": {
@@ -4964,7 +4987,9 @@
       "prefectures": [
         "東京都"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "東京都小笠原村"
+      ],
       "groups": [
         "小笠原諸島"
       ]
@@ -7092,8 +7117,12 @@
       "groups": []
     },
     "attraction-large-park-W190130793": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-W815801219": {
@@ -7698,7 +7727,9 @@
       "prefectures": [
         "神奈川県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "神奈川県横浜市中区"
+      ],
       "groups": []
     },
     "attraction-zoo-W59203234": {
@@ -8548,8 +8579,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1533223603": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道浦河町"
+      ],
       "groups": []
     },
     "attraction-national-park-R9394109": {
@@ -9178,8 +9213,12 @@
       "groups": []
     },
     "attraction-large-park-R3502023": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-military-base-R6261845": {
@@ -9312,8 +9351,12 @@
       "groups": []
     },
     "attraction-large-park-W260908824": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-park-W476665589": {
@@ -9488,8 +9531,12 @@
       "groups": []
     },
     "attraction-large-military-base-W192368718": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県横須賀市"
+      ],
       "groups": []
     },
     "attraction-large-military-base-W194056004": {
@@ -11044,8 +11091,13 @@
       "groups": []
     },
     "attraction-national-park-W342483714": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県渡嘉敷村",
+        "沖縄県座間味村"
+      ],
       "groups": []
     },
     "attraction-W1348754028": {
@@ -11313,7 +11365,9 @@
       "prefectures": [
         "広島県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "広島県廿日市市"
+      ],
       "groups": []
     },
     "attraction-W1214552789": {
@@ -11515,13 +11569,21 @@
       "groups": []
     },
     "attraction-large-large-port-W1535128312": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道日高町"
+      ],
       "groups": []
     },
     "attraction-large-large-port-W1540153358": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道厚岸町"
+      ],
       "groups": []
     },
     "attraction-large-airport-W935617782": {
@@ -12684,8 +12746,12 @@
       "groups": []
     },
     "attraction-large-park-R7325899": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-industrial-complex-W450034010": {
@@ -13851,8 +13917,12 @@
       "groups": []
     },
     "attraction-large-park-W31959357": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-airport-R16711610": {
@@ -15555,8 +15625,12 @@
       "groups": []
     },
     "attraction-large-park-W555942708": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-military-base-W598224645": {
@@ -16320,8 +16394,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1236343406": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "佐賀県"
+      ],
+      "municipalities": [
+        "佐賀県太良町"
+      ],
       "groups": []
     },
     "attraction-R18047883": {
@@ -17196,7 +17274,9 @@
       "prefectures": [
         "静岡県"
       ],
-      "municipalities": [],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-park-W458557534": {
@@ -17682,8 +17762,12 @@
       "groups": []
     },
     "attraction-large-military-base-R6010416": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県うるま市"
+      ],
       "groups": []
     },
     "attraction-W539368280": {
@@ -17930,8 +18014,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1167767214": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "佐賀県"
+      ],
+      "municipalities": [
+        "佐賀県唐津市"
+      ],
       "groups": []
     },
     "attraction-large-park-W1147776042": {
@@ -19044,8 +19132,12 @@
       "groups": []
     },
     "attraction-W1084172674": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "香川県"
+      ],
+      "municipalities": [
+        "香川県さぬき市"
+      ],
       "groups": []
     },
     "attraction-W243183188": {
@@ -19859,8 +19951,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1082987521": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "佐賀県"
+      ],
+      "municipalities": [
+        "佐賀県鹿島市"
+      ],
       "groups": []
     },
     "attraction-large-park-R3998527": {
@@ -19873,28 +19969,48 @@
       "groups": []
     },
     "attraction-large-airport-W42722174": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-military-base-W42722174": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-castle-W689644600": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-park-W31959341": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-R11267790": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県静岡市"
+      ],
       "groups": []
     },
     "attraction-large-park-W7836744": {
@@ -19984,10 +20100,10 @@
         "静岡県"
       ],
       "municipalities": [
-        "山梨県鳴沢村",
         "山梨県富士吉田市",
-        "山梨県富士河口湖町",
         "山梨県身延町",
+        "山梨県鳴沢村",
+        "山梨県富士河口湖町",
         "山梨県山中湖村",
         "山梨県忍野村",
         "静岡県静岡市",
@@ -21608,8 +21724,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1535310269": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道むかわ町"
+      ],
       "groups": []
     },
     "attraction-large-military-base-W1462250376": {
@@ -21838,8 +21958,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1537701708": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "岩手県"
+      ],
+      "municipalities": [
+        "岩手県野田村"
+      ],
       "groups": []
     },
     "attraction-large-park-W434939964": {
@@ -22015,8 +22139,12 @@
       "groups": []
     },
     "attraction-W600916401": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県沼津市"
+      ],
       "groups": []
     },
     "attraction-large-park-W482887077": {
@@ -22074,8 +22202,12 @@
       "groups": []
     },
     "attraction-large-large-port-W1273255152": {
-      "prefectures": [],
-      "municipalities": [],
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道様似町"
+      ],
       "groups": []
     },
     "attraction-large-park-W475809878": {
@@ -24228,6 +24360,24 @@
     "attraction-large-airport-W75208014": {
       "prefectures": [],
       "municipalities": [],
+      "groups": []
+    },
+    "attraction-unesco-1757": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県橿原市"
+      ],
+      "groups": []
+    },
+    "attraction-world-heritage-component-W426531398": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県橿原市"
+      ],
       "groups": []
     }
   }

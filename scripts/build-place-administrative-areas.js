@@ -26,6 +26,86 @@ const MANUAL_OVERRIDES = {
       '山梨県山中湖村', '山梨県忍野村', '静岡県静岡市', '静岡県富士宮市',
       '静岡県富士市', '静岡県裾野市', '静岡県御殿場市', '静岡県小山町'
     ]
+  },
+  // 海上の港湾・桟橋など、国土地理院の逆ジオコーダーが自治体を返さない施設。
+  'attraction-large-large-port-W1533223603': {
+    prefectures: ['北海道'], municipalities: ['北海道浦河町']
+  },
+  'attraction-large-military-base-W192368718': {
+    prefectures: ['神奈川県'], municipalities: ['神奈川県横須賀市']
+  },
+  'attraction-national-park-W342483714': {
+    prefectures: ['沖縄県'],
+    municipalities: ['沖縄県渡嘉敷村', '沖縄県座間味村']
+  },
+  'attraction-large-large-port-W1535128312': {
+    prefectures: ['北海道'], municipalities: ['北海道日高町']
+  },
+  'attraction-large-large-port-W1540153358': {
+    prefectures: ['北海道'], municipalities: ['北海道厚岸町']
+  },
+  'attraction-large-large-port-W1236343406': {
+    prefectures: ['佐賀県'], municipalities: ['佐賀県太良町']
+  },
+  'attraction-large-military-base-R6010416': {
+    prefectures: ['沖縄県'], municipalities: ['沖縄県うるま市']
+  },
+  'attraction-large-large-port-W1167767214': {
+    prefectures: ['佐賀県'], municipalities: ['佐賀県唐津市']
+  },
+  'attraction-W1084172674': {
+    prefectures: ['香川県'], municipalities: ['香川県さぬき市']
+  },
+  'attraction-large-large-port-W1082987521': {
+    prefectures: ['佐賀県'], municipalities: ['佐賀県鹿島市']
+  },
+  'attraction-large-large-port-W1535310269': {
+    prefectures: ['北海道'], municipalities: ['北海道むかわ町']
+  },
+  'attraction-large-large-port-W1537701708': {
+    prefectures: ['岩手県'], municipalities: ['岩手県野田村']
+  },
+  'attraction-W600916401': {
+    prefectures: ['静岡県'], municipalities: ['静岡県沼津市']
+  },
+  'attraction-large-large-port-W1273255152': {
+    prefectures: ['北海道'], municipalities: ['北海道様似町']
+  },
+  // 水面・海上や登録区域の代表点では逆ジオコーダーが空になる国内データ。
+  'attraction-W319352565': {
+    prefectures: ['神奈川県'], municipalities: ['神奈川県横浜市中区']
+  },
+  'attraction-unesco-776': {
+    prefectures: ['広島県'], municipalities: ['広島県廿日市市']
+  },
+  'water-wikipedia-W219619536': {
+    prefectures: ['宮城県'], municipalities: ['宮城県蔵王町', '宮城県川崎町']
+  },
+  'water-wikipedia-W90539285': {
+    prefectures: ['山形県'], municipalities: ['山形県鶴岡市']
+  },
+  'water-然別湖': {
+    prefectures: ['北海道'], municipalities: ['北海道鹿追町']
+  },
+  'water-鳥の海': {
+    prefectures: ['宮城県'], municipalities: ['宮城県亘理町']
+  },
+  'water-松川浦': {
+    prefectures: ['福島県'], municipalities: ['福島県相馬市']
+  },
+  'water-本栖湖': {
+    prefectures: ['山梨県'],
+    municipalities: ['山梨県富士河口湖町', '山梨県身延町']
+  },
+  'water-阿蘇海': {
+    prefectures: ['京都府'],
+    municipalities: ['京都府宮津市', '京都府与謝野町']
+  },
+  'water-長沼': {
+    prefectures: ['宮城県'], municipalities: ['宮城県登米市']
+  },
+  'island-R7349435': {
+    prefectures: ['東京都'], municipalities: ['東京都小笠原村']
   }
 };
 
@@ -208,6 +288,7 @@ async function reverseGeocode(point) {
 
 async function enrichFeature(feature, municipalityCatalog) {
   const properties = feature && feature.properties || {};
+  const featureId = cleanText(properties.id || feature.id);
   const geometryPath = properties.geometryFile ? path.join(ROOT, 'data', properties.geometryFile) : '';
   if (!geometryPath || !fs.existsSync(geometryPath)) {
     return { prefectures: [], municipalities: [], groups: deriveGroups(properties, []) };
@@ -215,7 +296,15 @@ async function enrichFeature(feature, municipalityCatalog) {
   const detailed = JSON.parse(fs.readFileSync(geometryPath, 'utf8'));
   const samples = sampleGeometry(detailed.geometry, properties);
   const codes = unique(await Promise.all(samples.map(reverseGeocode)));
-  const entries = codes.map(code => municipalityCatalog.get(code)).filter(Boolean);
+  if (process.env.DOKODEMO_DEBUG_ID === featureId) {
+    console.log(JSON.stringify({ featureId, samples, codes }, null, 2));
+  }
+  const entries = codes.map(code =>
+    municipalityCatalog.get(code)
+    // 政令指定都市の区再編直後など、逆ジオコーダーの区コードが
+    // 自治体一覧へ未反映の場合は市コードへフォールバックする。
+    || municipalityCatalog.get(`${code.slice(0, 3)}00`)
+  ).filter(Boolean);
   const matchedContextPrefectures = PREFECTURES.filter(prefecture => cleanText(properties.context).includes(prefecture));
   // 自然地物の複数県 context は掲載グループを表す場合があるため、単一県だけを所在地として採用する。
   // 複数構成資産を束ねる観光地・世界遺産では context の全県を検索対象に残す。
@@ -260,6 +349,38 @@ async function mapWithConcurrency(items, worker, concurrency) {
 }
 
 async function main() {
+  if (process.env.DOKODEMO_MANUAL_ONLY === '1') {
+    const payload = JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
+    for (const [id, override] of Object.entries(MANUAL_OVERRIDES)) {
+      const previousItem = payload.places[id] || {
+        prefectures: [], municipalities: [], groups: []
+      };
+      payload.places[id] = {
+        ...previousItem,
+        prefectures: unique(override.prefectures || []),
+        municipalities: unique(override.municipalities || [])
+      };
+    }
+    payload.generatedAt = new Date().toISOString();
+    payload.summary = Object.values(payload.places).reduce((result, item) => {
+      if (item.prefectures.length) result.withPrefectures += 1;
+      if (item.municipalities.length) result.withMunicipalities += 1;
+      if (item.prefectures.length > 1) result.multiPrefecture += 1;
+      if (item.municipalities.length > 1) result.multiMunicipality += 1;
+      if (item.groups.length) result.withGroups += 1;
+      return result;
+    }, {
+      total: Object.keys(payload.places).length,
+      withPrefectures: 0,
+      withMunicipalities: 0,
+      multiPrefecture: 0,
+      multiMunicipality: 0,
+      withGroups: 0
+    });
+    fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+    console.log(JSON.stringify(payload.summary, null, 2));
+    return;
+  }
   const natural = JSON.parse(fs.readFileSync(NATURAL_PATH, 'utf8'));
   const attractions = JSON.parse(fs.readFileSync(ATTRACTIONS_PATH, 'utf8'));
   const previous = fs.existsSync(OUTPUT_PATH)
@@ -273,7 +394,16 @@ async function main() {
     feature => {
       const properties = feature && feature.properties || {};
       const id = cleanText(properties.id || feature.id);
-      return previousPlaces[id] || enrichFeature(feature, municipalityCatalog);
+      const previousItem = previousPlaces[id];
+      const japaneseContext = cleanText(properties.context) === '日本'
+        || PREFECTURES.some(prefecture => cleanText(properties.context).includes(prefecture));
+      const incompleteJapaneseItem = japaneseContext && (
+        !(previousItem && Array.isArray(previousItem.prefectures) && previousItem.prefectures.length)
+        || !(previousItem && Array.isArray(previousItem.municipalities) && previousItem.municipalities.length)
+      );
+      return previousItem && !incompleteJapaneseItem
+        ? previousItem
+        : enrichFeature(feature, municipalityCatalog);
     },
     CONCURRENCY
   );

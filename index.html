@@ -273,6 +273,10 @@
       padding: 0 0.15rem;
     }
     .chip .spot-x:hover { opacity: 1; color: #f5c542; }
+    .chip.loc[aria-busy="true"] {
+      opacity: 0.72;
+      cursor: wait;
+    }
     .coord-input {
       width: 5.6rem;
       max-width: min(5.6rem, 38vw);
@@ -488,6 +492,47 @@
       overflow: hidden;
       pointer-events: auto;
     }
+    .bottom-controls {
+      display: grid;
+      gap: 0.42rem;
+      min-width: 0;
+      margin-bottom: 0.45rem;
+    }
+    .coordinate-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    .bottom-control-label {
+      flex: 0 0 auto;
+      color: #7ec8e3;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    #bottom-bar .coord-input,
+    #bottom-bar .coord-go {
+      height: 2rem;
+    }
+    #bottom-bar #btn-add-spot {
+      min-height: 2rem;
+      margin-left: auto;
+    }
+    .city-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-width: 0;
+    }
+    .city-row #city-bar {
+      flex: 1 1 auto;
+    }
+    @media (min-width: 768px) and (min-height: 501px) {
+      .ui-main-panel {
+        max-height: min(72vh, calc(100dvh - 17.75rem)) !important;
+      }
+    }
     .mobile-edit-start,
     #mobile-launchers,
     #mobile-edit-dock {
@@ -551,19 +596,23 @@
       min-width: 0;
     }
     .comparison-search-block {
-      min-width: min(100%, 25rem);
-      flex: 1 1 20rem;
+      min-width: 0;
+      width: 100%;
     }
     .comparison-search-row {
-      display: flex;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 6.2rem auto minmax(12rem, 1fr) auto auto;
+      align-items: start;
       gap: 0.35rem;
       min-width: 0;
       width: 100%;
     }
+    .comparison-query-field {
+      min-width: 0;
+    }
     .comparison-search-help {
       margin: 0.18rem 0 0;
-      padding-left: 6.55rem;
+      padding-left: 0.15rem;
       color: rgba(157, 214, 232, 0.78);
       font-size: 9px;
       line-height: 1.2;
@@ -611,6 +660,340 @@
     }
     .comparison-action.primary { background: linear-gradient(135deg, #f5c542, #e8b020); color: #061525; }
     .comparison-action:hover { filter: brightness(1.12); }
+    .search-builder-open {
+      height: 2rem;
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      border: 1px solid rgba(126, 200, 227, 0.45);
+      border-radius: 0.65rem;
+      background: rgba(15, 58, 95, 0.9);
+      color: #efe6d4;
+      padding: 0 0.65rem;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .search-builder-open:hover,
+    .search-builder-open:focus-visible {
+      border-color: #f5c542;
+      color: #f5c542;
+      outline: none;
+    }
+    #search-builder-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 3600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(3, 16, 30, 0.76);
+      backdrop-filter: blur(5px);
+    }
+    #search-builder-modal.open { display: flex; }
+    body.search-builder-opened { overflow: hidden; }
+    .search-builder-dialog {
+      width: min(1080px, 100%);
+      max-height: min(820px, calc(100vh - 2rem));
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(126, 200, 227, 0.42);
+      border-radius: 1.25rem;
+      background: #f7f9fb;
+      color: #10283d;
+      box-shadow: 0 26px 80px rgba(0, 0, 0, 0.46);
+    }
+    .search-builder-header {
+      position: relative;
+      flex: 0 0 auto;
+      padding: 1.15rem 3.5rem 0.85rem 1.25rem;
+      border-bottom: 1px solid #d8e2e9;
+      background: #fff;
+    }
+    .search-builder-header h2 {
+      margin: 0;
+      color: #0a2744;
+      font-size: 1.35rem;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+    .search-builder-header p {
+      margin: 0.25rem 0 0;
+      color: #5b7182;
+      font-size: 0.78rem;
+    }
+    .search-builder-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 0.9rem;
+      width: 2.35rem;
+      height: 2.35rem;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #29485f;
+      font-size: 1.35rem;
+      cursor: pointer;
+    }
+    .search-builder-close:hover,
+    .search-builder-close:focus-visible {
+      background: #e8f0f5;
+      outline: 2px solid #e8b020;
+      outline-offset: 1px;
+    }
+    .search-builder-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 1rem 1.25rem 1.2rem;
+    }
+    .search-builder-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.9rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      border: 1px solid #cedce5;
+      border-radius: 0.9rem;
+      background: #fff;
+    }
+    .search-builder-summary-main { min-width: 0; }
+    .search-builder-summary-title {
+      margin: 0 0 0.45rem;
+      color: #29485f;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    .search-builder-conditions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+    .search-builder-condition {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      max-width: 100%;
+      padding: 0.38rem 0.55rem;
+      border: 1px solid #d1dee6;
+      border-radius: 0.55rem;
+      background: #f7fafc;
+      color: #15384f;
+      font-size: 0.72rem;
+    }
+    .search-builder-condition strong {
+      color: #0a2744;
+      font-size: 0.68rem;
+    }
+    .search-builder-condition span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .search-builder-condition label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      color: #5b7182;
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+    .search-builder-condition input { accent-color: #e8b020; }
+    .search-builder-count {
+      min-width: 7.5rem;
+      color: #29485f;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: right;
+    }
+    .search-builder-count strong {
+      display: inline-block;
+      margin: 0 0.2rem;
+      color: #0b6fa4;
+      font-size: 1.65rem;
+      line-height: 1;
+    }
+    .search-builder-section {
+      padding: 0.95rem 0;
+      border-top: 1px solid #dbe5eb;
+    }
+    .search-builder-section:first-of-type { border-top: 0; }
+    .search-builder-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.7rem;
+    }
+    .search-builder-section h3 {
+      margin: 0;
+      color: #0a2744;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+    .search-builder-subtle {
+      margin: 0;
+      color: #6a7f8e;
+      font-size: 0.68rem;
+    }
+    .search-builder-link {
+      border: 0;
+      background: transparent;
+      color: #316a8b;
+      font-size: 0.68rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .search-builder-type-groups {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem 1rem;
+    }
+    .search-builder-type-group { min-width: 0; }
+    .search-builder-type-group h4 {
+      margin: 0 0 0.35rem;
+      color: #577084;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+    .search-builder-option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+    .search-builder-option {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 0.55rem;
+      border: 1px solid #d1dee6;
+      border-radius: 0.55rem;
+      background: #fff;
+      color: #17384f;
+      font-size: 0.73rem;
+      cursor: pointer;
+    }
+    .search-builder-option:has(input:checked) {
+      border-color: #0f4c70;
+      background: #0f3a5f;
+      color: #fff;
+      box-shadow: inset 3px 0 #f5c542;
+    }
+    .search-builder-option input {
+      flex: 0 0 auto;
+      accent-color: #f5c542;
+    }
+    .search-builder-option span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .search-builder-option small {
+      margin-left: auto;
+      color: #7890a0;
+      font-size: 0.62rem;
+    }
+    .search-builder-option:has(input:checked) small { color: #b7d7e7; }
+    .search-builder-location {
+      display: grid;
+      grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.6rem;
+    }
+    .search-builder-location label,
+    .search-builder-number label {
+      display: block;
+      color: #526b7c;
+      font-size: 0.66rem;
+      font-weight: 700;
+    }
+    .search-builder-select,
+    .search-builder-number input {
+      width: 100%;
+      height: 2.55rem;
+      margin-top: 0.3rem;
+      border: 1px solid #cbd9e2;
+      border-radius: 0.55rem;
+      background: #fff;
+      color: #15384f;
+      padding: 0 0.65rem;
+      font-size: 0.78rem;
+      outline: none;
+    }
+    .search-builder-select:focus,
+    .search-builder-number input:focus {
+      border-color: #0b6fa4;
+      box-shadow: 0 0 0 2px rgba(11, 111, 164, 0.12);
+    }
+    .search-builder-presets {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+    .search-builder-preset {
+      min-height: 2.35rem;
+      border: 1px solid #cbd9e2;
+      border-radius: 0.55rem;
+      background: #fff;
+      color: #29485f;
+      padding: 0.35rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .search-builder-preset.active {
+      border-color: #0f4c70;
+      background: #0f3a5f;
+      color: #fff;
+    }
+    .search-builder-number-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 12rem));
+      gap: 0.75rem;
+      margin-top: 0.65rem;
+    }
+    .search-builder-footer {
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.65rem;
+      padding: 0.8rem 1.25rem;
+      border-top: 1px solid #d8e2e9;
+      background: #fff;
+    }
+    .search-builder-footer button {
+      min-height: 2.65rem;
+      border-radius: 0.65rem;
+      padding: 0 1.2rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .search-builder-clear {
+      border: 1px solid #27475f;
+      background: #fff;
+      color: #17384f;
+    }
+    .search-builder-apply {
+      border: 1px solid #c9940a;
+      background: linear-gradient(135deg, #f5c542, #e8b020);
+      color: #061525;
+    }
+    .search-builder-loading {
+      padding: 1.2rem;
+      color: #526b7c;
+      font-size: 0.8rem;
+      text-align: center;
+    }
     #comparison-modal {
       position: fixed;
       inset: 0;
@@ -1039,6 +1422,12 @@
         width: 100%;
         max-width: none;
       }
+      #mobile-search-builder-open {
+        width: 100%;
+        height: 2.6rem;
+        margin-bottom: 0.4rem;
+        font-size: 12px;
+      }
       #mobile-edit-dock input,
       #mobile-edit-dock select {
         font-size: 16px;
@@ -1186,6 +1575,53 @@
       }
       .desktop-only-copy {
         display: none !important;
+      }
+    }
+    @media (max-width: 767.98px) {
+      #search-builder-modal {
+        align-items: stretch;
+        padding: 0;
+      }
+      .search-builder-dialog {
+        width: 100%;
+        max-height: 100dvh;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+      }
+      .search-builder-header {
+        padding: max(0.9rem, env(safe-area-inset-top)) 3.4rem 0.75rem 1rem;
+      }
+      .search-builder-header h2 { font-size: 1.15rem; }
+      .search-builder-body { padding: 0.75rem 0.9rem 1rem; }
+      .search-builder-summary {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+      }
+      .search-builder-count { text-align: left; }
+      .search-builder-count strong { font-size: 1.35rem; }
+      .search-builder-type-groups,
+      .search-builder-option-grid {
+        grid-template-columns: 1fr;
+      }
+      .search-builder-location,
+      .search-builder-number-row {
+        grid-template-columns: 1fr;
+      }
+      .search-builder-presets {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .search-builder-select,
+      .search-builder-number input {
+        height: 3rem;
+        font-size: 16px;
+      }
+      .search-builder-footer {
+        padding: 0.7rem 0.9rem max(0.7rem, env(safe-area-inset-bottom));
+      }
+      .search-builder-footer button {
+        flex: 1;
+        padding: 0 0.6rem;
       }
     }
   </style>
@@ -1367,18 +1803,22 @@
   <!-- Bottom: city jump strip + lat/lng -->
   <div id="bottom-bar" class="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-0 right-0 z-[1000] px-3 sm:px-4">
     <div class="panel rounded-2xl px-2 py-2 sm:px-3 sm:py-2.5 max-w-4xl mx-auto">
-      <div class="flex items-center gap-2 mb-1.5 px-1 flex-wrap">
-        <span class="text-[10px] uppercase tracking-wider text-ocean-300 shrink-0">比較スポット</span>
-        <div class="flex items-center gap-1 flex-wrap">
+      <div class="bottom-controls px-1">
+        <div class="coordinate-row">
+          <span class="bottom-control-label">座標移動</span>
           <label class="text-[10px] text-ocean-300 shrink-0" for="input-lat">緯度</label>
           <input id="input-lat" class="coord-input" type="text" inputmode="decimal" placeholder="35.681" autocomplete="off">
           <label class="text-[10px] text-ocean-300 shrink-0" for="input-lng">経度</label>
           <input id="input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
           <button type="button" id="btn-goto-coord" class="coord-go">移動</button>
+          <button type="button" id="btn-add-spot" class="text-[10px] sm:text-[11px] px-2 py-1 rounded-lg border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 transition-colors shrink-0">
+            ＋ この位置を追加 (0/2)
+          </button>
         </div>
         <div class="comparison-search-block">
           <div class="comparison-search-row" role="search" aria-label="比較対象を検索">
             <select id="comparison-period" class="comparison-period" aria-label="比較対象の種類">
+              <option value="all">すべて</option>
               <option value="current">現在</option>
               <option value="1995">1995年</option>
               <option value="country">国</option>
@@ -1391,18 +1831,21 @@
               <option value="infrastructure">港湾・工業地帯</option>
               <option value="land">農場・牧場・鉱山</option>
             </select>
-            <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
+            <button type="button" id="search-builder-open" class="search-builder-open" aria-haspopup="dialog">条件から探す</button>
+            <div class="comparison-query-field">
+              <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
+              <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
+            </div>
             <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
             <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
           </div>
-          <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
         </div>
-        <button type="button" id="btn-add-spot" class="ml-auto text-[10px] sm:text-[11px] px-2 py-1 rounded-lg border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 transition-colors shrink-0">
-          ＋ この位置を追加 (0/2)
-        </button>
       </div>
-      <div id="city-bar" class="city-scroll flex gap-1.5 sm:gap-2 overflow-x-auto pb-0.5">
-        <!-- filled by JS -->
+      <div class="city-row">
+        <span class="bottom-control-label">比較スポット</span>
+        <div id="city-bar" class="city-scroll flex gap-1.5 sm:gap-2 overflow-x-auto pb-0.5">
+          <!-- filled by JS -->
+        </div>
       </div>
     </div>
   </div>
@@ -1482,8 +1925,10 @@
         <button type="button" id="mobile-btn-goto-coord" class="coord-go">移動</button>
       </div>
       <div class="comparison-search-block">
+        <button type="button" id="mobile-search-builder-open" class="search-builder-open" aria-haspopup="dialog">条件から探す</button>
         <div class="comparison-search-row" role="search" aria-label="比較対象を検索">
           <select id="mobile-comparison-period" class="comparison-period" aria-label="比較対象の種類">
+            <option value="all">すべて</option>
             <option value="current">現在</option>
             <option value="1995">1995年</option>
             <option value="country">国</option>
@@ -1496,11 +1941,13 @@
             <option value="infrastructure">港湾・工業地帯</option>
             <option value="land">農場・牧場・鉱山</option>
           </select>
-          <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
+          <div class="comparison-query-field">
+            <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
+            <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
+          </div>
           <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
           <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
         </div>
-        <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
       </div>
       <button type="button" id="mobile-btn-add-spot">＋ この位置を追加 (0/2)</button>
       <div id="mobile-city-bar" aria-label="比較スポット"></div>
@@ -1517,6 +1964,104 @@
   </section>
 
   <datalist id="comparison-targets"></datalist>
+
+  <div id="search-builder-modal" role="dialog" aria-modal="true" aria-labelledby="search-builder-title" aria-hidden="true">
+    <div class="search-builder-dialog">
+      <header class="search-builder-header">
+        <h2 id="search-builder-title">条件から探す</h2>
+        <p>条件を選んで、検索を組み立てます</p>
+        <button type="button" id="search-builder-close" class="search-builder-close" aria-label="閉じる">×</button>
+      </header>
+      <div class="search-builder-body">
+        <section class="search-builder-summary" aria-live="polite">
+          <div class="search-builder-summary-main">
+            <p class="search-builder-summary-title">選択中の条件</p>
+            <div id="search-builder-conditions" class="search-builder-conditions">
+              <span class="search-builder-subtle">まだ条件を選択していません</span>
+            </div>
+          </div>
+          <div id="search-builder-count" class="search-builder-count">該当 <strong>—</strong> 件</div>
+        </section>
+
+        <div id="search-builder-loading" class="search-builder-loading">登録データを読み込んでいます…</div>
+        <div id="search-builder-controls" hidden>
+          <section class="search-builder-section" aria-labelledby="search-builder-target-heading">
+            <div class="search-builder-section-head">
+              <div>
+                <h3 id="search-builder-target-heading">対象</h3>
+                <p class="search-builder-subtle">複数選ぶと「いずれか」に一致します</p>
+              </div>
+              <button type="button" id="search-builder-clear-types" class="search-builder-link">対象をすべてクリア</button>
+            </div>
+            <div id="search-builder-type-groups" class="search-builder-type-groups"></div>
+          </section>
+
+          <section class="search-builder-section" aria-labelledby="search-builder-location-heading">
+            <div class="search-builder-section-head">
+              <div>
+                <h3 id="search-builder-location-heading">場所</h3>
+                <p class="search-builder-subtle">施設・島・湖なども市区町村で絞れます</p>
+              </div>
+            </div>
+            <div class="search-builder-location">
+              <label>
+                範囲
+                <select id="search-builder-location-mode" class="search-builder-select">
+                  <option value="all">全国・全地域</option>
+                  <option value="prefecture">都道府県</option>
+                  <option value="municipality">市区町村</option>
+                </select>
+              </label>
+              <label>
+                都道府県
+                <select id="search-builder-prefecture" class="search-builder-select" disabled>
+                  <option value="">選択してください</option>
+                </select>
+              </label>
+              <label>
+                市区町村
+                <select id="search-builder-municipality" class="search-builder-select" disabled>
+                  <option value="">先に都道府県を選択してください</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="search-builder-section" aria-labelledby="search-builder-area-heading">
+            <div class="search-builder-section-head">
+              <div>
+                <h3 id="search-builder-area-heading">大きさ</h3>
+                <p class="search-builder-subtle">面積は公式値または登録境界からの概算です</p>
+              </div>
+            </div>
+            <div id="search-builder-presets" class="search-builder-presets">
+              <button type="button" class="search-builder-preset" data-min="" data-max="0.1">0.1km²未満</button>
+              <button type="button" class="search-builder-preset" data-min="0.1" data-max="1">0.1〜1km²</button>
+              <button type="button" class="search-builder-preset" data-min="1" data-max="10">1〜10km²</button>
+              <button type="button" class="search-builder-preset" data-min="10" data-max="100">10〜100km²</button>
+              <button type="button" class="search-builder-preset" data-min="100" data-max="">100km²以上</button>
+              <button type="button" class="search-builder-preset" data-min="" data-max="21">ナウル未満</button>
+              <button type="button" class="search-builder-preset" data-min="21" data-max="">ナウル以上</button>
+            </div>
+            <div class="search-builder-number-row">
+              <div class="search-builder-number">
+                <label for="search-builder-area-min">最小（km²）</label>
+                <input id="search-builder-area-min" type="number" min="0" step="any" inputmode="decimal" placeholder="指定なし">
+              </div>
+              <div class="search-builder-number">
+                <label for="search-builder-area-max">最大（km²）</label>
+                <input id="search-builder-area-max" type="number" min="0" step="any" inputmode="decimal" placeholder="指定なし">
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <footer class="search-builder-footer">
+        <button type="button" id="search-builder-clear" class="search-builder-clear">条件をクリア</button>
+        <button type="button" id="search-builder-apply" class="search-builder-apply">検索欄に入れる</button>
+      </footer>
+    </div>
+  </div>
 
   <!-- 境界ユーザー色の小さな設定ウィンドウ -->
   <div id="user-color-pop" class="pop-card hidden" role="dialog" aria-label="境界の色設定">
@@ -1624,12 +2169,13 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
-    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=39';
-const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
-    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=3';
+    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=40';
+    const ATTRACTIONS_URL = './data/attractions.geojson?v=44';
+    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=4';
     const COUNTRIES_URL = './data/countries.geojson?v=42';
+    const SEARCH_AREA_INDEX_URL = './data/search-area-index.json?v=1';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
-    const COMPARISON_PERIODS = ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
+    const COMPARISON_PERIODS = ['all', 'current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
     const HISTORICAL_1995_DATE = '1995年10月1日時点';
@@ -1656,6 +2202,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
     ];
     const MAX_CUSTOM_SPOTS = 2;
     let customSpots = []; // { id, label, lat, lng, zoom, kind: 'custom' }
+    let currentLocationPending = false;
 
     const BASEMAPS = {
       osm: {
@@ -1828,8 +2375,22 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
     let attractionsPromise = null;
     let placeAdministrativeAreasPromise = null;
     let countriesPromise = null;
+    let searchAreaIndexPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
+    let searchBuilderTargets = [];
+    let searchBuilderFreeText = '';
+    const searchBuilderState = {
+      types: new Set(),
+      locationMode: 'all',
+      prefecture: '',
+      municipality: '',
+      minArea: '',
+      maxArea: '',
+      excludeTypes: false,
+      excludeLocation: false,
+      excludeArea: false
+    };
 
     function hexToRgb(hex) {
       const m = String(hex || '').replace('#', '').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -3183,23 +3744,78 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       showToast('削除しました');
     }
 
+    function setCurrentLocationPending(pending) {
+      currentLocationPending = pending;
+      document.querySelectorAll('#city-bar [data-id="here"], #mobile-city-bar [data-id="here"]').forEach(button => {
+        button.disabled = pending;
+        button.setAttribute('aria-busy', String(pending));
+        const label = button.querySelector('span');
+        if (label) label.textContent = pending ? '◎ 取得中…' : '◎ 現在地';
+      });
+    }
+
+    function requestCurrentPosition(options) {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
+    }
+
+    function currentLocationErrorMessage(error) {
+      if (!error) return '現在地を取得できませんでした。もう一度お試しください';
+      if (error.code === 1) {
+        return '位置情報が許可されていません。ブラウザのサイト設定で許可してください';
+      }
+      if (error.code === 3) {
+        return '現在地の取得が時間切れになりました。空が見える場所で再度お試しください';
+      }
+      return '現在地を確認できませんでした。位置情報をオンにして再度お試しください';
+    }
+
+    async function flyToCurrentLocation(spot) {
+      if (currentLocationPending) return;
+      if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        showToast('現在地の取得にはHTTPSでの接続が必要です');
+        return;
+      }
+      if (!navigator.geolocation) {
+        showToast('このブラウザでは現在地を取得できません');
+        return;
+      }
+
+      setCurrentLocationPending(true);
+      showToast('現在地を取得しています…');
+      try {
+        let position;
+        try {
+          position = await requestCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 8000,
+            maximumAge: 300000
+          });
+        } catch (firstError) {
+          if (firstError && firstError.code === 1) throw firstError;
+          showToast('現在地を再確認しています…');
+          position = await requestCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+          });
+        }
+        setActiveSpot('here');
+        map.flyTo([position.coords.latitude, position.coords.longitude], spot.zoom, { duration: 1.4 });
+        if (usesMobileLayout() && typeof window.__closeMobileMenu === 'function') {
+          window.__closeMobileMenu();
+        }
+      } catch (error) {
+        showToast(currentLocationErrorMessage(error));
+      } finally {
+        setCurrentLocationPending(false);
+      }
+    }
+
     function flyToSpot(spot) {
       if (spot.kind === 'loc') {
-        if (!navigator.geolocation) {
-          showToast('このブラウザでは現在地を取得できません');
-          return;
-        }
-        showToast('現在地を取得しています…');
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            setActiveSpot('here');
-            map.flyTo([pos.coords.latitude, pos.coords.longitude], spot.zoom, { duration: 1.4 });
-            if (usesMobileLayout() && typeof window.__closeMobileMenu === 'function') {
-              window.__closeMobileMenu();
-            }
-          },
-          () => showToast('現在地の取得に失敗しました')
-        );
+        flyToCurrentLocation(spot);
         return;
       }
       setActiveSpot(spot.id);
@@ -3252,6 +3868,21 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       return Array.from(normalizeComparisonQuery(value)).length;
     }
 
+    function structuredComparisonTerm(term) {
+      const normalized = normalizeComparisonQuery(term).replace(/：/g, ':');
+      const separatorIndex = normalized.indexOf(':');
+      if (separatorIndex <= 0) return null;
+      const field = normalized.slice(0, separatorIndex);
+      const value = normalized.slice(separatorIndex + 1);
+      if (!['種類', '対象', '場所', '面積'].includes(field) || !value) return null;
+      return { field: field === '対象' ? '種類' : field, value };
+    }
+
+    function isReadyComparisonTerm(term) {
+      return Boolean(structuredComparisonTerm(term))
+        || comparisonQueryLength(term) >= COMPARISON_PARTIAL_SEARCH_MIN_LENGTH;
+    }
+
     function parseComparisonSearch(value) {
       const source = String(value || '')
         .replace(/｜/g, '|')
@@ -3302,18 +3933,45 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
         excludedTerms,
         hasPositiveTerms: positiveTerms.length > 0,
         partialReady: groups.length > 0 && groups.every(group =>
-          group.some(term => comparisonQueryLength(term) >= COMPARISON_PARTIAL_SEARCH_MIN_LENGTH)),
+          group.some(isReadyComparisonTerm)),
         simpleQuery: !hasOperator && excludedTerms.length === 0 && positiveTerms.length === 1
-          ? positiveTerms[0]
+          && !structuredComparisonTerm(positiveTerms[0]) ? positiveTerms[0]
           : ''
       };
     }
 
     function matchesComparisonSearch(target, parsedSearch) {
       const matchesTerm = term => {
+        const structured = structuredComparisonTerm(term);
+        if (structured) {
+          if (structured.field === '種類') {
+            const requested = structured.value.split(/[,、]/).filter(Boolean);
+            const available = (target.searchTypes || []).map(normalizeComparisonQuery);
+            return requested.some(value => available.includes(value));
+          }
+          if (structured.field === '場所') {
+            const requested = structured.value.split(/[,、]/).filter(Boolean);
+            const available = [
+              ...(target.prefectures || []),
+              ...(target.municipalities || [])
+            ].map(normalizeComparisonQuery);
+            return requested.some(value => available.includes(value));
+          }
+          if (structured.field === '面積') {
+            const area = Number(target.areaKm2);
+            if (!Number.isFinite(area) || area <= 0) return false;
+            const [rawMin, rawMax] = structured.value
+              .replace(/km²|km2/g, '')
+              .split('..');
+            const min = rawMin === '' ? null : Number(rawMin);
+            const max = rawMax === '' ? null : Number(rawMax);
+            if (min !== null && (!Number.isFinite(min) || area < min)) return false;
+            if (max !== null && (!Number.isFinite(max) || area >= max)) return false;
+            return min !== null || max !== null;
+          }
+        }
         const searchable = normalizeComparisonQuery(target.search || target.name);
-        if (searchable.includes(term)) return true;
-        return (target.searchKeywords || []).some(keyword => keyword === term);
+        return searchable.includes(term);
       };
       if (parsedSearch.excludedTerms.some(matchesTerm)) return false;
       return parsedSearch.groups.some(group => group.every(matchesTerm));
@@ -3331,6 +3989,27 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
           throw error;
         });
       return officialAreaDataPromise;
+    }
+
+    async function loadSearchAreaIndex() {
+      if (searchAreaIndexPromise) return searchAreaIndexPromise;
+      searchAreaIndexPromise = fetch(SEARCH_AREA_INDEX_URL, { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error('検索用の面積データを取得できませんでした');
+          return response.json();
+        })
+        .catch(error => {
+          searchAreaIndexPromise = null;
+          throw error;
+        });
+      return searchAreaIndexPromise;
+    }
+
+    function indexedFeatureArea(properties, feature, areaIndex) {
+      const official = Number(properties && properties.officialAreaKm2);
+      if (Number.isFinite(official) && official > 0) return official;
+      const id = properties && properties.id || feature && feature.id || '';
+      return Number(areaIndex && areaIndex.featureAreas && areaIndex.featureAreas[id]);
     }
 
     async function getOfficialAreaKm2(target) {
@@ -3355,6 +4034,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
     }
 
     function comparisonCategoryLabel(period = comparisonPeriod) {
+      if (period === 'all') return '比較対象';
       if (period === '1995') return '1995年の自治体';
       if (period === 'country') return '国・地域';
       if (period === 'island') return '島';
@@ -3428,7 +4108,11 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       const properties = feature && feature.properties || {};
       const id = properties.id || feature.id;
       const item = index && index.places && index.places[id] || {};
-      const prefectures = Array.isArray(item.prefectures) ? item.prefectures : [];
+      const indexedPrefectures = Array.isArray(item.prefectures) ? item.prefectures : [];
+      const contextPrefectures = PREFECTURES
+        .map(prefecture => prefecture.name)
+        .filter(prefecture => String(properties.context || '').includes(prefecture));
+      const prefectures = indexedPrefectures.length ? indexedPrefectures : contextPrefectures;
       const municipalities = Array.isArray(item.municipalities) ? item.municipalities : [];
       const groups = Array.isArray(item.groups) ? item.groups : [];
       const locationLabel = municipalities.length
@@ -3437,7 +4121,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       return { prefectures, municipalities, groups, locationLabel };
     }
 
-    function naturalTargetFromFeature(feature, administrativeIndex) {
+    function naturalTargetFromFeature(feature, administrativeIndex, areaIndex) {
       const properties = feature && feature.properties || {};
       const kind = properties.kind === 'water' ? 'water' : 'island';
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
@@ -3453,7 +4137,8 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
         municipalities: administrative.municipalities,
         groups: administrative.groups,
         locationLabel: administrative.locationLabel,
-        areaKm2: Number(properties.officialAreaKm2),
+        areaKm2: indexedFeatureArea(properties, feature, areaIndex),
+        searchTypes: [kind === 'water' ? '湖・池' : '島'],
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
         boundarySourceLabel: properties.boundarySourceLabel || '',
@@ -3472,7 +4157,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       };
     }
 
-    function countryTargetFromFeature(feature) {
+    function countryTargetFromFeature(feature, areaIndex) {
       const properties = feature && feature.properties || {};
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
       return {
@@ -3483,7 +4168,8 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
         name: properties.name,
         shortName: properties.shortName || properties.name,
         context: properties.context || '',
-        areaKm2: Number(properties.officialAreaKm2),
+        areaKm2: indexedFeatureArea(properties, feature, areaIndex),
+        searchTypes: ['国・地域'],
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
         boundarySourceLabel: properties.boundarySourceLabel || '',
@@ -3497,52 +4183,25 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
     function attractionPeriodFromSubtype(subtype) {
       if (subtype === 'airport') return 'airport';
       if (subtype === 'military-base') return 'military';
-      if (subtype === 'world-heritage') return 'heritage';
+      if (['world-heritage', 'world-heritage-component'].includes(subtype)) return 'heritage';
       if (['large-port', 'industrial-complex'].includes(subtype)) return 'infrastructure';
       if (['large-farm', 'large-mine'].includes(subtype)) return 'land';
       return 'attraction';
     }
 
-    const ATTRACTION_CATEGORY_SEARCH_TERMS = [
-      '遊園地', 'テーマパーク',
-      '野球場', '球場', 'NPB', 'ファーム', '本拠地',
-      'サッカー場', '競技場', 'ラグビー場', 'スポーツ公園', '武道館', 'アリーナ',
-      '空港', '飛行場', '基地', '駐屯地', '演習場',
-      '世界遺産', '港湾', '埠頭', '工業地帯', '工場',
-      '農場', '牧場', '鉱山', '採石場',
-      '国立公園', '景勝地', '城郭', '城跡', '現存天守', '再建天守',
-      '公園', '大型公園', '都市公園', '広域公園',
-      '動物園', '植物園', '動植物園'
-    ];
-
-    const ATTRACTION_SUBTYPE_SEARCH_TERMS = {
-      'sports-football': ['Jリーグ'],
-      'sports-baseball': ['プロ野球'],
-      'large-park': ['大規模公園'],
-      'zoological-botanical-park': ['動物園', '植物園']
-    };
-
-    function attractionSearchKeywords(subtype, subtypeLabel) {
-      const label = String(subtypeLabel || '');
-      const normalizedLabel = normalizeComparisonQuery(label);
-      const keywords = [
-        normalizedLabel,
-        ...label.split(/[・／/、,（）()\s　]+/).map(normalizeComparisonQuery),
-        ...(label.match(/[A-Za-z0-9]+/g) || []).map(normalizeComparisonQuery)
-      ];
-      ATTRACTION_CATEGORY_SEARCH_TERMS.forEach(term => {
-        const normalized = normalizeComparisonQuery(term);
-        if (normalizedLabel.includes(normalized)) keywords.push(normalized);
-      });
-      (ATTRACTION_SUBTYPE_SEARCH_TERMS[subtype] || []).forEach(term =>
-        keywords.push(normalizeComparisonQuery(term)));
-      return [...new Set(keywords.filter(Boolean))];
+    function attractionSemanticSearchTags(properties) {
+      const status = String(properties && properties.statusLabel || '');
+      return [
+        'NPB', 'ファーム', 'Jリーグ', 'WEリーグ', 'なでしこリーグ',
+        'Bリーグ', 'Vリーグ', 'リーグワン'
+      ].filter(tag => status.toLowerCase().includes(tag.toLowerCase()));
     }
 
-    function attractionTargetFromFeature(feature, administrativeIndex) {
+    function attractionTargetFromFeature(feature, administrativeIndex, areaIndex) {
       const properties = feature && feature.properties || {};
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
       const administrative = administrativeMetadata(feature, administrativeIndex);
+      const semanticTags = attractionSemanticSearchTags(properties);
       return {
         kind: 'attraction',
         period: attractionPeriodFromSubtype(properties.subtype),
@@ -3557,13 +4216,14 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
         subtype: properties.subtype || '',
         subtypeLabel: properties.subtypeLabel || '観光地・施設',
         statusLabel: properties.statusLabel || '',
-        areaKm2: Number(properties.officialAreaKm2),
+        areaKm2: indexedFeatureArea(properties, feature, areaIndex),
+        searchTypes: [properties.subtypeLabel || '観光地・施設'],
+        searchTags: semanticTags,
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
         boundarySourceLabel: properties.boundarySourceLabel || '',
         boundarySourceUrl: properties.boundarySourceUrl || '',
         geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
-        searchKeywords: attractionSearchKeywords(properties.subtype, properties.subtypeLabel),
         search: [
           properties.name,
           properties.shortName,
@@ -3571,6 +4231,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
           ...administrative.prefectures,
           ...administrative.municipalities,
           ...administrative.groups,
+          ...semanticTags,
           ...aliases
         ].filter(Boolean).join(' '),
         feature
@@ -3591,7 +4252,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       return historical1995TopologyPromise;
     }
 
-    function historicalTargetFromGeometry(geometry, topologyIndex) {
+    function historicalTargetFromGeometry(geometry, topologyIndex, areaIndex) {
       const properties = geometry && geometry.properties || {};
       const prefecture = String(properties.N03_001 || '');
       const parent = String(properties.N03_003 || '');
@@ -3609,6 +4270,13 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
         parent: parentLabel,
         name,
         shortName: municipality,
+        prefectures: [prefecture],
+        municipalities: [`${prefecture}${parentLabel}${municipality}`],
+        areaKm2: Number(areaIndex && areaIndex.historicalMunicipalityAreas &&
+          areaIndex.historicalMunicipalityAreas[
+            String(properties.id || geometry.id || `1995-${topologyIndex}`)
+          ]),
+        searchTypes: ['1995年の市区町村'],
         search: `${name} ${prefecture}${municipality} ${parentLabel}${municipality} ${municipality}`
       };
     }
@@ -3671,6 +4339,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
     }
 
     function updateComparisonSearchPresentation() {
+      const all = comparisonPeriod === 'all';
       const historical = comparisonPeriod === '1995';
       const country = comparisonPeriod === 'country';
       const island = comparisonPeriod === 'island';
@@ -3683,7 +4352,9 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       const land = comparisonPeriod === 'land';
       const desktop = document.getElementById('comparison-search');
       const mobile = document.getElementById('mobile-comparison-search');
-      if (desktop) desktop.placeholder = country
+      if (desktop) desktop.placeholder = all
+        ? '名称・場所を検索、または条件から探す'
+        : country
         ? '国・地域を検索（例：台湾、フランス）'
         : island
         ? '島名・都道府県・市区町村・諸島名を検索'
@@ -3696,7 +4367,9 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
           : land ? '農場・牧場・鉱山・都道府県・市区町村を検索'
           : historical ? '1995年時点の市区町村を検索（例：田無市）'
             : '市区町村・都道府県を検索（例：千代田区、東京都）';
-      if (mobile) mobile.placeholder = country
+      if (mobile) mobile.placeholder = all
+        ? '名称・場所・条件で検索'
+        : country
         ? '国・地域を検索'
         : island
         ? '島名・地域名を検索'
@@ -3738,27 +4411,41 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
 
     async function loadComparisonCatalog(period = comparisonPeriod) {
       if (!comparisonCatalogPromises.has(period)) {
-        const promise = period === 'country'
-          ? loadCountries().then(collection => (collection.features || []).map(countryTargetFromFeature))
+        const promise = period === 'all'
+          ? Promise.all(
+            ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS]
+              .map(catalogPeriod => loadComparisonCatalog(catalogPeriod))
+          ).then(catalogs => catalogs.flat())
+          : period === 'country'
+          ? Promise.all([loadCountries(), loadSearchAreaIndex()])
+            .then(([collection, areaIndex]) => (collection.features || [])
+              .map(feature => countryTargetFromFeature(feature, areaIndex)))
           : ATTRACTION_PERIODS.includes(period)
-            ? Promise.all([loadAttractions(), loadPlaceAdministrativeAreas()]).then(([collection, administrativeIndex]) => (collection.features || [])
-              .map(feature => attractionTargetFromFeature(feature, administrativeIndex))
+            ? Promise.all([loadAttractions(), loadPlaceAdministrativeAreas(), loadSearchAreaIndex()])
+              .then(([collection, administrativeIndex, areaIndex]) => (collection.features || [])
+              .map(feature => attractionTargetFromFeature(feature, administrativeIndex, areaIndex))
               .filter(target => target.period === period))
           : ['island', 'water'].includes(period)
-            ? Promise.all([loadNaturalFeatures(), loadPlaceAdministrativeAreas()]).then(([collection, administrativeIndex]) => (collection.features || [])
-              .map(feature => naturalTargetFromFeature(feature, administrativeIndex))
+            ? Promise.all([loadNaturalFeatures(), loadPlaceAdministrativeAreas(), loadSearchAreaIndex()])
+              .then(([collection, administrativeIndex, areaIndex]) => (collection.features || [])
+              .map(feature => naturalTargetFromFeature(feature, administrativeIndex, areaIndex))
               .filter(target => target.kind === period))
           : period === '1995'
-            ? loadHistorical1995Topology().then(topology => {
+            ? Promise.all([loadHistorical1995Topology(), loadSearchAreaIndex()])
+              .then(([topology, areaIndex]) => {
               const geometries = topology.objects && topology.objects.city && topology.objects.city.geometries || [];
-              return geometries.map(historicalTargetFromGeometry).filter(Boolean);
+              return geometries
+                .map((geometry, index) => historicalTargetFromGeometry(geometry, index, areaIndex))
+                .filter(Boolean);
             })
-            : fetch(MUNICIPALITY_LIST_URL)
-              .then(response => {
-                if (!response.ok) throw new Error('自治体一覧を取得できませんでした');
-                return response.json();
-              })
-              .then(data => {
+            : Promise.all([
+              fetch(MUNICIPALITY_LIST_URL).then(response => {
+                  if (!response.ok) throw new Error('自治体一覧を取得できませんでした');
+                  return response.json();
+                }),
+              loadOfficialAreaData()
+            ])
+              .then(([data, areaData]) => {
                 const municipalities = Object.entries(data)
                   .filter(([code, item]) => /^\d{6}$/.test(code) && item && item.prefecture && item.city)
                   .map(([code, item]) => ({
@@ -3768,9 +4455,21 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
                     adminCode: code.slice(0, -1),
                     name: `${item.prefecture}${item.city}`,
                     shortName: item.city,
+                    prefectures: [item.prefecture],
+                    municipalities: [`${item.prefecture}${item.city}`],
+                    areaKm2: Number(areaData.municipalities[code.slice(0, -1)]),
+                    searchTypes: ['市区町村'],
                     search: `${item.prefecture}${item.city} ${item.city}`
                   }));
-                return PREFECTURES.concat(municipalities);
+                const prefectures = PREFECTURES.map(target => ({
+                  ...target,
+                  period: 'current',
+                  prefectures: [target.name],
+                  municipalities: [],
+                  areaKm2: Number(areaData.prefectures[target.code]),
+                  searchTypes: ['都道府県']
+                }));
+                return prefectures.concat(municipalities);
               });
         comparisonCatalogPromises.set(period, promise.catch(error => {
           comparisonCatalogPromises.delete(period);
@@ -3786,6 +4485,333 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
         renderComparisonCatalogOptions(targets, activeInput ? activeInput.value : '');
       }
       return targets;
+    }
+
+    const SEARCH_BUILDER_BASE_GROUPS = [
+      { label: '行政区域', types: ['国・地域', '都道府県', '市区町村', '1995年の市区町村'] },
+      { label: '自然', types: ['島', '湖・池'] }
+    ];
+
+    function searchBuilderAttractionGroup(target) {
+      const subtype = String(target && target.subtype || '');
+      if ([
+        'theme-park', 'large-park', 'national-park', 'scenic-large',
+        'zoo', 'botanical-garden', 'zoological-botanical-park', 'expo-event'
+      ].includes(subtype)) return '公園・レジャー';
+      if (subtype.startsWith('sports-')) return 'スポーツ';
+      if ([
+        'airport', 'military-base', 'large-port', 'industrial-complex',
+        'large-farm', 'large-mine'
+      ].includes(subtype)) return '交通・産業';
+      return '文化・その他';
+    }
+
+    function resetSearchBuilderState() {
+      searchBuilderState.types.clear();
+      searchBuilderState.locationMode = 'all';
+      searchBuilderState.prefecture = '';
+      searchBuilderState.municipality = '';
+      searchBuilderState.minArea = '';
+      searchBuilderState.maxArea = '';
+      searchBuilderState.excludeTypes = false;
+      searchBuilderState.excludeLocation = false;
+      searchBuilderState.excludeArea = false;
+      searchBuilderFreeText = '';
+    }
+
+    function readSearchBuilderQuery(value) {
+      resetSearchBuilderState();
+      const freeTokens = [];
+      String(value || '').trim().split(/[\s　]+/).filter(Boolean).forEach(rawToken => {
+        const excluded = rawToken.startsWith('-') && rawToken.length > 1;
+        const token = excluded ? rawToken.slice(1) : rawToken;
+        const structured = structuredComparisonTerm(token);
+        if (!structured) {
+          freeTokens.push(rawToken);
+          return;
+        }
+        if (structured.field === '種類') {
+          structured.value.split(/[,、]/).filter(Boolean)
+            .forEach(type => searchBuilderState.types.add(type));
+          searchBuilderState.excludeTypes = excluded;
+          return;
+        }
+        if (structured.field === '場所') {
+          const location = structured.value.split(/[,、]/).filter(Boolean)[0] || '';
+          const prefecture = PREFECTURES.find(item => location.startsWith(item.name));
+          searchBuilderState.prefecture = prefecture ? prefecture.name : '';
+          searchBuilderState.municipality = location === searchBuilderState.prefecture ? '' : location;
+          searchBuilderState.locationMode = searchBuilderState.municipality
+            ? 'municipality'
+            : searchBuilderState.prefecture ? 'prefecture' : 'all';
+          searchBuilderState.excludeLocation = excluded;
+          return;
+        }
+        if (structured.field === '面積') {
+          const [minArea = '', maxArea = ''] = structured.value
+            .replace(/km²|km2/gi, '')
+            .split('..');
+          searchBuilderState.minArea = minArea;
+          searchBuilderState.maxArea = maxArea;
+          searchBuilderState.excludeArea = excluded;
+        }
+      });
+      searchBuilderFreeText = freeTokens.join(' ');
+    }
+
+    function buildSearchBuilderQuery() {
+      const tokens = searchBuilderFreeText ? [searchBuilderFreeText] : [];
+      if (searchBuilderState.types.size) {
+        tokens.push(
+          `${searchBuilderState.excludeTypes ? '-' : ''}種類:${[...searchBuilderState.types].join(',')}`
+        );
+      }
+      const location = searchBuilderState.locationMode === 'municipality'
+        ? searchBuilderState.municipality
+        : searchBuilderState.locationMode === 'prefecture'
+          ? searchBuilderState.prefecture
+          : '';
+      if (location) {
+        tokens.push(`${searchBuilderState.excludeLocation ? '-' : ''}場所:${location}`);
+      }
+      if (searchBuilderState.minArea !== '' || searchBuilderState.maxArea !== '') {
+        tokens.push(
+          `${searchBuilderState.excludeArea ? '-' : ''}面積:${searchBuilderState.minArea}..${searchBuilderState.maxArea}km²`
+        );
+      }
+      return tokens.filter(Boolean).join(' ');
+    }
+
+    function searchBuilderTypeGroups() {
+      const groups = SEARCH_BUILDER_BASE_GROUPS.map(group => ({
+        label: group.label,
+        types: group.types.slice()
+      }));
+      const attractionGroups = new Map();
+      searchBuilderTargets
+        .filter(target => target.kind === 'attraction')
+        .forEach(target => {
+          const label = searchBuilderAttractionGroup(target);
+          if (!attractionGroups.has(label)) attractionGroups.set(label, new Set());
+          (target.searchTypes || []).forEach(type => attractionGroups.get(label).add(type));
+        });
+      ['公園・レジャー', 'スポーツ', '交通・産業', '文化・その他'].forEach(label => {
+        const types = [...(attractionGroups.get(label) || [])].sort((a, b) => a.localeCompare(b, 'ja'));
+        if (types.length) groups.push({ label, types });
+      });
+      return groups;
+    }
+
+    function renderSearchBuilderTypes() {
+      const container = document.getElementById('search-builder-type-groups');
+      if (!container) return;
+      const counts = new Map();
+      searchBuilderTargets.forEach(target => {
+        (target.searchTypes || []).forEach(type => counts.set(type, (counts.get(type) || 0) + 1));
+      });
+      const fragment = document.createDocumentFragment();
+      searchBuilderTypeGroups().forEach(group => {
+        const section = document.createElement('section');
+        section.className = 'search-builder-type-group';
+        const heading = document.createElement('h4');
+        heading.textContent = group.label;
+        section.appendChild(heading);
+        const grid = document.createElement('div');
+        grid.className = 'search-builder-option-grid';
+        group.types.forEach(type => {
+          const label = document.createElement('label');
+          label.className = 'search-builder-option';
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.value = type;
+          input.checked = searchBuilderState.types.has(type);
+          input.addEventListener('change', () => {
+            if (input.checked) searchBuilderState.types.add(type);
+            else searchBuilderState.types.delete(type);
+            updateSearchBuilderSummary();
+          });
+          const text = document.createElement('span');
+          text.textContent = type;
+          const count = document.createElement('small');
+          count.textContent = `${counts.get(type) || 0}件`;
+          label.append(input, text, count);
+          grid.appendChild(label);
+        });
+        section.appendChild(grid);
+        fragment.appendChild(section);
+      });
+      container.replaceChildren(fragment);
+    }
+
+    function updateSearchBuilderMunicipalities() {
+      const mode = document.getElementById('search-builder-location-mode');
+      const prefecture = document.getElementById('search-builder-prefecture');
+      const municipality = document.getElementById('search-builder-municipality');
+      if (!mode || !prefecture || !municipality) return;
+      mode.value = searchBuilderState.locationMode;
+      prefecture.disabled = searchBuilderState.locationMode === 'all';
+      prefecture.value = searchBuilderState.prefecture;
+      const municipalities = [...new Set(searchBuilderTargets
+        .filter(target => target.period !== '1995'
+          && (target.prefectures || []).includes(searchBuilderState.prefecture))
+        .flatMap(target => target.municipalities || [])
+        .filter(name => name && name !== searchBuilderState.prefecture))]
+        .sort((a, b) => a.localeCompare(b, 'ja'));
+      const options = [new Option(
+        searchBuilderState.prefecture ? '選択してください' : '先に都道府県を選択してください',
+        ''
+      )];
+      municipalities.forEach(name => options.push(new Option(
+        name.startsWith(searchBuilderState.prefecture)
+          ? name.slice(searchBuilderState.prefecture.length)
+          : name,
+        name
+      )));
+      municipality.replaceChildren(...options);
+      municipality.disabled = searchBuilderState.locationMode !== 'municipality'
+        || !searchBuilderState.prefecture;
+      municipality.value = municipalities.includes(searchBuilderState.municipality)
+        ? searchBuilderState.municipality
+        : '';
+      if (!municipality.value) searchBuilderState.municipality = '';
+    }
+
+    function searchBuilderCondition(label, value, exclusionKey) {
+      const condition = document.createElement('div');
+      condition.className = 'search-builder-condition';
+      const text = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.textContent = label;
+      const span = document.createElement('span');
+      span.textContent = value;
+      text.append(strong, span);
+      const exclude = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = Boolean(searchBuilderState[exclusionKey]);
+      checkbox.addEventListener('change', () => {
+        searchBuilderState[exclusionKey] = checkbox.checked;
+        updateSearchBuilderSummary();
+      });
+      exclude.append(checkbox, document.createTextNode('除外'));
+      condition.append(text, exclude);
+      return condition;
+    }
+
+    function updateSearchBuilderSummary() {
+      const conditions = document.getElementById('search-builder-conditions');
+      const count = document.getElementById('search-builder-count');
+      if (!conditions || !count) return;
+      const items = [];
+      if (searchBuilderState.types.size) {
+        items.push(searchBuilderCondition(
+          '対象',
+          [...searchBuilderState.types].join('・'),
+          'excludeTypes'
+        ));
+      }
+      const location = searchBuilderState.locationMode === 'municipality'
+        ? searchBuilderState.municipality
+        : searchBuilderState.locationMode === 'prefecture'
+          ? searchBuilderState.prefecture
+          : '';
+      if (location) {
+        items.push(searchBuilderCondition('場所', location, 'excludeLocation'));
+      }
+      if (searchBuilderState.minArea !== '' || searchBuilderState.maxArea !== '') {
+        const range = searchBuilderState.minArea === ''
+          ? `${searchBuilderState.maxArea}km²未満`
+          : searchBuilderState.maxArea === ''
+            ? `${searchBuilderState.minArea}km²以上`
+            : `${searchBuilderState.minArea}〜${searchBuilderState.maxArea}km²`;
+        items.push(searchBuilderCondition('大きさ', range, 'excludeArea'));
+      }
+      if (items.length) conditions.replaceChildren(...items);
+      else {
+        const empty = document.createElement('span');
+        empty.className = 'search-builder-subtle';
+        empty.textContent = 'まだ条件を選択していません';
+        conditions.replaceChildren(empty);
+      }
+      const query = buildSearchBuilderQuery();
+      const parsed = parseComparisonSearch(query);
+      const matchedCount = query
+        ? searchBuilderTargets.filter(target => matchesComparisonSearch(target, parsed)).length
+        : searchBuilderTargets.length;
+      const strong = document.createElement('strong');
+      strong.textContent = matchedCount.toLocaleString('ja-JP');
+      count.replaceChildren(document.createTextNode('該当 '), strong, document.createTextNode(' 件'));
+      document.querySelectorAll('.search-builder-preset').forEach(button => {
+        button.classList.toggle(
+          'active',
+          button.dataset.min === String(searchBuilderState.minArea)
+            && button.dataset.max === String(searchBuilderState.maxArea)
+        );
+      });
+    }
+
+    function syncSearchBuilderControls() {
+      const prefectureSelect = document.getElementById('search-builder-prefecture');
+      if (prefectureSelect && prefectureSelect.options.length <= 1) {
+        PREFECTURES.forEach(item => prefectureSelect.add(new Option(item.name, item.name)));
+      }
+      document.getElementById('search-builder-area-min').value = searchBuilderState.minArea;
+      document.getElementById('search-builder-area-max').value = searchBuilderState.maxArea;
+      renderSearchBuilderTypes();
+      updateSearchBuilderMunicipalities();
+      updateSearchBuilderSummary();
+    }
+
+    let searchBuilderReturnFocus = null;
+
+    async function openSearchBuilder() {
+      const modal = document.getElementById('search-builder-modal');
+      if (!modal) return;
+      searchBuilderReturnFocus = document.activeElement;
+      const currentQuery = document.getElementById('comparison-search').value
+        || document.getElementById('mobile-comparison-search').value;
+      readSearchBuilderQuery(currentQuery);
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('search-builder-opened');
+      document.getElementById('search-builder-loading').hidden = false;
+      document.getElementById('search-builder-controls').hidden = true;
+      document.getElementById('search-builder-close').focus();
+      try {
+        searchBuilderTargets = await loadComparisonCatalog('all');
+        syncSearchBuilderControls();
+        document.getElementById('search-builder-loading').hidden = true;
+        document.getElementById('search-builder-controls').hidden = false;
+      } catch (error) {
+        console.warn(error);
+        showToast('条件検索用の登録データを読み込めませんでした');
+      }
+    }
+
+    function closeSearchBuilder() {
+      const modal = document.getElementById('search-builder-modal');
+      if (!modal || !modal.classList.contains('open')) return false;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('search-builder-opened');
+      if (searchBuilderReturnFocus && typeof searchBuilderReturnFocus.focus === 'function') {
+        searchBuilderReturnFocus.focus();
+      }
+      return true;
+    }
+
+    async function applySearchBuilder() {
+      const query = buildSearchBuilderQuery();
+      const parsed = parseComparisonSearch(query);
+      if (!parsed.hasPositiveTerms) {
+        showToast('検索する対象・場所・大きさを選んでください');
+        return;
+      }
+      await setComparisonPeriod('all');
+      syncComparisonSearch(query);
+      renderComparisonCatalogOptions(comparisonTargets, query);
+      closeSearchBuilder();
+      showToast('選んだ条件を検索欄に入れました');
     }
 
     async function resolveComparisonTarget(value) {
@@ -4383,6 +5409,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       document.getElementById('user-color-cancel').addEventListener('click', closeUserColorPop);
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          if (closeSearchBuilder()) return;
           closeUserColorPop();
           closeComparison();
         }
@@ -4408,6 +5435,67 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
       });
 
       // 比較対象の種類を先に選び、その種類の候補だけを検索する。
+      ['search-builder-open', 'mobile-search-builder-open'].forEach(id => {
+        const button = document.getElementById(id);
+        if (button) button.addEventListener('click', openSearchBuilder);
+      });
+      document.getElementById('search-builder-close').addEventListener('click', closeSearchBuilder);
+      document.getElementById('search-builder-modal').addEventListener('click', event => {
+        if (event.target === event.currentTarget) closeSearchBuilder();
+      });
+      document.getElementById('search-builder-clear-types').addEventListener('click', () => {
+        searchBuilderState.types.clear();
+        renderSearchBuilderTypes();
+        updateSearchBuilderSummary();
+      });
+      document.getElementById('search-builder-location-mode').addEventListener('change', event => {
+        searchBuilderState.locationMode = event.target.value;
+        if (searchBuilderState.locationMode === 'all') {
+          searchBuilderState.prefecture = '';
+          searchBuilderState.municipality = '';
+        } else if (searchBuilderState.locationMode === 'prefecture') {
+          searchBuilderState.municipality = '';
+        }
+        updateSearchBuilderMunicipalities();
+        updateSearchBuilderSummary();
+      });
+      document.getElementById('search-builder-prefecture').addEventListener('change', event => {
+        searchBuilderState.prefecture = event.target.value;
+        searchBuilderState.municipality = '';
+        updateSearchBuilderMunicipalities();
+        updateSearchBuilderSummary();
+      });
+      document.getElementById('search-builder-municipality').addEventListener('change', event => {
+        searchBuilderState.municipality = event.target.value;
+        updateSearchBuilderSummary();
+      });
+      ['search-builder-area-min', 'search-builder-area-max'].forEach(id => {
+        document.getElementById(id).addEventListener('input', event => {
+          if (id.endsWith('-min')) searchBuilderState.minArea = event.target.value;
+          else searchBuilderState.maxArea = event.target.value;
+          updateSearchBuilderSummary();
+        });
+      });
+      document.querySelectorAll('.search-builder-preset').forEach(button => {
+        button.addEventListener('click', () => {
+          searchBuilderState.minArea = button.dataset.min;
+          searchBuilderState.maxArea = button.dataset.max;
+          document.getElementById('search-builder-area-min').value = searchBuilderState.minArea;
+          document.getElementById('search-builder-area-max').value = searchBuilderState.maxArea;
+          updateSearchBuilderSummary();
+        });
+      });
+      document.getElementById('search-builder-clear').addEventListener('click', () => {
+        resetSearchBuilderState();
+        syncSearchBuilderControls();
+      });
+      document.getElementById('search-builder-apply').addEventListener('click', () => {
+        applySearchBuilder().catch(error => {
+          console.warn(error);
+          showToast('条件を検索欄へ反映できませんでした');
+        });
+      });
+
       syncComparisonPeriod(comparisonPeriod);
       updateComparisonSearchPresentation();
       comparisonTargets = comparisonPeriod === 'current' ? PREFECTURES.slice() : [];
