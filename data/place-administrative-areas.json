@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-23T17:11:27.791Z",
+  "generatedAt": "2026-07-25T23:59:55.044Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 1746,
-    "withPrefectures": 1608,
-    "withMunicipalities": 1575,
+    "total": 1769,
+    "withPrefectures": 1620,
+    "withMunicipalities": 1587,
     "multiPrefecture": 16,
     "multiMunicipality": 63,
-    "withGroups": 147
+    "withGroups": 158
   },
   "places": {
     "water-W541590471": {
@@ -15585,6 +15585,191 @@
         "岡山県美咲町"
       ],
       "groups": []
+    },
+    "attraction-W208138817": {
+      "prefectures": [
+        "千葉県"
+      ],
+      "municipalities": [
+        "千葉県鎌ケ谷市"
+      ],
+      "groups": []
+    },
+    "attraction-W603207951": {
+      "prefectures": [
+        "宮城県"
+      ],
+      "municipalities": [
+        "宮城県仙台市泉区"
+      ],
+      "groups": []
+    },
+    "attraction-W165013675": {
+      "prefectures": [
+        "埼玉県"
+      ],
+      "municipalities": [
+        "埼玉県所沢市"
+      ],
+      "groups": []
+    },
+    "attraction-W1362664803": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都稲城市"
+      ],
+      "groups": []
+    },
+    "attraction-W353033207": {
+      "prefectures": [
+        "埼玉県"
+      ],
+      "municipalities": [
+        "埼玉県さいたま市南区"
+      ],
+      "groups": []
+    },
+    "attraction-W150587439": {
+      "prefectures": [
+        "埼玉県"
+      ],
+      "municipalities": [
+        "埼玉県戸田市"
+      ],
+      "groups": []
+    },
+    "attraction-W440207870": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県横須賀市"
+      ],
+      "groups": []
+    },
+    "attraction-W47197598": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県名古屋市中川区"
+      ],
+      "groups": []
+    },
+    "attraction-W708496563": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市此花区"
+      ],
+      "groups": []
+    },
+    "attraction-W94120123": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県尼崎市"
+      ],
+      "groups": []
+    },
+    "attraction-W233104120": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県岩国市"
+      ],
+      "groups": []
+    },
+    "attraction-W683693132": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県筑後市"
+      ],
+      "groups": []
+    },
+    "island-overseas-ファラリョン・デ・パハロス島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-マウグ島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-アスンシオン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-アグリハン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-パガン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-アラマガン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-ググアン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-サリガン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-アナタハン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-ファラリョン・デ・メディニラ島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
+    },
+    "island-overseas-アギガン島": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": [
+        "北マリアナ諸島・アメリカ合衆国"
+      ]
     },
     "attraction-large-airport-W75208014": {
       "prefectures": [],

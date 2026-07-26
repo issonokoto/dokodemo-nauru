@@ -37,6 +37,22 @@ const entries = [
     ['みずほPayPayドーム福岡', '福岡県福岡市', ['福岡ドーム', 'PayPayドーム'], 'Fukuoka Dome', 'way', 28445837]
   ].map(([name, context, aliases, query, osmType, osmId]) => ({ name, context, subtype: 'sports-baseball', subtypeLabel: '野球場・NPB本拠地', statusLabel: 'NPB 12球団本拠地（2026年）', aliases, queries: [query], osmType, osmId })),
 
+  // NPB 12球団のファーム主要本拠球場（NPB公式の2026年日程で継続的に主催試合を開催）。
+  ...[
+    ['ファイターズ鎌ケ谷スタジアム', '千葉県鎌ケ谷市', ['鎌ケ谷スタジアム', '鎌スタ', 'ファイターズスタジアム'], 'ファイターズスタジアム', 'way', 208138817],
+    ['森林どりスタジアム泉', '宮城県仙台市', ['楽天イーグルス泉練習場', '森林どり泉'], '森林どりスタジアム泉, Sendai, Japan'],
+    ['CAR3219フィールド', '埼玉県所沢市', ['西武第二球場', 'カーミニークフィールド'], '西武第二球場', 'way', 165013675],
+    ['ジャイアンツタウンスタジアム', '東京都稲城市', ['GIANTS TOWN STADIUM', 'Gタウン'], 'ジャイアンツタウンスタジアム, Inagi, Japan'],
+    ['ロッテ浦和球場', '埼玉県さいたま市', ['千葉ロッテマリーンズ浦和球場'], 'ロッテ浦和球場, Saitama, Japan'],
+    ['ヤクルト戸田球場', '埼玉県戸田市', ['戸田球場', '東京ヤクルトスワローズ 戸田グラウンド'], '東京ヤクルトスワローズ 戸田グラウンド', 'way', 150587439],
+    ['横須賀スタジアム', '神奈川県横須賀市', ['追浜球場'], '横須賀スタジアム, Yokosuka, Japan'],
+    ['ナゴヤ球場', '愛知県名古屋市', ['中日スタヂアム'], 'ナゴヤ球場, Nagoya, Japan'],
+    ['杉本商事バファローズスタジアム舞洲', '大阪府大阪市', ['舞洲バファローズスタジアム', '杉本商事BS', '舞洲サブ球場'], '杉本商事バファローズスタジアム舞洲, Osaka, Japan', 'way', 708496563],
+    ['日鉄鋼板SGLスタジアム尼崎', '兵庫県尼崎市', ['SGLスタジアム尼崎', '日鉄鋼板SGL'], '日鉄鋼板SGLスタジアム尼崎, Japan'],
+    ['広島東洋カープ由宇練習場', '山口県岩国市', ['由宇球場', '由宇練習場', '広島東洋カープ由宇二軍練習場'], '広島東洋カープ由宇二軍練習場', 'way', 233104120],
+    ['タマホーム スタジアム筑後', '福岡県筑後市', ['HAWKSベースボールパーク筑後', 'タマスタ筑後'], 'タマホーム スタジアム筑後, Fukuoka, Japan']
+  ].map(([name, context, aliases, query, osmType, osmId]) => ({ name, context, subtype: 'sports-baseball', subtypeLabel: '野球場・NPBファーム本拠地', statusLabel: 'NPB 12球団ファーム主要本拠地（2026年）', aliases, queries: [query], osmType, osmId })),
+
   // 地方開催・準本拠地・歴史的本拠地として著名な野球場。
   ...[
     ['ほっともっとフィールド神戸', '兵庫県神戸市', ['グリーンスタジアム神戸', '神戸総合運動公園野球場'], 'ほっともっとフィールド神戸, Kobe, Japan'],
@@ -266,7 +282,7 @@ async function main() {
     imported.push({ type: 'Feature', id, properties, geometry: null });
     report.imported.push({ name: entry.name, query: resolved.query, osmType: source.osm_type, osmId: Number(source.osm_id), displayName: source.display_name, geometryType: source.geojson.type });
     console.log(`${source.osm_type} ${source.osm_id}`);
-    await sleep(1100);
+    if (resolved.query !== 'existing') await sleep(1100);
   }
 
   const deduped = new Map();

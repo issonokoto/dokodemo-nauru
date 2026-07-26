@@ -1597,9 +1597,9 @@
     const MUNICIPALITY_LIST_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
-    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=38';
-const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
-    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=1';
+    const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=39';
+const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
+    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=2';
     const COUNTRIES_URL = './data/countries.geojson?v=42';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
     const COMPARISON_PERIODS = ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
@@ -3219,6 +3219,12 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       return String(value || '').replace(/[\s　]/g, '').toLowerCase();
     }
 
+    const COMPARISON_PARTIAL_SEARCH_MIN_LENGTH = 2;
+
+    function comparisonQueryLength(value) {
+      return Array.from(normalizeComparisonQuery(value)).length;
+    }
+
     async function loadOfficialAreaData() {
       if (officialAreaDataPromise) return officialAreaDataPromise;
       officialAreaDataPromise = fetch(OFFICIAL_AREA_DATA_URL)
@@ -3481,8 +3487,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       const list = document.getElementById('comparison-targets');
       if (!list) return;
       const query = normalizeComparisonQuery(value);
-      const minimumLength = ['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod) ? 1 : 2;
-      if (query.length < minimumLength) {
+      if (comparisonQueryLength(query) < COMPARISON_PARTIAL_SEARCH_MIN_LENGTH) {
         list.replaceChildren();
         return;
       }
@@ -3668,6 +3673,10 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       }
       const exactMatches = comparisonTargets.filter(target =>
         normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query);
+      if (comparisonQueryLength(query) < COMPARISON_PARTIAL_SEARCH_MIN_LENGTH && exactMatches.length === 0) {
+        showToast('2文字以上で検索してください');
+        return null;
+      }
       const fullExact = exactMatches.find(target => normalizeComparisonQuery(target.name) === query);
       if (!fullExact && exactMatches.length > 1 && !['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod)) {
         showToast('同名の自治体があります。都道府県・郡を含む候補を選んでください');
@@ -4266,7 +4275,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
       });
 
       // 大きな datalist はモバイルブラウザのメイン処理を塞ぐため、
-      // 2文字以上の入力後に読み込み、一致する先頭20件だけをDOMへ追加する。
+      // 全カテゴリで2文字以上の入力後に読み込み、一致する候補だけをDOMへ追加する。
       ['comparison-search', 'mobile-comparison-search'].forEach(id => {
         const input = document.getElementById(id);
         if (!input) return;
@@ -4275,8 +4284,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=41';
           syncComparisonSearch(input.value);
           clearTimeout(catalogTimer);
           const query = normalizeComparisonQuery(input.value);
-          const minimumLength = ['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod) ? 1 : 2;
-          if (query.length < minimumLength) {
+          if (comparisonQueryLength(query) < COMPARISON_PARTIAL_SEARCH_MIN_LENGTH) {
             renderComparisonCatalogOptions([], '');
             return;
           }
