@@ -788,11 +788,19 @@
       color: #15384f;
       font-size: 0.72rem;
     }
+    .search-builder-condition-text {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
     .search-builder-condition strong {
+      flex: 0 0 auto;
       color: #0a2744;
       font-size: 0.68rem;
     }
     .search-builder-condition span {
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -806,6 +814,29 @@
       cursor: pointer;
     }
     .search-builder-condition input { accent-color: #e8b020; }
+    .search-builder-condition-remove {
+      flex: 0 0 auto;
+      width: 1.55rem;
+      height: 1.55rem;
+      display: grid;
+      place-items: center;
+      margin: -0.2rem -0.3rem -0.2rem 0;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #607787;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .search-builder-condition-remove:hover,
+    .search-builder-condition-remove:focus-visible {
+      background: #dfeaf0;
+      color: #0a2744;
+      outline: 2px solid rgba(11, 111, 164, 0.18);
+      outline-offset: 1px;
+    }
     .search-builder-count {
       min-width: 7.5rem;
       color: #29485f;
@@ -4802,10 +4833,32 @@
       if (!municipality.value) searchBuilderState.municipality = '';
     }
 
-    function searchBuilderCondition(label, value, exclusionKey) {
+    function clearSearchBuilderCondition(kind) {
+      if (kind === 'types') {
+        searchBuilderState.types.clear();
+        searchBuilderState.excludeTypes = false;
+        renderSearchBuilderTypes();
+      } else if (kind === 'location') {
+        searchBuilderState.locationMode = 'all';
+        searchBuilderState.prefecture = '';
+        searchBuilderState.municipality = '';
+        searchBuilderState.excludeLocation = false;
+        updateSearchBuilderMunicipalities();
+      } else if (kind === 'area') {
+        searchBuilderState.minArea = '';
+        searchBuilderState.maxArea = '';
+        searchBuilderState.excludeArea = false;
+        document.getElementById('search-builder-area-min').value = '';
+        document.getElementById('search-builder-area-max').value = '';
+      }
+      updateSearchBuilderSummary();
+    }
+
+    function searchBuilderCondition(label, value, exclusionKey, kind) {
       const condition = document.createElement('div');
       condition.className = 'search-builder-condition';
       const text = document.createElement('div');
+      text.className = 'search-builder-condition-text';
       const strong = document.createElement('strong');
       strong.textContent = label;
       const span = document.createElement('span');
@@ -4820,7 +4873,14 @@
         updateSearchBuilderSummary();
       });
       exclude.append(checkbox, document.createTextNode('除外'));
-      condition.append(text, exclude);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'search-builder-condition-remove';
+      remove.setAttribute('aria-label', `${label}の条件を削除`);
+      remove.title = `${label}の条件を削除`;
+      remove.textContent = '×';
+      remove.addEventListener('click', () => clearSearchBuilderCondition(kind));
+      condition.append(text, exclude, remove);
       return condition;
     }
 
@@ -4934,7 +4994,8 @@
         items.push(searchBuilderCondition(
           '対象',
           [...searchBuilderState.types].join('・'),
-          'excludeTypes'
+          'excludeTypes',
+          'types'
         ));
       }
       const location = searchBuilderState.locationMode === 'municipality'
@@ -4943,7 +5004,7 @@
           ? searchBuilderState.prefecture
           : '';
       if (location) {
-        items.push(searchBuilderCondition('場所', location, 'excludeLocation'));
+        items.push(searchBuilderCondition('場所', location, 'excludeLocation', 'location'));
       }
       if (searchBuilderState.minArea !== '' || searchBuilderState.maxArea !== '') {
         const range = searchBuilderState.minArea === ''
@@ -4951,7 +5012,7 @@
           : searchBuilderState.maxArea === ''
             ? `${searchBuilderState.minArea}km²以上`
             : `${searchBuilderState.minArea}〜${searchBuilderState.maxArea}km²`;
-        items.push(searchBuilderCondition('大きさ', range, 'excludeArea'));
+        items.push(searchBuilderCondition('大きさ', range, 'excludeArea', 'area'));
       }
       if (items.length) conditions.replaceChildren(...items);
       else {
