@@ -753,6 +753,62 @@
       overflow: auto;
       padding: 1rem 1.25rem 1.2rem;
     }
+    .search-builder-keyword {
+      margin-bottom: 0.8rem;
+      padding: 0.8rem;
+      border: 1px solid #cedce5;
+      border-radius: 0.9rem;
+      background: #fff;
+    }
+    .search-builder-keyword label {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: #29485f;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    .search-builder-keyword-field {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.45rem;
+    }
+    .search-builder-keyword input {
+      width: 100%;
+      min-width: 0;
+      height: 2.75rem;
+      border: 1px solid #cbd9e2;
+      border-radius: 0.6rem;
+      background: #fff;
+      color: #15384f;
+      padding: 0 0.75rem;
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .search-builder-keyword input:focus {
+      border-color: #0b6fa4;
+      box-shadow: 0 0 0 2px rgba(11, 111, 164, 0.12);
+    }
+    .search-builder-keyword-clear {
+      min-width: 4.3rem;
+      border: 1px solid #9fb7c6;
+      border-radius: 0.6rem;
+      background: #f7fafc;
+      color: #174a69;
+      font-size: 0.7rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .search-builder-keyword-clear:hover,
+    .search-builder-keyword-clear:focus-visible {
+      border-color: #0b6fa4;
+      background: #eef7fb;
+      outline: none;
+    }
+    .search-builder-keyword-help {
+      margin: 0.35rem 0 0;
+      color: #6a7f8e;
+      font-size: 0.65rem;
+    }
     .search-builder-summary {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -1729,6 +1785,10 @@
       }
       .search-builder-header h2 { font-size: 1.15rem; }
       .search-builder-body { padding: 0.75rem 0.9rem 1rem; }
+      .search-builder-keyword input {
+        height: 3rem;
+        font-size: 16px;
+      }
       .search-builder-summary {
         grid-template-columns: 1fr;
         gap: 0.65rem;
@@ -2116,6 +2176,15 @@
         <button type="button" id="search-builder-close" class="search-builder-close" aria-label="閉じる">×</button>
       </header>
       <div class="search-builder-body">
+        <div class="search-builder-keyword">
+          <label for="search-builder-keyword">名前・キーワード</label>
+          <div class="search-builder-keyword-field">
+            <input id="search-builder-keyword" type="search" autocomplete="off" placeholder="名称・場所・内容を検索" title="空白: AND／|: OR／-語: NOT（除外）" aria-describedby="search-builder-keyword-help">
+            <button type="button" id="search-builder-keyword-clear" class="search-builder-keyword-clear" hidden>文字を消す</button>
+          </div>
+          <p id="search-builder-keyword-help" class="search-builder-keyword-help">通常の検索欄から引き継ぎます　空白：AND　｜：OR　－語：除外</p>
+        </div>
+
         <section class="search-builder-summary" aria-live="polite">
           <div class="search-builder-summary-main">
             <p class="search-builder-summary-title">選択中の条件</p>
@@ -4717,7 +4786,8 @@
     }
 
     function buildSearchBuilderQuery() {
-      const tokens = searchBuilderFreeText ? [searchBuilderFreeText] : [];
+      const keyword = searchBuilderFreeText.trim();
+      const tokens = keyword ? [keyword] : [];
       if (searchBuilderState.types.size) {
         tokens.push(
           `${searchBuilderState.excludeTypes ? '-' : ''}種類:${[...searchBuilderState.types].join(',')}`
@@ -4834,7 +4904,10 @@
     }
 
     function clearSearchBuilderCondition(kind) {
-      if (kind === 'types') {
+      if (kind === 'keyword') {
+        searchBuilderFreeText = '';
+        syncSearchBuilderKeyword();
+      } else if (kind === 'types') {
         searchBuilderState.types.clear();
         searchBuilderState.excludeTypes = false;
         renderSearchBuilderTypes();
@@ -4854,6 +4927,13 @@
       updateSearchBuilderSummary();
     }
 
+    function syncSearchBuilderKeyword() {
+      const input = document.getElementById('search-builder-keyword');
+      const clear = document.getElementById('search-builder-keyword-clear');
+      if (input && input.value !== searchBuilderFreeText) input.value = searchBuilderFreeText;
+      if (clear) clear.hidden = !searchBuilderFreeText.trim();
+    }
+
     function searchBuilderCondition(label, value, exclusionKey, kind) {
       const condition = document.createElement('div');
       condition.className = 'search-builder-condition';
@@ -4864,15 +4944,6 @@
       const span = document.createElement('span');
       span.textContent = value;
       text.append(strong, span);
-      const exclude = document.createElement('label');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = Boolean(searchBuilderState[exclusionKey]);
-      checkbox.addEventListener('change', () => {
-        searchBuilderState[exclusionKey] = checkbox.checked;
-        updateSearchBuilderSummary();
-      });
-      exclude.append(checkbox, document.createTextNode('除外'));
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'search-builder-condition-remove';
@@ -4880,7 +4951,20 @@
       remove.title = `${label}の条件を削除`;
       remove.textContent = '×';
       remove.addEventListener('click', () => clearSearchBuilderCondition(kind));
-      condition.append(text, exclude, remove);
+      condition.appendChild(text);
+      if (exclusionKey) {
+        const exclude = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = Boolean(searchBuilderState[exclusionKey]);
+        checkbox.addEventListener('change', () => {
+          searchBuilderState[exclusionKey] = checkbox.checked;
+          updateSearchBuilderSummary();
+        });
+        exclude.append(checkbox, document.createTextNode('除外'));
+        condition.appendChild(exclude);
+      }
+      condition.appendChild(remove);
       return condition;
     }
 
@@ -4990,6 +5074,15 @@
       const count = document.getElementById('search-builder-count');
       if (!conditions || !count) return;
       const items = [];
+      const keyword = searchBuilderFreeText.trim();
+      if (keyword) {
+        items.push(searchBuilderCondition(
+          '文字',
+          keyword,
+          '',
+          'keyword'
+        ));
+      }
       if (searchBuilderState.types.size) {
         items.push(searchBuilderCondition(
           '対象',
@@ -5043,6 +5136,7 @@
       }
       document.getElementById('search-builder-area-min').value = searchBuilderState.minArea;
       document.getElementById('search-builder-area-max').value = searchBuilderState.maxArea;
+      syncSearchBuilderKeyword();
       renderSearchBuilderTypes();
       updateSearchBuilderMunicipalities();
       updateSearchBuilderSummary();
@@ -5057,6 +5151,7 @@
       const currentQuery = document.getElementById('comparison-search').value
         || document.getElementById('mobile-comparison-search').value;
       readSearchBuilderQuery(currentQuery);
+      syncSearchBuilderKeyword();
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('search-builder-opened');
@@ -5734,6 +5829,15 @@
       document.getElementById('search-builder-close').addEventListener('click', closeSearchBuilder);
       document.getElementById('search-builder-modal').addEventListener('click', event => {
         if (event.target === event.currentTarget) closeSearchBuilder();
+      });
+      document.getElementById('search-builder-keyword').addEventListener('input', event => {
+        searchBuilderFreeText = event.target.value;
+        syncSearchBuilderKeyword();
+        updateSearchBuilderSummary();
+      });
+      document.getElementById('search-builder-keyword-clear').addEventListener('click', () => {
+        clearSearchBuilderCondition('keyword');
+        document.getElementById('search-builder-keyword').focus();
       });
       document.getElementById('search-builder-clear-types').addEventListener('click', () => {
         searchBuilderState.types.clear();
