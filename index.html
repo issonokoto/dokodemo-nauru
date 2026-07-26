@@ -1079,6 +1079,11 @@
       color: #fff;
       box-shadow: inset 3px 0 #f5c542;
     }
+    .search-builder-option.unavailable {
+      opacity: 0.45;
+      background: #edf2f5;
+      cursor: not-allowed;
+    }
     .search-builder-option input {
       flex: 0 0 auto;
       accent-color: #f5c542;
@@ -2202,7 +2207,7 @@
               <div class="search-builder-section-head">
                 <div>
                   <h3 id="search-builder-target-heading">対象</h3>
-                  <p class="search-builder-subtle">複数選ぶと「いずれか」に一致します</p>
+                  <p class="search-builder-subtle">複数選ぶと「いずれか」に一致・件数は他の条件に連動します</p>
                 </div>
                 <button type="button" id="search-builder-clear-types" class="search-builder-link">対象をすべてクリア</button>
               </div>
@@ -4785,10 +4790,10 @@
       searchBuilderFreeText = freeTokens.join(' ');
     }
 
-    function buildSearchBuilderQuery() {
+    function buildSearchBuilderQuery({ omitTypes = false } = {}) {
       const keyword = searchBuilderFreeText.trim();
       const tokens = keyword ? [keyword] : [];
-      if (searchBuilderState.types.size) {
+      if (!omitTypes && searchBuilderState.types.size) {
         tokens.push(
           `${searchBuilderState.excludeTypes ? '-' : ''}種類:${[...searchBuilderState.types].join(',')}`
         );
@@ -4868,6 +4873,30 @@
         fragment.appendChild(section);
       });
       container.replaceChildren(fragment);
+    }
+
+    function updateSearchBuilderTypeCounts() {
+      const query = buildSearchBuilderQuery({ omitTypes: true });
+      const parsed = parseComparisonSearch(query);
+      const filteredTargets = query
+        ? searchBuilderTargets.filter(target => matchesComparisonSearch(target, parsed))
+        : searchBuilderTargets;
+      const counts = new Map();
+      filteredTargets.forEach(target => {
+        (target.searchTypes || []).forEach(type => {
+          counts.set(type, (counts.get(type) || 0) + 1);
+        });
+      });
+      document.querySelectorAll('.search-builder-option').forEach(label => {
+        const input = label.querySelector('input');
+        const count = label.querySelector('small');
+        if (!input || !count) return;
+        const remaining = counts.get(input.value) || 0;
+        const unavailable = remaining === 0 && !input.checked;
+        count.textContent = `${remaining}件`;
+        input.disabled = unavailable;
+        label.classList.toggle('unavailable', unavailable);
+      });
     }
 
     function updateSearchBuilderMunicipalities() {
@@ -5120,6 +5149,7 @@
       strong.textContent = matches.length.toLocaleString('ja-JP');
       count.replaceChildren(document.createTextNode('該当 '), strong, document.createTextNode(' 件'));
       renderSearchBuilderResults(matches);
+      updateSearchBuilderTypeCounts();
       document.querySelectorAll('.search-builder-preset').forEach(button => {
         button.classList.toggle(
           'active',
