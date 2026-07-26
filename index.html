@@ -550,12 +550,24 @@
       max-width: 100%;
       min-width: 0;
     }
+    .comparison-search-block {
+      min-width: min(100%, 25rem);
+      flex: 1 1 20rem;
+    }
     .comparison-search-row {
       display: flex;
       align-items: center;
       gap: 0.35rem;
-      min-width: min(100%, 25rem);
-      flex: 1 1 20rem;
+      min-width: 0;
+      width: 100%;
+    }
+    .comparison-search-help {
+      margin: 0.18rem 0 0;
+      padding-left: 6.55rem;
+      color: rgba(157, 214, 232, 0.78);
+      font-size: 9px;
+      line-height: 1.2;
+      letter-spacing: 0.01em;
     }
     .comparison-search {
       min-width: 0;
@@ -1043,6 +1055,15 @@
         min-width: 0;
         gap: 0.4rem;
       }
+      #mobile-edit-dock .comparison-search-block {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 0.55rem;
+      }
+      #mobile-edit-dock .comparison-search-help {
+        padding-left: 0.15rem;
+        font-size: 9px;
+      }
       #mobile-edit-dock .comparison-period {
         width: 100%;
         min-width: 0;
@@ -1355,23 +1376,26 @@
           <input id="input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
           <button type="button" id="btn-goto-coord" class="coord-go">移動</button>
         </div>
-        <div class="comparison-search-row" role="search" aria-label="比較対象を検索">
-          <select id="comparison-period" class="comparison-period" aria-label="比較対象の種類">
-            <option value="current">現在</option>
-            <option value="1995">1995年</option>
-            <option value="country">国</option>
-            <option value="island">島</option>
-            <option value="water">湖・池</option>
-            <option value="attraction">観光地・施設・スポーツ</option>
-            <option value="airport">空港・飛行場</option>
-            <option value="military">基地・駐屯地・演習場</option>
-            <option value="heritage">世界遺産</option>
-            <option value="infrastructure">港湾・工業地帯</option>
-            <option value="land">農場・牧場・鉱山</option>
-          </select>
-          <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
-          <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
-          <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
+        <div class="comparison-search-block">
+          <div class="comparison-search-row" role="search" aria-label="比較対象を検索">
+            <select id="comparison-period" class="comparison-period" aria-label="比較対象の種類">
+              <option value="current">現在</option>
+              <option value="1995">1995年</option>
+              <option value="country">国</option>
+              <option value="island">島</option>
+              <option value="water">湖・池</option>
+              <option value="attraction">観光地・施設・スポーツ</option>
+              <option value="airport">空港・飛行場</option>
+              <option value="military">基地・駐屯地・演習場</option>
+              <option value="heritage">世界遺産</option>
+              <option value="infrastructure">港湾・工業地帯</option>
+              <option value="land">農場・牧場・鉱山</option>
+            </select>
+            <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
+            <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
+            <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
+          </div>
+          <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
         </div>
         <button type="button" id="btn-add-spot" class="ml-auto text-[10px] sm:text-[11px] px-2 py-1 rounded-lg border border-gold-500/40 text-gold-400 hover:bg-gold-500/10 transition-colors shrink-0">
           ＋ この位置を追加 (0/2)
@@ -1457,23 +1481,26 @@
         <input id="mobile-input-lng" class="coord-input" type="text" inputmode="decimal" placeholder="139.767" autocomplete="off">
         <button type="button" id="mobile-btn-goto-coord" class="coord-go">移動</button>
       </div>
-      <div class="comparison-search-row" role="search" aria-label="比較対象を検索">
-        <select id="mobile-comparison-period" class="comparison-period" aria-label="比較対象の種類">
-          <option value="current">現在</option>
-          <option value="1995">1995年</option>
-          <option value="country">国</option>
-          <option value="island">島</option>
-          <option value="water">湖・池</option>
-          <option value="attraction">観光地・施設・スポーツ</option>
-          <option value="airport">空港・飛行場</option>
-          <option value="military">基地・駐屯地・演習場</option>
-          <option value="heritage">世界遺産</option>
-          <option value="infrastructure">港湾・工業地帯</option>
-          <option value="land">農場・牧場・鉱山</option>
-        </select>
-        <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
-        <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
-        <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
+      <div class="comparison-search-block">
+        <div class="comparison-search-row" role="search" aria-label="比較対象を検索">
+          <select id="mobile-comparison-period" class="comparison-period" aria-label="比較対象の種類">
+            <option value="current">現在</option>
+            <option value="1995">1995年</option>
+            <option value="country">国</option>
+            <option value="island">島</option>
+            <option value="water">湖・池</option>
+            <option value="attraction">観光地・施設・スポーツ</option>
+            <option value="airport">空港・飛行場</option>
+            <option value="military">基地・駐屯地・演習場</option>
+            <option value="heritage">世界遺産</option>
+            <option value="infrastructure">港湾・工業地帯</option>
+            <option value="land">農場・牧場・鉱山</option>
+          </select>
+          <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
+          <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
+          <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
+        </div>
+        <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
       </div>
       <button type="button" id="mobile-btn-add-spot">＋ この位置を追加 (0/2)</button>
       <div id="mobile-city-bar" aria-label="比較スポット"></div>
