@@ -1369,7 +1369,7 @@
             <option value="infrastructure">港湾・工業地帯</option>
             <option value="land">農場・牧場・鉱山</option>
           </select>
-          <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off">
+          <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
           <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
           <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
         </div>
@@ -1471,7 +1471,7 @@
           <option value="infrastructure">港湾・工業地帯</option>
           <option value="land">農場・牧場・鉱山</option>
         </select>
-        <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off">
+        <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
         <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
         <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
       </div>
@@ -3225,6 +3225,69 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
       return Array.from(normalizeComparisonQuery(value)).length;
     }
 
+    function parseComparisonSearch(value) {
+      const source = String(value || '')
+        .replace(/｜/g, '|')
+        .replace(/[－−]/g, '-')
+        .trim();
+      const tokens = source.split(/([\s　]+|\|)/).filter(token => token && !/^[\s　]+$/.test(token));
+      const positiveGroups = [[]];
+      const excludedTerms = [];
+      let negateNext = false;
+      let hasOperator = false;
+
+      tokens.forEach(rawToken => {
+        const upperToken = rawToken.toUpperCase();
+        if (rawToken === '|' || upperToken === 'OR') {
+          hasOperator = true;
+          negateNext = false;
+          if (positiveGroups[positiveGroups.length - 1].length) positiveGroups.push([]);
+          return;
+        }
+        if (upperToken === 'AND') {
+          hasOperator = true;
+          return;
+        }
+        if (upperToken === 'NOT') {
+          hasOperator = true;
+          negateNext = true;
+          return;
+        }
+
+        let token = rawToken;
+        let excluded = negateNext;
+        negateNext = false;
+        if (token.startsWith('-') && token.length > 1) {
+          hasOperator = true;
+          excluded = true;
+          token = token.slice(1);
+        }
+        const normalized = normalizeComparisonQuery(token);
+        if (!normalized) return;
+        if (excluded) excludedTerms.push(normalized);
+        else positiveGroups[positiveGroups.length - 1].push(normalized);
+      });
+
+      const groups = positiveGroups.filter(group => group.length);
+      const positiveTerms = groups.flat();
+      return {
+        groups,
+        excludedTerms,
+        hasPositiveTerms: positiveTerms.length > 0,
+        partialReady: groups.length > 0 && groups.every(group =>
+          group.some(term => comparisonQueryLength(term) >= COMPARISON_PARTIAL_SEARCH_MIN_LENGTH)),
+        simpleQuery: !hasOperator && excludedTerms.length === 0 && positiveTerms.length === 1
+          ? positiveTerms[0]
+          : ''
+      };
+    }
+
+    function matchesComparisonSearch(target, parsedSearch) {
+      const searchable = normalizeComparisonQuery(target.search || target.name);
+      if (parsedSearch.excludedTerms.some(term => searchable.includes(term))) return false;
+      return parsedSearch.groups.some(group => group.every(term => searchable.includes(term)));
+    }
+
     async function loadOfficialAreaData() {
       if (officialAreaDataPromise) return officialAreaDataPromise;
       officialAreaDataPromise = fetch(OFFICIAL_AREA_DATA_URL)
@@ -3486,19 +3549,19 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
     function renderComparisonCatalogOptions(targets, value = '') {
       const list = document.getElementById('comparison-targets');
       if (!list) return;
-      const query = normalizeComparisonQuery(value);
-      if (comparisonQueryLength(query) < COMPARISON_PARTIAL_SEARCH_MIN_LENGTH) {
+      const parsedSearch = parseComparisonSearch(value);
+      if (!parsedSearch.partialReady) {
         list.replaceChildren();
         return;
       }
-      const matches = targets.filter(target => normalizeComparisonQuery(target.search || target.name).includes(query));
+      const matches = targets.filter(target => matchesComparisonSearch(target, parsedSearch));
       if (comparisonPeriod === 'heritage') {
         matches.sort((a, b) => {
           const officialA = String(a.id || '').startsWith('attraction-unesco-') ? 1 : 0;
           const officialB = String(b.id || '').startsWith('attraction-unesco-') ? 1 : 0;
           if (officialA !== officialB) return officialB - officialA;
-          const exactA = normalizeComparisonQuery(a.name) === query ? 1 : 0;
-          const exactB = normalizeComparisonQuery(b.name) === query ? 1 : 0;
+          const exactA = normalizeComparisonQuery(a.name) === parsedSearch.simpleQuery ? 1 : 0;
+          const exactB = normalizeComparisonQuery(b.name) === parsedSearch.simpleQuery ? 1 : 0;
           return exactB - exactA;
         });
       }
@@ -3659,8 +3722,12 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
     }
 
     async function resolveComparisonTarget(value) {
-      const query = normalizeComparisonQuery(value);
-      if (!query) {
+      const parsedSearch = parseComparisonSearch(value);
+      if (!parsedSearch.hasPositiveTerms) {
+        if (parsedSearch.excludedTerms.length) {
+          showToast('除外語だけでは検索できません');
+          return null;
+        }
         showToast(`${comparisonCategoryLabel()}を入力してください`);
         return null;
       }
@@ -3671,24 +3738,34 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
         showToast(`${comparisonCategoryLabel()}一覧を読み込めませんでした。通信を確認してください`);
         return null;
       }
-      const exactMatches = comparisonTargets.filter(target =>
-        normalizeComparisonQuery(target.name) === query || normalizeComparisonQuery(target.shortName) === query);
-      if (comparisonQueryLength(query) < COMPARISON_PARTIAL_SEARCH_MIN_LENGTH && exactMatches.length === 0) {
-        showToast('2文字以上で検索してください');
+      const exactMatches = parsedSearch.simpleQuery
+        ? comparisonTargets.filter(target =>
+          normalizeComparisonQuery(target.name) === parsedSearch.simpleQuery ||
+          normalizeComparisonQuery(target.shortName) === parsedSearch.simpleQuery)
+        : [];
+      if (!parsedSearch.partialReady && exactMatches.length === 0) {
+        showToast('2文字以上の検索語を含めてください');
         return null;
       }
-      const fullExact = exactMatches.find(target => normalizeComparisonQuery(target.name) === query);
+      const fullExact = exactMatches.find(target =>
+        normalizeComparisonQuery(target.name) === parsedSearch.simpleQuery);
       if (!fullExact && exactMatches.length > 1 && !['country', 'island', 'water', ...ATTRACTION_PERIODS].includes(comparisonPeriod)) {
         showToast('同名の自治体があります。都道府県・郡を含む候補を選んでください');
         return null;
       }
       const exact = fullExact || exactMatches[0];
-      const partial = comparisonTargets.find(target => normalizeComparisonQuery(target.search || target.name).includes(query));
-      const target = exact || partial;
-      if (!target) {
+      const matches = exact ? [exact] : comparisonTargets.filter(target =>
+        matchesComparisonSearch(target, parsedSearch));
+      if (matches.length === 0) {
         showToast(`一致する${comparisonCategoryLabel()}が見つかりません`);
         return null;
       }
+      if (!exact && matches.length > 1) {
+        renderComparisonCatalogOptions(comparisonTargets, value);
+        showToast(`候補が${matches.length}件あります。候補から1件選んでください`);
+        return null;
+      }
+      const target = exact || matches[0];
       syncComparisonSearch(target.name);
       return target;
     }
@@ -4275,7 +4352,7 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
       });
 
       // 大きな datalist はモバイルブラウザのメイン処理を塞ぐため、
-      // 全カテゴリで2文字以上の入力後に読み込み、一致する候補だけをDOMへ追加する。
+      // 各ORグループに2文字以上の語がある場合だけ読み込み、一致する候補だけをDOMへ追加する。
       ['comparison-search', 'mobile-comparison-search'].forEach(id => {
         const input = document.getElementById(id);
         if (!input) return;
@@ -4283,8 +4360,8 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
         input.addEventListener('input', () => {
           syncComparisonSearch(input.value);
           clearTimeout(catalogTimer);
-          const query = normalizeComparisonQuery(input.value);
-          if (comparisonQueryLength(query) < COMPARISON_PARTIAL_SEARCH_MIN_LENGTH) {
+          const parsedSearch = parseComparisonSearch(input.value);
+          if (!parsedSearch.partialReady) {
             renderComparisonCatalogOptions([], '');
             return;
           }
