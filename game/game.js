@@ -58,7 +58,7 @@
     soundEnabled: true,
     audioContext: null,
     finishedRound: null,
-    rankingPeriod: 'all',
+    rankingPeriod: 'daily',
     rankingReturnScreen: 'start-screen',
     rankingRequestId: 0,
     serverSessionId: null,

@@ -187,11 +187,11 @@
 
       <div class="ranking-board">
         <div class="ranking-tabs" role="tablist" aria-label="ランキング期間">
-          <button class="ranking-tab is-active" type="button" role="tab" aria-selected="true" data-period="all">全期間</button>
+          <button class="ranking-tab is-active" type="button" role="tab" aria-selected="true" data-period="daily">日間</button>
           <button class="ranking-tab" type="button" role="tab" aria-selected="false" data-period="weekly">週間</button>
-          <button class="ranking-tab" type="button" role="tab" aria-selected="false" data-period="daily">日間</button>
+          <button class="ranking-tab" type="button" role="tab" aria-selected="false" data-period="all">累計</button>
         </div>
-        <p id="ranking-period-note" class="ranking-period-note">これまでの自己最高記録</p>
+        <p id="ranking-period-note" class="ranking-period-note">今日0時からの自己最高記録</p>
         <div id="ranking-loading" class="ranking-loading" role="status">ランキングを読み込んでいます…</div>
         <ol id="ranking-list" class="ranking-list" aria-live="polite"></ol>
         <button id="ranking-reload-button" class="ranking-reload-button" type="button" hidden>もう一度読み込む</button>
@@ -208,6 +208,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script src="./ranking-config.js?v=54"></script>
-  <script src="./game.js?v=54" defer></script>
+  <script src="./game.js?v=55" defer></script>
 </body>
 </html>
