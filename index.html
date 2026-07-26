@@ -820,6 +820,110 @@
       font-size: 1.65rem;
       line-height: 1;
     }
+    #search-builder-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(19rem, 0.85fr);
+      gap: 1rem;
+      align-items: start;
+    }
+    .search-builder-filter-pane { min-width: 0; }
+    .search-builder-results {
+      position: sticky;
+      top: 0;
+      min-width: 0;
+      max-height: min(590px, calc(100dvh - 14.5rem));
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #cedce5;
+      border-radius: 0.9rem;
+      background: #fff;
+    }
+    .search-builder-results-head {
+      flex: 0 0 auto;
+      padding: 0.85rem 0.9rem 0.7rem;
+      border-bottom: 1px solid #dbe5eb;
+    }
+    .search-builder-results-head h3 {
+      margin: 0;
+      color: #0a2744;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+    .search-builder-results-head p {
+      margin: 0.2rem 0 0;
+      color: #6a7f8e;
+      font-size: 0.68rem;
+    }
+    .search-builder-result-list {
+      min-height: 8rem;
+      overflow-y: auto;
+      padding: 0.55rem;
+      scrollbar-gutter: stable;
+    }
+    .search-builder-result {
+      width: 100%;
+      display: block;
+      margin: 0 0 0.45rem;
+      padding: 0.7rem 0.75rem;
+      border: 1px solid #d5e1e8;
+      border-radius: 0.65rem;
+      background: #f9fbfc;
+      color: #15384f;
+      text-align: left;
+      cursor: pointer;
+    }
+    .search-builder-result:last-child { margin-bottom: 0; }
+    .search-builder-result:hover,
+    .search-builder-result:focus-visible {
+      border-color: #0b6fa4;
+      background: #eef7fb;
+      outline: 2px solid rgba(11, 111, 164, 0.18);
+      outline-offset: 1px;
+    }
+    .search-builder-result-name {
+      display: block;
+      color: #0a2744;
+      font-size: 0.8rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+    .search-builder-result-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.55rem;
+      margin-top: 0.3rem;
+      color: #607787;
+      font-size: 0.65rem;
+      line-height: 1.4;
+    }
+    .search-builder-result-empty {
+      display: grid;
+      min-height: 7rem;
+      place-items: center;
+      padding: 1rem;
+      color: #607787;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    .search-builder-more {
+      flex: 0 0 auto;
+      min-height: 2.65rem;
+      margin: 0 0.55rem 0.55rem;
+      border: 1px solid #9fb7c6;
+      border-radius: 0.6rem;
+      background: #fff;
+      color: #174a69;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .search-builder-more:hover,
+    .search-builder-more:focus-visible {
+      border-color: #0b6fa4;
+      background: #eef7fb;
+      outline: none;
+    }
     .search-builder-section {
       padding: 0.95rem 0;
       border-top: 1px solid #dbe5eb;
@@ -1600,6 +1704,14 @@
       }
       .search-builder-count { text-align: left; }
       .search-builder-count strong { font-size: 1.35rem; }
+      #search-builder-controls {
+        grid-template-columns: 1fr;
+      }
+      .search-builder-results {
+        position: static;
+        order: -1;
+        max-height: 19rem;
+      }
       .search-builder-type-groups,
       .search-builder-option-grid {
         grid-template-columns: 1fr;
@@ -1985,75 +2097,86 @@
 
         <div id="search-builder-loading" class="search-builder-loading">登録データを読み込んでいます…</div>
         <div id="search-builder-controls" hidden>
-          <section class="search-builder-section" aria-labelledby="search-builder-target-heading">
-            <div class="search-builder-section-head">
-              <div>
-                <h3 id="search-builder-target-heading">対象</h3>
-                <p class="search-builder-subtle">複数選ぶと「いずれか」に一致します</p>
+          <div class="search-builder-filter-pane">
+            <section class="search-builder-section" aria-labelledby="search-builder-target-heading">
+              <div class="search-builder-section-head">
+                <div>
+                  <h3 id="search-builder-target-heading">対象</h3>
+                  <p class="search-builder-subtle">複数選ぶと「いずれか」に一致します</p>
+                </div>
+                <button type="button" id="search-builder-clear-types" class="search-builder-link">対象をすべてクリア</button>
               </div>
-              <button type="button" id="search-builder-clear-types" class="search-builder-link">対象をすべてクリア</button>
-            </div>
-            <div id="search-builder-type-groups" class="search-builder-type-groups"></div>
-          </section>
+              <div id="search-builder-type-groups" class="search-builder-type-groups"></div>
+            </section>
 
-          <section class="search-builder-section" aria-labelledby="search-builder-location-heading">
-            <div class="search-builder-section-head">
-              <div>
-                <h3 id="search-builder-location-heading">場所</h3>
-                <p class="search-builder-subtle">施設・島・湖なども市区町村で絞れます</p>
+            <section class="search-builder-section" aria-labelledby="search-builder-location-heading">
+              <div class="search-builder-section-head">
+                <div>
+                  <h3 id="search-builder-location-heading">場所</h3>
+                  <p class="search-builder-subtle">施設・島・湖なども市区町村で絞れます</p>
+                </div>
               </div>
-            </div>
-            <div class="search-builder-location">
-              <label>
-                範囲
-                <select id="search-builder-location-mode" class="search-builder-select">
-                  <option value="all">全国・全地域</option>
-                  <option value="prefecture">都道府県</option>
-                  <option value="municipality">市区町村</option>
-                </select>
-              </label>
-              <label>
-                都道府県
-                <select id="search-builder-prefecture" class="search-builder-select" disabled>
-                  <option value="">選択してください</option>
-                </select>
-              </label>
-              <label>
-                市区町村
-                <select id="search-builder-municipality" class="search-builder-select" disabled>
-                  <option value="">先に都道府県を選択してください</option>
-                </select>
-              </label>
-            </div>
-          </section>
+              <div class="search-builder-location">
+                <label>
+                  範囲
+                  <select id="search-builder-location-mode" class="search-builder-select">
+                    <option value="all">全国・全地域</option>
+                    <option value="prefecture">都道府県</option>
+                    <option value="municipality">市区町村</option>
+                  </select>
+                </label>
+                <label>
+                  都道府県
+                  <select id="search-builder-prefecture" class="search-builder-select" disabled>
+                    <option value="">選択してください</option>
+                  </select>
+                </label>
+                <label>
+                  市区町村
+                  <select id="search-builder-municipality" class="search-builder-select" disabled>
+                    <option value="">先に都道府県を選択してください</option>
+                  </select>
+                </label>
+              </div>
+            </section>
 
-          <section class="search-builder-section" aria-labelledby="search-builder-area-heading">
-            <div class="search-builder-section-head">
-              <div>
-                <h3 id="search-builder-area-heading">大きさ</h3>
-                <p class="search-builder-subtle">面積は公式値または登録境界からの概算です</p>
+            <section class="search-builder-section" aria-labelledby="search-builder-area-heading">
+              <div class="search-builder-section-head">
+                <div>
+                  <h3 id="search-builder-area-heading">大きさ</h3>
+                  <p class="search-builder-subtle">面積は公式値または登録境界からの概算です</p>
+                </div>
               </div>
-            </div>
-            <div id="search-builder-presets" class="search-builder-presets">
-              <button type="button" class="search-builder-preset" data-min="" data-max="0.1">0.1km²未満</button>
-              <button type="button" class="search-builder-preset" data-min="0.1" data-max="1">0.1〜1km²</button>
-              <button type="button" class="search-builder-preset" data-min="1" data-max="10">1〜10km²</button>
-              <button type="button" class="search-builder-preset" data-min="10" data-max="100">10〜100km²</button>
-              <button type="button" class="search-builder-preset" data-min="100" data-max="">100km²以上</button>
-              <button type="button" class="search-builder-preset" data-min="" data-max="21">ナウル未満</button>
-              <button type="button" class="search-builder-preset" data-min="21" data-max="">ナウル以上</button>
-            </div>
-            <div class="search-builder-number-row">
-              <div class="search-builder-number">
-                <label for="search-builder-area-min">最小（km²）</label>
-                <input id="search-builder-area-min" type="number" min="0" step="any" inputmode="decimal" placeholder="指定なし">
+              <div id="search-builder-presets" class="search-builder-presets">
+                <button type="button" class="search-builder-preset" data-min="" data-max="0.1">0.1km²未満</button>
+                <button type="button" class="search-builder-preset" data-min="0.1" data-max="1">0.1〜1km²</button>
+                <button type="button" class="search-builder-preset" data-min="1" data-max="10">1〜10km²</button>
+                <button type="button" class="search-builder-preset" data-min="10" data-max="100">10〜100km²</button>
+                <button type="button" class="search-builder-preset" data-min="100" data-max="">100km²以上</button>
+                <button type="button" class="search-builder-preset" data-min="" data-max="21">ナウル未満</button>
+                <button type="button" class="search-builder-preset" data-min="21" data-max="">ナウル以上</button>
               </div>
-              <div class="search-builder-number">
-                <label for="search-builder-area-max">最大（km²）</label>
-                <input id="search-builder-area-max" type="number" min="0" step="any" inputmode="decimal" placeholder="指定なし">
+              <div class="search-builder-number-row">
+                <div class="search-builder-number">
+                  <label for="search-builder-area-min">最小（km²）</label>
+                  <input id="search-builder-area-min" type="number" min="0" step="any" inputmode="decimal" placeholder="指定なし">
+                </div>
+                <div class="search-builder-number">
+                  <label for="search-builder-area-max">最大（km²）</label>
+                  <input id="search-builder-area-max" type="number" min="0" step="any" inputmode="decimal" placeholder="指定なし">
+                </div>
               </div>
+            </section>
+          </div>
+
+          <aside class="search-builder-results" aria-labelledby="search-builder-results-heading">
+            <div class="search-builder-results-head">
+              <h3 id="search-builder-results-heading">一致する候補</h3>
+              <p id="search-builder-results-note">候補を選ぶと通常の検索欄に入ります</p>
             </div>
-          </section>
+            <div id="search-builder-results" class="search-builder-result-list"></div>
+            <button type="button" id="search-builder-more" class="search-builder-more" hidden>さらに50件表示</button>
+          </aside>
         </div>
       </div>
       <footer class="search-builder-footer">
@@ -2380,6 +2503,8 @@
     let activeComparison = null;
     let searchBuilderTargets = [];
     let searchBuilderFreeText = '';
+    let searchBuilderResultLimit = 50;
+    let selectedComparisonTarget = null;
     const searchBuilderState = {
       types: new Set(),
       locationMode: 'all',
@@ -4386,6 +4511,7 @@
 
     async function setComparisonPeriod(value) {
       const nextPeriod = COMPARISON_PERIODS.includes(value) ? value : 'current';
+      selectedComparisonTarget = null;
       if (ATTRACTION_PERIODS.includes(nextPeriod)) {
         attractionsPromise = null;
         ATTRACTION_PERIODS.forEach(period => comparisonCatalogPromises.delete(period));
@@ -4698,7 +4824,108 @@
       return condition;
     }
 
-    function updateSearchBuilderSummary() {
+    function searchBuilderTargetTypeLabel(target) {
+      if (target.kind === 'historicalMunicipality') return '旧市区町村・1995年時点';
+      if (target.kind === 'prefecture') return '都道府県';
+      if (target.kind === 'municipality') return '市区町村';
+      if (target.kind === 'country') return '国・地域';
+      if (target.kind === 'island') return '島';
+      if (target.kind === 'water') return '湖・池';
+      if (target.kind === 'attraction') return target.subtypeLabel || '観光地・施設';
+      return (target.searchTypes || []).join('・') || '登録対象';
+    }
+
+    function searchBuilderTargetLocationLabel(target) {
+      const municipalities = (target.municipalities || []).filter(Boolean);
+      const prefectures = (target.prefectures || []).filter(Boolean);
+      return municipalities[0]
+        || target.locationLabel
+        || prefectures.join('・')
+        || target.context
+        || '';
+    }
+
+    function matchingSearchBuilderTargets() {
+      const query = buildSearchBuilderQuery();
+      if (!query) return searchBuilderTargets.slice();
+      const parsed = parseComparisonSearch(query);
+      return searchBuilderTargets.filter(target => matchesComparisonSearch(target, parsed));
+    }
+
+    async function selectSearchBuilderTarget(target) {
+      const targetPeriod = COMPARISON_PERIODS.includes(target.period) ? target.period : 'all';
+      comparisonPeriod = targetPeriod;
+      syncComparisonPeriod(targetPeriod);
+      updateComparisonSearchPresentation();
+      try {
+        comparisonTargets = await loadComparisonCatalog(targetPeriod);
+      } catch (error) {
+        console.warn(error);
+        showToast('選んだ候補の一覧を読み込めませんでした');
+        return;
+      }
+      selectedComparisonTarget = target;
+      syncComparisonSearch(target.name);
+      renderComparisonCatalogOptions(comparisonTargets, target.name);
+      closeSearchBuilder();
+      showToast(`「${target.name}」を検索欄に入れました`);
+    }
+
+    function renderSearchBuilderResults(matches) {
+      const container = document.getElementById('search-builder-results');
+      const more = document.getElementById('search-builder-more');
+      const note = document.getElementById('search-builder-results-note');
+      if (!container || !more || !note) return;
+      if (!matches.length) {
+        const empty = document.createElement('div');
+        empty.className = 'search-builder-result-empty';
+        empty.textContent = '条件に一致する候補がありません';
+        container.replaceChildren(empty);
+        note.textContent = '条件を減らすか、除外設定を見直してください';
+        more.hidden = true;
+        return;
+      }
+      const visible = matches.slice(0, searchBuilderResultLimit);
+      const fragment = document.createDocumentFragment();
+      visible.forEach(target => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'search-builder-result';
+        const name = document.createElement('span');
+        name.className = 'search-builder-result-name';
+        name.textContent = target.name;
+        const meta = document.createElement('span');
+        meta.className = 'search-builder-result-meta';
+        const labels = [
+          searchBuilderTargetTypeLabel(target),
+          searchBuilderTargetLocationLabel(target)
+        ];
+        const area = Number(target.areaKm2);
+        if (Number.isFinite(area)) labels.push(`約${formatArea(area)}km²`);
+        labels.filter(Boolean).forEach(label => {
+          const item = document.createElement('span');
+          item.textContent = label;
+          meta.appendChild(item);
+        });
+        button.append(name, meta);
+        button.addEventListener('click', () => {
+          selectSearchBuilderTarget(target).catch(error => {
+            console.warn(error);
+            showToast('候補を検索欄へ反映できませんでした');
+          });
+        });
+        fragment.appendChild(button);
+      });
+      container.replaceChildren(fragment);
+      note.textContent = `${visible.length.toLocaleString('ja-JP')} / ${matches.length.toLocaleString('ja-JP')}件を表示`;
+      more.hidden = visible.length >= matches.length;
+      if (!more.hidden) {
+        const remaining = Math.min(50, matches.length - visible.length);
+        more.textContent = `さらに${remaining.toLocaleString('ja-JP')}件表示`;
+      }
+    }
+
+    function updateSearchBuilderSummary(resetResults = true) {
       const conditions = document.getElementById('search-builder-conditions');
       const count = document.getElementById('search-builder-count');
       if (!conditions || !count) return;
@@ -4733,14 +4960,12 @@
         empty.textContent = 'まだ条件を選択していません';
         conditions.replaceChildren(empty);
       }
-      const query = buildSearchBuilderQuery();
-      const parsed = parseComparisonSearch(query);
-      const matchedCount = query
-        ? searchBuilderTargets.filter(target => matchesComparisonSearch(target, parsed)).length
-        : searchBuilderTargets.length;
+      if (resetResults) searchBuilderResultLimit = 50;
+      const matches = matchingSearchBuilderTargets();
       const strong = document.createElement('strong');
-      strong.textContent = matchedCount.toLocaleString('ja-JP');
+      strong.textContent = matches.length.toLocaleString('ja-JP');
       count.replaceChildren(document.createTextNode('該当 '), strong, document.createTextNode(' 件'));
+      renderSearchBuilderResults(matches);
       document.querySelectorAll('.search-builder-preset').forEach(button => {
         button.classList.toggle(
           'active',
@@ -4808,6 +5033,7 @@
         return;
       }
       await setComparisonPeriod('all');
+      selectedComparisonTarget = null;
       syncComparisonSearch(query);
       renderComparisonCatalogOptions(comparisonTargets, query);
       closeSearchBuilder();
@@ -4846,7 +5072,12 @@
         showToast('同名の自治体があります。都道府県・郡を含む候補を選んでください');
         return null;
       }
-      const exact = fullExact || exactMatches[0];
+      const preferred = selectedComparisonTarget
+        && selectedComparisonTarget.period === comparisonPeriod
+        && normalizeComparisonQuery(selectedComparisonTarget.name) === parsedSearch.simpleQuery
+        ? selectedComparisonTarget
+        : null;
+      const exact = preferred || fullExact || exactMatches[0];
       const matches = exact ? [exact] : comparisonTargets.filter(target =>
         matchesComparisonSearch(target, parsedSearch));
       if (matches.length === 0) {
@@ -5489,6 +5720,10 @@
         resetSearchBuilderState();
         syncSearchBuilderControls();
       });
+      document.getElementById('search-builder-more').addEventListener('click', () => {
+        searchBuilderResultLimit += 50;
+        updateSearchBuilderSummary(false);
+      });
       document.getElementById('search-builder-apply').addEventListener('click', () => {
         applySearchBuilder().catch(error => {
           console.warn(error);
@@ -5513,6 +5748,11 @@
         if (!input) return;
         let catalogTimer = null;
         input.addEventListener('input', () => {
+          if (selectedComparisonTarget
+            && normalizeComparisonQuery(input.value)
+              !== normalizeComparisonQuery(selectedComparisonTarget.name)) {
+            selectedComparisonTarget = null;
+          }
           syncComparisonSearch(input.value);
           clearTimeout(catalogTimer);
           const parsedSearch = parseComparisonSearch(input.value);
