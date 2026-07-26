@@ -1625,8 +1625,8 @@
     const MUNICIPALITY_GEOJSON_BASE = 'https://geolonia.github.io/japanese-admins';
     const OFFICIAL_AREA_DATA_URL = './data/gsi-area-r8-04.json';
     const NATURAL_FEATURES_URL = './data/natural-features.geojson?v=39';
-const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
-    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=2';
+const ATTRACTIONS_URL = './data/attractions.geojson?v=43';
+    const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=3';
     const COUNTRIES_URL = './data/countries.geojson?v=42';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
     const COMPARISON_PERIODS = ['current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
@@ -3310,9 +3310,13 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
     }
 
     function matchesComparisonSearch(target, parsedSearch) {
-      const searchable = normalizeComparisonQuery(target.search || target.name);
-      if (parsedSearch.excludedTerms.some(term => searchable.includes(term))) return false;
-      return parsedSearch.groups.some(group => group.every(term => searchable.includes(term)));
+      const matchesTerm = term => {
+        const searchable = normalizeComparisonQuery(target.search || target.name);
+        if (searchable.includes(term)) return true;
+        return (target.searchKeywords || []).some(keyword => keyword === term);
+      };
+      if (parsedSearch.excludedTerms.some(matchesTerm)) return false;
+      return parsedSearch.groups.some(group => group.every(matchesTerm));
     }
 
     async function loadOfficialAreaData() {
@@ -3499,6 +3503,42 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
       return 'attraction';
     }
 
+    const ATTRACTION_CATEGORY_SEARCH_TERMS = [
+      '遊園地', 'テーマパーク',
+      '野球場', '球場', 'NPB', 'ファーム', '本拠地',
+      'サッカー場', '競技場', 'ラグビー場', 'スポーツ公園', '武道館', 'アリーナ',
+      '空港', '飛行場', '基地', '駐屯地', '演習場',
+      '世界遺産', '港湾', '埠頭', '工業地帯', '工場',
+      '農場', '牧場', '鉱山', '採石場',
+      '国立公園', '景勝地', '城郭', '城跡', '現存天守', '再建天守',
+      '公園', '大型公園', '都市公園', '広域公園',
+      '動物園', '植物園', '動植物園'
+    ];
+
+    const ATTRACTION_SUBTYPE_SEARCH_TERMS = {
+      'sports-football': ['Jリーグ'],
+      'sports-baseball': ['プロ野球'],
+      'large-park': ['大規模公園'],
+      'zoological-botanical-park': ['動物園', '植物園']
+    };
+
+    function attractionSearchKeywords(subtype, subtypeLabel) {
+      const label = String(subtypeLabel || '');
+      const normalizedLabel = normalizeComparisonQuery(label);
+      const keywords = [
+        normalizedLabel,
+        ...label.split(/[・／/、,（）()\s　]+/).map(normalizeComparisonQuery),
+        ...(label.match(/[A-Za-z0-9]+/g) || []).map(normalizeComparisonQuery)
+      ];
+      ATTRACTION_CATEGORY_SEARCH_TERMS.forEach(term => {
+        const normalized = normalizeComparisonQuery(term);
+        if (normalizedLabel.includes(normalized)) keywords.push(normalized);
+      });
+      (ATTRACTION_SUBTYPE_SEARCH_TERMS[subtype] || []).forEach(term =>
+        keywords.push(normalizeComparisonQuery(term)));
+      return [...new Set(keywords.filter(Boolean))];
+    }
+
     function attractionTargetFromFeature(feature, administrativeIndex) {
       const properties = feature && feature.properties || {};
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
@@ -3523,11 +3563,11 @@ const ATTRACTIONS_URL = './data/attractions.geojson?v=42';
         boundarySourceLabel: properties.boundarySourceLabel || '',
         boundarySourceUrl: properties.boundarySourceUrl || '',
         geometryUrl: properties.geometryFile ? `./data/${properties.geometryFile}` : null,
+        searchKeywords: attractionSearchKeywords(properties.subtype, properties.subtypeLabel),
         search: [
           properties.name,
           properties.shortName,
           properties.context,
-          properties.subtypeLabel,
           ...administrative.prefectures,
           ...administrative.municipalities,
           ...administrative.groups,

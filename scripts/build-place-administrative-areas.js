@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = process.env.DOKODEMO_NAURU_ROOT || path.resolve(__dirname, '..');
 const NATURAL_PATH = path.join(ROOT, 'data', 'natural-features.geojson');
 const ATTRACTIONS_PATH = path.join(ROOT, 'data', 'attractions.geojson');
 const OUTPUT_PATH = path.join(ROOT, 'data', 'place-administrative-areas.json');
 const MUNICIPALITY_URL = 'https://madefor.github.io/jisx0402/api/v1/all.json';
 const REVERSE_URL = 'https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress';
-const CONCURRENCY = 6;
+const CONCURRENCY = 12;
 const PREFECTURES = [
   '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
   '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
@@ -262,11 +262,19 @@ async function mapWithConcurrency(items, worker, concurrency) {
 async function main() {
   const natural = JSON.parse(fs.readFileSync(NATURAL_PATH, 'utf8'));
   const attractions = JSON.parse(fs.readFileSync(ATTRACTIONS_PATH, 'utf8'));
+  const previous = fs.existsSync(OUTPUT_PATH)
+    ? JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'))
+    : { places: {} };
+  const previousPlaces = previous && previous.places || {};
   const municipalityCatalog = await loadMunicipalities();
   const features = [...(natural.features || []), ...(attractions.features || [])];
   const results = await mapWithConcurrency(
     features,
-    feature => enrichFeature(feature, municipalityCatalog),
+    feature => {
+      const properties = feature && feature.properties || {};
+      const id = cleanText(properties.id || feature.id);
+      return previousPlaces[id] || enrichFeature(feature, municipalityCatalog);
+    },
     CONCURRENCY
   );
   const places = {};
