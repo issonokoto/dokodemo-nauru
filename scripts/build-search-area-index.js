@@ -73,17 +73,30 @@ function roundedArea(value) {
 
 function featureArea(feature) {
   const properties = feature && feature.properties || {};
+  const geometryFile = properties.geometryFile;
+  let geometryArea = null;
+  if (geometryFile) {
+    const geometryPath = path.join(DATA_DIR, geometryFile);
+    if (fs.existsSync(geometryPath)) {
+      const geometry = readJson(path.join('data', geometryFile));
+      geometryArea = roundedArea(polygonsAreaKm2(polygonGroups(geometry)));
+    }
+  }
+  if (properties.subtype === 'national-park'
+      && (!Number.isFinite(geometryArea) || geometryArea < 10)) {
+    throw new Error(
+      `National park geometry is implausibly small: ${properties.name || properties.id} `
+      + `(${geometryArea === null ? 'missing' : geometryArea} km²)`
+    );
+  }
   const official = Number(properties.officialAreaKm2);
   if (Number.isFinite(official) && official > 0) {
     return { area: roundedArea(official), source: 'official' };
   }
-  const geometryFile = properties.geometryFile;
   if (!geometryFile) return { area: null, source: 'missing-geometry-file' };
-  const geometryPath = path.join(DATA_DIR, geometryFile);
-  if (!fs.existsSync(geometryPath)) return { area: null, source: 'missing-geometry' };
-  const geometry = readJson(path.join('data', geometryFile));
+  if (geometryArea === null) return { area: null, source: 'missing-geometry' };
   return {
-    area: roundedArea(polygonsAreaKm2(polygonGroups(geometry))),
+    area: geometryArea,
     source: 'geometry'
   };
 }

@@ -213,9 +213,21 @@ function writeFeature(properties, geometry) {
 
 async function main() {
   const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-  const preserved = (catalog.features || []).filter(feature => ![
-    'castle-existing', 'castle-reconstructed', 'castle-ruins-large', 'scenic-large', 'national-park', 'imperial-site'
-  ].includes(feature.properties && feature.properties.subtype));
+  const verifiedNationalParkNames = new Set([
+    '吉野熊野国立公園',
+    '三陸復興国立公園'
+  ]);
+  const minimumNationalParkAreaKm2 = 10;
+  const preserved = (catalog.features || []).filter(feature => {
+    const properties = feature.properties || {};
+    if (properties.subtype === 'national-park' && verifiedNationalParkNames.has(properties.name)) {
+      return true;
+    }
+    return ![
+      'castle-existing', 'castle-reconstructed', 'castle-ruins-large',
+      'scenic-large', 'national-park', 'imperial-site'
+    ].includes(properties.subtype);
+  });
   const data = await fetchOverpass();
   const castleGroups = new Map();
   const nationalParkGroups = new Map();
@@ -304,6 +316,16 @@ async function main() {
 
   for (const candidates of nationalParkGroups.values()) {
     const selected = candidates.slice().sort((a, b) => b.areaKm2 - a.areaKm2)[0];
+    if (verifiedNationalParkNames.has(selected.tags.name)) continue;
+    if (selected.areaKm2 < minimumNationalParkAreaKm2) {
+      rejected.push({
+        osmType: selected.element.type,
+        osmId: selected.element.id,
+        name: selected.tags.name,
+        reason: `国立公園境界として過小（${selected.areaKm2.toFixed(3)}km²）`
+      });
+      continue;
+    }
     const prefix = osmPrefix(selected.element.type);
     const id = `attraction-national-park-${prefix}${selected.element.id}`;
     const geometryFile = `attractions/national-park-${prefix}${selected.element.id}.geojson`;
