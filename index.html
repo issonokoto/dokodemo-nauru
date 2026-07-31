@@ -42,7 +42,7 @@
       overflow: hidden;
     }
     #map { position: absolute; inset: 0; z-index: 0; }
-    #kumamoto-relief-banner {
+    #disaster-relief-banner {
       position: fixed;
       top: max(0.65rem, env(safe-area-inset-top));
       left: 50%;
@@ -60,12 +60,12 @@
       transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease;
       pointer-events: none;
     }
-    #kumamoto-relief-banner.is-visible {
+    #disaster-relief-banner.is-visible {
       opacity: 1;
       transform: translate(-50%, 0);
       pointer-events: auto;
     }
-    .kumamoto-relief-link {
+    .disaster-relief-link {
       display: flex;
       min-width: 0;
       flex: 1;
@@ -75,12 +75,12 @@
       color: #0a2744;
       text-decoration: none;
     }
-    .kumamoto-relief-link:hover,
-    .kumamoto-relief-link:focus-visible {
+    .disaster-relief-link:hover,
+    .disaster-relief-link:focus-visible {
       background: rgba(245, 197, 66, 0.13);
       outline: none;
     }
-    .kumamoto-relief-mark {
+    .disaster-relief-mark {
       display: grid;
       width: 2.45rem;
       height: 2.45rem;
@@ -92,21 +92,21 @@
       font-size: 1.15rem;
       box-shadow: inset 0 0 0 1px rgba(6, 21, 37, 0.08);
     }
-    .kumamoto-relief-copy { min-width: 0; line-height: 1.25; }
-    .kumamoto-relief-title {
+    .disaster-relief-copy { min-width: 0; line-height: 1.25; }
+    .disaster-relief-title {
       display: block;
       font-size: 0.88rem;
       font-weight: 800;
       letter-spacing: 0.01em;
     }
-    .kumamoto-relief-action {
+    .disaster-relief-action {
       display: block;
       margin-top: 0.2rem;
       color: #155a8a;
       font-size: 0.72rem;
       font-weight: 700;
     }
-    .kumamoto-relief-close {
+    .disaster-relief-close {
       width: 2.55rem;
       flex: 0 0 auto;
       border: 0;
@@ -116,21 +116,21 @@
       font-size: 1.05rem;
       cursor: pointer;
     }
-    .kumamoto-relief-close:hover,
-    .kumamoto-relief-close:focus-visible {
+    .disaster-relief-close:hover,
+    .disaster-relief-close:focus-visible {
       background: #fff;
       color: #0a2744;
       outline: none;
     }
     @media (max-width: 767.98px) {
-      #kumamoto-relief-banner { width: min(94vw, 420px); }
-      .kumamoto-relief-link { padding: 0.68rem 0.55rem 0.68rem 0.72rem; }
-      .kumamoto-relief-mark { width: 2.1rem; height: 2.1rem; font-size: 1rem; }
-      .kumamoto-relief-title { font-size: 0.79rem; }
-      .kumamoto-relief-action { font-size: 0.66rem; }
+      #disaster-relief-banner { width: min(94vw, 420px); }
+      .disaster-relief-link { padding: 0.68rem 0.55rem 0.68rem 0.72rem; }
+      .disaster-relief-mark { width: 2.1rem; height: 2.1rem; font-size: 1rem; }
+      .disaster-relief-title { font-size: 0.79rem; }
+      .disaster-relief-action { font-size: 0.66rem; }
     }
     @media (prefers-reduced-motion: reduce) {
-      #kumamoto-relief-banner { transition: opacity 160ms ease; }
+      #disaster-relief-banner { transition: opacity 160ms ease; }
     }
     #map-share-logo {
       position: absolute;
@@ -1937,15 +1937,15 @@
   </div>
 
   <div id="map"></div>
-  <div id="kumamoto-relief-banner" role="region" aria-label="令和8年熊本地震の義援金案内" aria-hidden="true">
-    <a class="kumamoto-relief-link" href="https://www.pref.kumamoto.jp/soshiki/27/274572.html" target="_blank" rel="noopener noreferrer">
-      <span class="kumamoto-relief-mark" aria-hidden="true">♥</span>
-      <span class="kumamoto-relief-copy">
-        <span class="kumamoto-relief-title">令和8年熊本地震 義援金</span>
-        <span class="kumamoto-relief-action">熊本県公式の受付窓口はこちら →</span>
+  <div id="disaster-relief-banner" role="region" aria-label="災害義援金の案内" aria-hidden="true">
+    <a class="disaster-relief-link" href="https://www.pref.kumamoto.jp/soshiki/27/274572.html" target="_blank" rel="noopener noreferrer">
+      <span class="disaster-relief-mark" aria-hidden="true">♥</span>
+      <span class="disaster-relief-copy">
+        <span id="disaster-relief-title" class="disaster-relief-title">令和8年熊本地震 義援金</span>
+        <span id="disaster-relief-action" class="disaster-relief-action">熊本県公式の受付窓口はこちら →</span>
       </span>
     </a>
-    <button type="button" class="kumamoto-relief-close" aria-label="義援金案内を閉じる">×</button>
+    <button type="button" class="disaster-relief-close" aria-label="義援金案内を閉じる">×</button>
   </div>
   <div id="map-share-logo" aria-hidden="true">
     <img class="app-logo" src="assets/dokodemo-nauru-logo-transparent-v3.png" alt="">
@@ -3324,30 +3324,54 @@
       if (imageLayer && map.hasLayer(imageLayer)) map.removeLayer(imageLayer);
     }
 
-    const KUMAMOTO_RELIEF_END = Date.parse('2026-10-31T00:00:00+09:00');
-    const KUMAMOTO_NEARBY_BOUNDS = {
-      minLat: 31.75,
-      maxLat: 33.55,
-      minLng: 129.70,
-      maxLng: 131.55
-    };
-    let kumamotoReliefDismissed = false;
+    const DISASTER_RELIEF_CAMPAIGNS = [
+      {
+        id: 'kumamoto-2026',
+        title: '令和8年熊本地震 義援金',
+        action: '熊本県公式の受付窓口はこちら →',
+        url: 'https://www.pref.kumamoto.jp/soshiki/27/274572.html',
+        end: Date.parse('2026-10-31T00:00:00+09:00'),
+        bounds: { minLat: 31.75, maxLat: 33.55, minLng: 129.70, maxLng: 131.55 }
+      },
+      {
+        id: 'noto-2024',
+        title: '令和6年能登半島地震 義援金',
+        action: '石川県公式の受付窓口はこちら →',
+        url: 'https://www.pref.ishikawa.lg.jp/suitou/gienkinr0601.html',
+        end: Date.parse('2027-04-01T00:00:00+09:00'),
+        bounds: { minLat: 35.85, maxLat: 37.75, minLng: 135.85, maxLng: 137.65 }
+      }
+    ];
+    const dismissedReliefCampaigns = new Set();
+    let activeReliefCampaignId = '';
 
-    function isNearKumamoto(latlng) {
-      if (!latlng || Date.now() >= KUMAMOTO_RELIEF_END) return false;
+    function reliefCampaignNear(latlng) {
+      if (!latlng) return null;
       let lng = Number(latlng.lng) % 360;
       if (lng > 180) lng -= 360;
       if (lng < -180) lng += 360;
-      return Number(latlng.lat) >= KUMAMOTO_NEARBY_BOUNDS.minLat
-        && Number(latlng.lat) <= KUMAMOTO_NEARBY_BOUNDS.maxLat
-        && lng >= KUMAMOTO_NEARBY_BOUNDS.minLng
-        && lng <= KUMAMOTO_NEARBY_BOUNDS.maxLng;
+      const lat = Number(latlng.lat);
+      return DISASTER_RELIEF_CAMPAIGNS.find(campaign =>
+        Date.now() < campaign.end
+        && lat >= campaign.bounds.minLat
+        && lat <= campaign.bounds.maxLat
+        && lng >= campaign.bounds.minLng
+        && lng <= campaign.bounds.maxLng
+      ) || null;
     }
 
-    function updateKumamotoReliefBanner(latlng) {
-      const banner = document.getElementById('kumamoto-relief-banner');
+    function updateDisasterReliefBanner(latlng) {
+      const banner = document.getElementById('disaster-relief-banner');
       if (!banner) return;
-      const visible = !kumamotoReliefDismissed && isNearKumamoto(latlng);
+      const campaign = reliefCampaignNear(latlng);
+      const visible = Boolean(campaign && !dismissedReliefCampaigns.has(campaign.id));
+      activeReliefCampaignId = visible ? campaign.id : '';
+      if (visible) {
+        banner.querySelector('.disaster-relief-link').href = campaign.url;
+        document.getElementById('disaster-relief-title').textContent = campaign.title;
+        document.getElementById('disaster-relief-action').textContent = campaign.action;
+        banner.setAttribute('aria-label', `${campaign.title}の案内`);
+      }
       banner.classList.toggle('is-visible', visible);
       banner.setAttribute('aria-hidden', visible ? 'false' : 'true');
       banner.querySelectorAll('a, button').forEach(element => {
@@ -3576,7 +3600,7 @@
         document.getElementById('user-color-pop'),
         document.getElementById('toast'),
         document.getElementById('map-screen-logo'),
-        document.getElementById('kumamoto-relief-banner'),
+        document.getElementById('disaster-relief-banner'),
         document.getElementById('notice-modal'),
         document.getElementById('loading-overlay')
       ].filter(Boolean);
@@ -5871,15 +5895,15 @@
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      const kumamotoReliefBanner = document.getElementById('kumamoto-relief-banner');
-      const kumamotoReliefClose = kumamotoReliefBanner && kumamotoReliefBanner.querySelector('.kumamoto-relief-close');
-      if (kumamotoReliefClose) {
-        kumamotoReliefClose.addEventListener('click', () => {
-          kumamotoReliefDismissed = true;
-          updateKumamotoReliefBanner(map.getCenter());
+      const disasterReliefBanner = document.getElementById('disaster-relief-banner');
+      const disasterReliefClose = disasterReliefBanner && disasterReliefBanner.querySelector('.disaster-relief-close');
+      if (disasterReliefClose) {
+        disasterReliefClose.addEventListener('click', () => {
+          if (activeReliefCampaignId) dismissedReliefCampaigns.add(activeReliefCampaignId);
+          updateDisasterReliefBanner(map.getCenter());
         });
       }
-      updateKumamotoReliefBanner(map.getCenter());
+      updateDisasterReliefBanner(map.getCenter());
 
       // 共有リンクの見た目を優先。指定がなければ前回の地図を復元
       let initialBasemap = sharedView && sharedView.hasStyle && sharedView.basemap
@@ -6230,7 +6254,7 @@
 
       map.on('moveend', () => {
         const c = map.getCenter();
-        updateKumamotoReliefBanner(c);
+        updateDisasterReliefBanner(c);
         const MAX_LAT = 84.5;
         if (c.lat > MAX_LAT + 0.05) {
           map.panTo([MAX_LAT, c.lng], { animate: true, duration: 0.4 });
