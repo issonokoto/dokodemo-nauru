@@ -4426,7 +4426,10 @@
         return searchable.includes(term);
       };
       if (parsedSearch.excludedTerms.some(matchesTerm)) return false;
-      return parsedSearch.groups.some(group => group.every(matchesTerm));
+      if (parsedSearch.groups.length) {
+        return parsedSearch.groups.some(group => group.every(matchesTerm));
+      }
+      return parsedSearch.excludedTerms.length > 0;
     }
 
     async function loadOfficialAreaData() {
