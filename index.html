@@ -1017,10 +1017,15 @@
       background: #fff;
     }
     .search-builder-results-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.6rem 0.8rem;
       flex: 0 0 auto;
       padding: 0.85rem 0.9rem 0.7rem;
       border-bottom: 1px solid #dbe5eb;
     }
+    .search-builder-results-heading { min-width: 0; }
     .search-builder-results-head h3 {
       margin: 0;
       color: #0a2744;
@@ -1031,6 +1036,48 @@
       margin: 0.2rem 0 0;
       color: #6a7f8e;
       font-size: 0.68rem;
+    }
+    .search-builder-results-tools {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .search-builder-sort-label {
+      color: #6a7f8e;
+      font-size: 0.65rem;
+      white-space: nowrap;
+    }
+    .search-builder-sort-buttons {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .search-builder-sort-button {
+      min-height: 1.9rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #b8cbd6;
+      border-radius: 0.5rem;
+      background: #fff;
+      color: #174a69;
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1.2;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .search-builder-sort-button:hover,
+    .search-builder-sort-button:focus-visible {
+      border-color: #0b6fa4;
+      background: #eef7fb;
+      outline: 2px solid rgba(11, 111, 164, 0.18);
+      outline-offset: 1px;
+    }
+    .search-builder-sort-button[aria-pressed="true"] {
+      border-color: #0b6fa4;
+      background: #e7f4fa;
+      color: #0a5d87;
     }
     .search-builder-result-list {
       min-height: 8rem;
@@ -1893,6 +1940,13 @@
       #search-builder-controls {
         grid-template-columns: 1fr;
       }
+      .search-builder-results-head {
+        display: block;
+      }
+      .search-builder-results-tools {
+        justify-content: flex-start;
+        margin-top: 0.55rem;
+      }
       .search-builder-results {
         position: static;
         order: -1;
@@ -2376,8 +2430,18 @@
 
           <aside class="search-builder-results" aria-labelledby="search-builder-results-heading">
             <div class="search-builder-results-head">
-              <h3 id="search-builder-results-heading">一致する候補</h3>
-              <p id="search-builder-results-note">候補を選ぶと通常の検索欄に入ります</p>
+              <div class="search-builder-results-heading">
+                <h3 id="search-builder-results-heading">一致する候補</h3>
+                <p id="search-builder-results-note">候補を選ぶと通常の検索欄に入ります</p>
+              </div>
+              <div class="search-builder-results-tools" role="group" aria-label="一覧の並び替え">
+                <span class="search-builder-sort-label">並び替え</span>
+                <div class="search-builder-sort-buttons">
+                  <button type="button" id="search-builder-sort-name" class="search-builder-sort-button" aria-pressed="true">名前順</button>
+                  <button type="button" id="search-builder-sort-area" class="search-builder-sort-button" aria-pressed="false">面積順</button>
+                  <button type="button" id="search-builder-sort-direction" class="search-builder-sort-button" aria-label="昇順。クリックで降順に切り替え" title="昇順。クリックで降順に切り替え">昇順 ↑</button>
+                </div>
+              </div>
             </div>
             <div id="search-builder-results" class="search-builder-result-list"></div>
             <button type="button" id="search-builder-more" class="search-builder-more" hidden>さらに50件表示</button>
@@ -2709,6 +2773,8 @@
     let searchBuilderTargets = [];
     let searchBuilderFreeText = '';
     let searchBuilderResultLimit = 50;
+    let searchBuilderSortKey = 'name';
+    let searchBuilderSortDirection = 'asc';
     let selectedComparisonTarget = null;
     const searchBuilderState = {
       types: new Set(),
@@ -5181,6 +5247,42 @@
       return searchBuilderTargets.filter(target => matchesComparisonSearch(target, parsed));
     }
 
+    function updateSearchBuilderSortControls() {
+      const nameButton = document.getElementById('search-builder-sort-name');
+      const areaButton = document.getElementById('search-builder-sort-area');
+      const directionButton = document.getElementById('search-builder-sort-direction');
+      if (nameButton) nameButton.setAttribute('aria-pressed', String(searchBuilderSortKey === 'name'));
+      if (areaButton) areaButton.setAttribute('aria-pressed', String(searchBuilderSortKey === 'area'));
+      if (directionButton) {
+        const isAscending = searchBuilderSortDirection === 'asc';
+        const currentLabel = isAscending ? '昇順' : '降順';
+        const nextLabel = isAscending ? '降順' : '昇順';
+        directionButton.textContent = `${currentLabel} ${isAscending ? '↑' : '↓'}`;
+        directionButton.setAttribute('aria-label', `${currentLabel}。クリックで${nextLabel}に切り替え`);
+        directionButton.title = `${currentLabel}。クリックで${nextLabel}に切り替え`;
+      }
+    }
+
+    function sortSearchBuilderTargets(matches) {
+      const direction = searchBuilderSortDirection === 'desc' ? -1 : 1;
+      return matches.slice().sort((a, b) => {
+        const nameA = String(a && a.name || '');
+        const nameB = String(b && b.name || '');
+        const nameResult = nameA.localeCompare(nameB, 'ja');
+        if (searchBuilderSortKey === 'name' && nameResult !== 0) return nameResult * direction;
+        if (searchBuilderSortKey === 'area') {
+          const areaA = Number(a && a.areaKm2);
+          const areaB = Number(b && b.areaKm2);
+          const hasAreaA = Number.isFinite(areaA);
+          const hasAreaB = Number.isFinite(areaB);
+          if (hasAreaA !== hasAreaB) return hasAreaA ? -1 : 1;
+          if (hasAreaA && areaA !== areaB) return (areaA - areaB) * direction;
+        }
+        if (nameResult !== 0) return nameResult;
+        return String(a && a.id || '').localeCompare(String(b && b.id || ''), 'ja');
+      });
+    }
+
     async function selectSearchBuilderTarget(target) {
       const targetPeriod = COMPARISON_PERIODS.includes(target.period) ? target.period : 'all';
       comparisonPeriod = targetPeriod;
@@ -5205,6 +5307,7 @@
       const more = document.getElementById('search-builder-more');
       const note = document.getElementById('search-builder-results-note');
       if (!container || !more || !note) return;
+      updateSearchBuilderSortControls();
       if (!matches.length) {
         const empty = document.createElement('div');
         empty.className = 'search-builder-result-empty';
@@ -5214,7 +5317,8 @@
         more.hidden = true;
         return;
       }
-      const visible = matches.slice(0, searchBuilderResultLimit);
+      const sortedMatches = sortSearchBuilderTargets(matches);
+      const visible = sortedMatches.slice(0, searchBuilderResultLimit);
       const fragment = document.createDocumentFragment();
       visible.forEach(target => {
         const button = document.createElement('button');
@@ -6076,6 +6180,19 @@
           document.getElementById('search-builder-area-max').value = searchBuilderState.maxArea;
           updateSearchBuilderSummary();
         });
+      });
+      [['search-builder-sort-name', 'name'], ['search-builder-sort-area', 'area']].forEach(([id, key]) => {
+        const button = document.getElementById(id);
+        if (!button) return;
+        button.addEventListener('click', () => {
+          if (searchBuilderSortKey === key) return;
+          searchBuilderSortKey = key;
+          updateSearchBuilderSummary();
+        });
+      });
+      document.getElementById('search-builder-sort-direction').addEventListener('click', () => {
+        searchBuilderSortDirection = searchBuilderSortDirection === 'asc' ? 'desc' : 'asc';
+        updateSearchBuilderSummary();
       });
       document.getElementById('search-builder-clear').addEventListener('click', () => {
         resetSearchBuilderState();
