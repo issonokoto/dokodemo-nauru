@@ -917,11 +917,13 @@ async function findReusableTarget(outputDir, name, requestedKind, context) {
   return matches.values().next().value ?? null;
 }
 
-function svgViewport(bbox, padding) {
+function svgViewport(bbox, paddingRatio) {
   const lonScale = Math.cos(((bbox[1] + bbox[3]) / 2) * Math.PI / 180);
   const contentWidth = (bbox[2] - bbox[0]) * lonScale;
   const contentHeight = bbox[3] - bbox[1];
-  return { lonScale, contentWidth, contentHeight, viewWidth: contentWidth + padding * 2, viewHeight: contentHeight + padding * 2 };
+  const paddingX = contentWidth * paddingRatio;
+  const paddingY = contentHeight * paddingRatio;
+  return { lonScale, contentWidth, contentHeight, paddingX, paddingY, viewWidth: contentWidth + paddingX * 2, viewHeight: contentHeight + paddingY * 2 };
 }
 
 function rasterDimensions(aspectRatio) {
@@ -931,9 +933,9 @@ function rasterDimensions(aspectRatio) {
     : { width: Math.max(1, Math.round(2048 * safeRatio)), height: 2048 };
 }
 
-function svgText(geometry, bbox, width, height, padding) {
-  const { lonScale, viewWidth, viewHeight } = svgViewport(bbox, padding);
-  const mapPoint = ([lon, lat]) => [padding + (lon - bbox[0]) * lonScale, padding + (bbox[3] - lat)];
+function svgText(geometry, bbox, width, height, paddingRatio) {
+  const { lonScale, paddingX, paddingY, viewWidth, viewHeight } = svgViewport(bbox, paddingRatio);
+  const mapPoint = ([lon, lat]) => [paddingX + (lon - bbox[0]) * lonScale, paddingY + (bbox[3] - lat)];
   const ringPath = (ring) => ring.map((point, index) => { const [x, y] = mapPoint(point); return `${index ? 'L' : 'M'}${x.toFixed(3)},${y.toFixed(3)}`; }).join(' ') + (isAreaGeometry(geometry) ? ' Z' : '');
   const d = allRings(geometry).map(ringPath).join(' ');
   const pathStyle = isAreaGeometry(geometry)
@@ -1104,10 +1106,8 @@ async function main() {
   const projectedAspectRatio = longitudeSpan > 0 && latitudeSpan > 0
     ? (longitudeSpan * Math.cos(centerLat * Math.PI / 180)) / latitudeSpan
     : null;
-  const projectedWidth = longitudeSpan * Math.cos(centerLat * Math.PI / 180);
-  const projectedHeight = latitudeSpan;
-  const svgPadding = Math.max(projectedWidth, projectedHeight) * 0.04;
-  const svgBounds = svgViewport(bbox, svgPadding);
+  const svgPaddingRatio = 0.04;
+  const svgBounds = svgViewport(bbox, svgPaddingRatio);
   const svgCanvasAspectRatio = svgBounds.viewHeight > 0 ? svgBounds.viewWidth / svgBounds.viewHeight : 1;
   const svgDimensions = rasterDimensions(svgCanvasAspectRatio);
   const maskDimensions = rasterDimensions(projectedAspectRatio);
@@ -1139,7 +1139,7 @@ async function main() {
   const geojson = { type: 'Feature', properties: { name: resolvedName, kind, context: resolvedContext, boundaryDefinition, geometryType: geometry.type, boundaryStatus: geometrySummary.boundaryStatus, osmType, osmId: Number(osmId), boundarySourceUrl: `https://www.openstreetmap.org/${osmType}/${osmId}`, license: 'OpenStreetMap contributors, ODbL 1.0' }, geometry };
   await fs.writeFile(path.join(outputDir, `${stem}.geojson`), `${JSON.stringify(geojson, null, 2)}\n`, 'utf8');
   if (!args['no-svg']) {
-    await fs.writeFile(path.join(outputDir, `${stem}.preview.svg`), svgText(geometry, bbox, svgDimensions.width, svgDimensions.height, svgPadding), 'utf8');
+    await fs.writeFile(path.join(outputDir, `${stem}.preview.svg`), svgText(geometry, bbox, svgDimensions.width, svgDimensions.height, svgPaddingRatio), 'utf8');
   }
   if (args['keep-raw'] || args['reuse-cache']) await fs.writeFile(rawCachePath, fetched.text, 'utf8');
   const svgExport = args['no-svg'] ? null : { file: `${stem}.preview.svg`, width: svgDimensions.width, height: svgDimensions.height, aspectRatio: svgCanvasAspectRatioValue, contentAspectRatio: projectedAspectRatioValue, projection: 'local equirectangular, one x/y scale', mode: lineGeometry ? 'line' : 'area' };
