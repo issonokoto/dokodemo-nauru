@@ -95,6 +95,7 @@ Run checks appropriate to the feature and output scale:
 - geodesic or equal-area projected area, with holes subtracted;
 - comparison with official/reference area and the intended boundary meaning;
 - area preservation after any simplification, with a stated tolerance;
+- serialized SVG precision at the intended canvas size; keep the measured worst-case coordinate quantization error at or below 0.25 output pixel;
 - visual overlay or rendered preview at the target scale.
 
 In Quick mode, perform the structural, ring, coordinate, area-plausibility, and aspect-ratio checks locally. Do not block the save on a fresh official website, Geolonia, or raster-renderer request when those references are not already cached; record them as optional checks instead.
@@ -133,13 +134,15 @@ At minimum, preserve these properties alongside the geometry:
 
 Add `geometryAreaKm2`, `bbox`, validation status, simplification tolerance, and reference-area source when available. Preserve raw API responses or a checksum in a research cache when reproducibility matters, but keep large caches out of the public catalog unless they are intentionally part of the project.
 
+For SVG derivatives, also preserve `width`, `height`, `viewBox`, `coordinatePrecision`, and `quantizationErrorPx` in metadata. These describe numeric serialization precision, not geometric simplification, and must not replace the canonical unsimplified GeoJSON or its area checks.
+
 For Dokodemo Nauru, inspect the current nested `github-dokodemo-nauru` repository before writing. The established pattern is a catalog under `data/` with detailed files under a feature-specific directory, metadata such as `osmType`, `osmId`, `geometryFile`, and source attribution, and local audit scripts under `scripts/`. Re-check current paths and schema rather than assuming an old revision is unchanged.
 
 ### 7. Derive image and other outputs from the vector
 
 Treat GeoJSON or another validated vector as canonical; never make a screenshot the only saved boundary. For each derivative, save the transform specification with the output:
 
-- **SVG:** choose a projection or planar transform, map the target bounds to the viewBox, preserve holes as subpaths, and document whether y-axis inversion was applied. For a `LineString`, emit a stroked path without closing it.
+- **SVG:** choose a projection or planar transform, map the target bounds to the viewBox, preserve holes as subpaths, and document whether y-axis inversion was applied. Serialize mapped coordinates with enough precision that rounding error is at or below 0.25 output pixel at the target canvas; never apply a fixed three-decimal format to a small geographic-unit viewBox. Record `coordinatePrecision`, measured `quantizationErrorPx`, and any scale-specific simplification tolerance. For a `LineString`, emit a stroked path without closing it.
 - **PNG/TIFF mask:** choose width, height, bounds, background, fill/alpha convention, antialiasing, and pixel-to-coordinate transform. Use transparency or a documented mask value outside the boundary. If exact geographic placement is needed, use GeoTIFF or a world-file/sidecar rather than an unreferenced PNG.
   An open `LineString` is not an area mask; keep the vector and line preview and report that a mask is unsupported unless a separately verified closed water boundary is selected.
 - **Raster tiles or MBTiles:** record zoom range, tile scheme, projection, source geometry version, and simplification rule.
@@ -176,6 +179,7 @@ Return a compact receipt containing the accepted OSM object, rejected or ambiguo
 - **Relation/API timeout:** retry a bounded endpoint/query with backoff, then document a fallback; do not silently replace the source.
 - **Administrative relation contains sea:** inspect outer-way `maritime=yes`; fetch one bounded `natural=coastline` bbox, snap the two land/sea contacts, replace only the maritime arc, and keep closed coastline ways inside the original relation as separate island components. If any contact or coastline graph join is missing, fail the conversion rather than retaining the parent sea polygon.
 - **Geometry looks plausible but renders wrong:** check `[lon, lat]` order, ring closure, projection, y-axis direction, antimeridian handling, and hole winding before changing the data.
+- **The boundary looks blocky or stair-stepped:** inspect SVG coordinate serialization before changing OSM geometry; compare `quantizationErrorPx` with the 0.25-pixel bound, then increase precision or use a pixel-based viewBox. Keep the detailed GeoJSON unchanged.
 - **The output is square or too narrow:** inspect the actual SVG `width`, `height`, and `viewBox`, then compare canvas ratio with projected content ratio; remove independent x/y normalization and recompute raster dimensions from one projected scale.
 - **A ratio answer seems contradictory:** label whether it is area, coordinate-bbox, projected-content, or canvas ratio before making a conclusion.
 - **Simplification changes the result:** reduce tolerance or retain the detailed geometry and generate a scale-specific derivative; record the measured area ratio.
@@ -195,6 +199,7 @@ Return a compact receipt containing the accepted OSM object, rejected or ambiguo
 - [ ] Candidate identity is pinned by verified `osmType` and `osmId`, or the alternate source is explicit.
 - [ ] Complete polygon/multipolygon geometry is saved in GeoJSON coordinate order.
 - [ ] Geometry, area, bounds, holes, and target-scale rendering have been checked.
+- [ ] SVG serialization precision is measured and `quantizationErrorPx` is within the target-scale bound, or an exception is documented.
 - [ ] Canonical metadata, provenance, license, and retrieval time are present.
 - [ ] SVG/PNG/raster/export settings and georeferencing sidecars are saved where needed.
 - [ ] Catalog references and output paths are consistent.

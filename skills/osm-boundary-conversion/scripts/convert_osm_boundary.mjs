@@ -917,6 +917,13 @@ async function findReusableTarget(outputDir, name, requestedKind, context) {
   return matches.values().next().value ?? null;
 }
 
+const SVG_COORDINATE_PRECISION = 6;
+
+function svgQuantizationErrorPx(viewWidth, viewHeight, width, height) {
+  const halfStep = 0.5 * (10 ** -SVG_COORDINATE_PRECISION);
+  return Number(Math.max(halfStep * width / viewWidth, halfStep * height / viewHeight).toFixed(6));
+}
+
 function svgViewport(bbox, paddingRatio) {
   const lonScale = Math.cos(((bbox[1] + bbox[3]) / 2) * Math.PI / 180);
   const contentWidth = (bbox[2] - bbox[0]) * lonScale;
@@ -936,7 +943,7 @@ function rasterDimensions(aspectRatio) {
 function svgText(geometry, bbox, width, height, paddingRatio) {
   const { lonScale, paddingX, paddingY, viewWidth, viewHeight } = svgViewport(bbox, paddingRatio);
   const mapPoint = ([lon, lat]) => [paddingX + (lon - bbox[0]) * lonScale, paddingY + (bbox[3] - lat)];
-  const ringPath = (ring) => ring.map((point, index) => { const [x, y] = mapPoint(point); return `${index ? 'L' : 'M'}${x.toFixed(6)},${y.toFixed(6)}`; }).join(' ') + (isAreaGeometry(geometry) ? ' Z' : '');
+  const ringPath = (ring) => ring.map((point, index) => { const [x, y] = mapPoint(point); return `${index ? 'L' : 'M'}${x.toFixed(SVG_COORDINATE_PRECISION)},${y.toFixed(SVG_COORDINATE_PRECISION)}`; }).join(' ') + (isAreaGeometry(geometry) ? ' Z' : '');
   const d = allRings(geometry).map(ringPath).join(' ');
   const pathStyle = isAreaGeometry(geometry)
     ? 'fill="#6c9f84" fill-rule="evenodd"'
@@ -1110,6 +1117,7 @@ async function main() {
   const svgBounds = svgViewport(bbox, svgPaddingRatio);
   const svgCanvasAspectRatio = svgBounds.viewHeight > 0 ? svgBounds.viewWidth / svgBounds.viewHeight : 1;
   const svgDimensions = rasterDimensions(svgCanvasAspectRatio);
+  const svgQuantizationErrorPxValue = svgQuantizationErrorPx(svgBounds.viewWidth, svgBounds.viewHeight, svgDimensions.width, svgDimensions.height);
   const maskDimensions = rasterDimensions(projectedAspectRatio);
   const rings = allRings(geometry);
   const deepChecks = args.deep ? { selfIntersectionCount: rings.reduce((sum, ring) => sum + selfIntersectionCount(ring, areaGeometry), 0) } : null;
@@ -1142,7 +1150,7 @@ async function main() {
     await fs.writeFile(path.join(outputDir, `${stem}.preview.svg`), svgText(geometry, bbox, svgDimensions.width, svgDimensions.height, svgPaddingRatio), 'utf8');
   }
   if (args['keep-raw'] || args['reuse-cache']) await fs.writeFile(rawCachePath, fetched.text, 'utf8');
-  const svgExport = args['no-svg'] ? null : { file: `${stem}.preview.svg`, width: svgDimensions.width, height: svgDimensions.height, aspectRatio: svgCanvasAspectRatioValue, contentAspectRatio: projectedAspectRatioValue, coordinatePrecision: 6, projection: 'local equirectangular, one x/y scale', mode: lineGeometry ? 'line' : 'area' };
+  const svgExport = args['no-svg'] ? null : { file: `${stem}.preview.svg`, width: svgDimensions.width, height: svgDimensions.height, aspectRatio: svgCanvasAspectRatioValue, contentAspectRatio: projectedAspectRatioValue, coordinatePrecision: SVG_COORDINATE_PRECISION, quantizationErrorPx: svgQuantizationErrorPxValue, projection: 'local equirectangular, one x/y scale', mode: lineGeometry ? 'line' : 'area' };
   const pngMaskExport = lineGeometry
     ? { supported: false, reason: 'An open LineString has no area to rasterize as a mask' }
     : { supported: true, recommendedWidth: maskDimensions.width, recommendedHeight: maskDimensions.height, aspectRatio: projectedAspectRatioValue, rendered: false };
