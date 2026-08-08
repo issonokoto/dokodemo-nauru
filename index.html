@@ -2566,6 +2566,7 @@
     const PLACE_ADMINISTRATIVE_AREAS_URL = './data/place-administrative-areas.json?v=4';
     const COUNTRIES_URL = './data/countries.geojson?v=42';
     const SEARCH_AREA_INDEX_URL = './data/search-area-index.json?v=1';
+    const FACILITY_RELATIONS_URL = './data/facility-relations.json?v=1';
     const ATTRACTION_PERIODS = ['attraction', 'airport', 'military', 'heritage', 'infrastructure', 'land'];
     const COMPARISON_PERIODS = ['all', 'current', '1995', 'country', 'island', 'water', ...ATTRACTION_PERIODS];
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
@@ -2768,6 +2769,7 @@
     let placeAdministrativeAreasPromise = null;
     let countriesPromise = null;
     let searchAreaIndexPromise = null;
+    let facilityRelationsPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
     let searchBuilderTargets = [];
@@ -4545,6 +4547,20 @@
       return attractionsPromise;
     }
 
+    async function loadFacilityRelations() {
+      if (facilityRelationsPromise) return facilityRelationsPromise;
+      facilityRelationsPromise = fetch(FACILITY_RELATIONS_URL, { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error('施設間の関係データを取得できませんでした');
+          return response.json();
+        })
+        .catch(error => {
+          facilityRelationsPromise = null;
+          throw error;
+        });
+      return facilityRelationsPromise;
+    }
+
     async function loadPlaceAdministrativeAreas() {
       if (placeAdministrativeAreasPromise) return placeAdministrativeAreasPromise;
       placeAdministrativeAreasPromise = fetch(PLACE_ADMINISTRATIVE_AREAS_URL, { cache: 'no-store' })
@@ -4652,7 +4668,86 @@
       ].filter(tag => status.toLowerCase().includes(tag.toLowerCase()));
     }
 
-    function attractionTargetFromFeature(feature, administrativeIndex, areaIndex) {
+    function facilityKeyFromProperties(properties) {
+      const osmType = String(properties && properties.osmType || '').trim();
+      const osmId = String(properties && properties.osmId || '').trim();
+      return osmType && osmId ? `${osmType}:${osmId}` : '';
+    }
+
+    function buildFacilityRoleIndex(collection) {
+      const index = new Map();
+      (collection && collection.features || []).forEach(feature => {
+        const properties = feature && feature.properties || {};
+        const key = facilityKeyFromProperties(properties);
+        const subtype = String(properties.subtype || '').trim();
+        if (!key || !subtype) return;
+        if (!index.has(key)) index.set(key, new Set());
+        index.get(key).add(subtype);
+      });
+      return index;
+    }
+
+    function buildFacilityRelationIndex(data) {
+      const index = new Map();
+      (data && Array.isArray(data.relations) ? data.relations : []).forEach(item => {
+        const relation = String(item && item.relation || '').trim();
+        const base = String(item && item.base || '').trim();
+        const airfield = String(item && item.airfield || '').trim();
+        if (!relation || !base || !airfield) return;
+        [[base, 'base', airfield], [airfield, 'airfield', base]].forEach(([key, role, otherKey]) => {
+          if (!index.has(key)) index.set(key, []);
+          index.get(key).push({ relation, role, otherKey });
+        });
+      });
+      return index;
+    }
+
+    function facilityScopeMetadata(properties, roleIndex, relationIndex) {
+      const key = facilityKeyFromProperties(properties);
+      const roles = roleIndex && roleIndex.get(key) || new Set();
+      const relations = relationIndex && relationIndex.get(key) || [];
+      const sameBoundary = roles.has('airport') && roles.has('military-base');
+      if (sameBoundary) {
+        const relatedBase = relations.some(item => item.relation === 'base-airfield' && item.role === 'airfield');
+        const sharedFacility = relations.some(item => item.relation === 'shared-airfield');
+        const notes = ['同じOSM輪郭が空港・基地の両方に登録されています。'];
+        if (relatedBase) notes.push('別の基地区域とも関係づけられています。');
+        if (sharedFacility) notes.push('空港と共用する施設としても登録されています。');
+        return {
+          facilityScopeLabel: '基地・飛行場区域',
+          facilityRelationNote: notes.join(' ')
+        };
+      }
+      const baseAirfield = relations.find(item => item.relation === 'base-airfield');
+      if (baseAirfield && baseAirfield.role === 'airfield') {
+        return {
+          facilityScopeLabel: '基地に関連する飛行場区域',
+          facilityRelationNote: '基地区域とは別の飛行場区域として登録されています。'
+        };
+      }
+      if (baseAirfield && baseAirfield.role === 'base') {
+        return {
+          facilityScopeLabel: '基地区域',
+          facilityRelationNote: '別の飛行場区域と関係づけられています。'
+        };
+      }
+      const sharedAirfield = relations.find(item => item.relation === 'shared-airfield');
+      if (sharedAirfield && sharedAirfield.role === 'airfield') {
+        return {
+          facilityScopeLabel: '基地と共用する飛行場区域',
+          facilityRelationNote: '基地と共用する飛行場区域として登録されています。'
+        };
+      }
+      if (sharedAirfield && sharedAirfield.role === 'base') {
+        return {
+          facilityScopeLabel: '飛行場と共用する基地区域',
+          facilityRelationNote: '飛行場と共用する基地区域として登録されています。'
+        };
+      }
+      return { facilityScopeLabel: '', facilityRelationNote: '' };
+    }
+
+    function attractionTargetFromFeature(feature, administrativeIndex, areaIndex, facilityMetadata = {}) {
       const properties = feature && feature.properties || {};
       const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
       const administrative = administrativeMetadata(feature, administrativeIndex);
@@ -4672,8 +4767,11 @@
         subtypeLabel: properties.subtypeLabel || '観光地・施設',
         statusLabel: properties.statusLabel || '',
         areaKm2: indexedFeatureArea(properties, feature, areaIndex),
+        hasOfficialArea: Number(properties.officialAreaKm2) > 0,
         searchTypes: [properties.subtypeLabel || '観光地・施設'],
         searchTags: semanticTags,
+        facilityScopeLabel: facilityMetadata.facilityScopeLabel || '',
+        facilityRelationNote: facilityMetadata.facilityRelationNote || '',
         areaSourceLabel: properties.areaSourceLabel || '',
         areaSourceUrl: properties.areaSourceUrl || '',
         boundarySourceLabel: properties.boundarySourceLabel || '',
@@ -4691,6 +4789,13 @@
         ].filter(Boolean).join(' '),
         feature
       };
+    }
+
+    function comparisonTargetDisplayName(target) {
+      const scope = target && target.kind === 'attraction'
+        ? String(target.facilityScopeLabel || '').trim()
+        : '';
+      return scope ? `${target.name}（${scope}）` : target.name;
     }
 
     async function loadHistorical1995Topology() {
@@ -4877,10 +4982,24 @@
             .then(([collection, areaIndex]) => (collection.features || [])
               .map(feature => countryTargetFromFeature(feature, areaIndex)))
           : ATTRACTION_PERIODS.includes(period)
-            ? Promise.all([loadAttractions(), loadPlaceAdministrativeAreas(), loadSearchAreaIndex()])
-              .then(([collection, administrativeIndex, areaIndex]) => (collection.features || [])
-              .map(feature => attractionTargetFromFeature(feature, administrativeIndex, areaIndex))
-              .filter(target => target.period === period))
+            ? Promise.all([
+              loadAttractions(),
+              loadPlaceAdministrativeAreas(),
+              loadSearchAreaIndex(),
+              loadFacilityRelations()
+            ])
+              .then(([collection, administrativeIndex, areaIndex, relationData]) => {
+                const roleIndex = buildFacilityRoleIndex(collection);
+                const relationIndex = buildFacilityRelationIndex(relationData);
+                return (collection.features || [])
+                  .map(feature => attractionTargetFromFeature(
+                    feature,
+                    administrativeIndex,
+                    areaIndex,
+                    facilityScopeMetadata(feature && feature.properties, roleIndex, relationIndex)
+                  ))
+                  .filter(target => target.period === period);
+              })
           : ['island', 'water'].includes(period)
             ? Promise.all([loadNaturalFeatures(), loadPlaceAdministrativeAreas(), loadSearchAreaIndex()])
               .then(([collection, administrativeIndex, areaIndex]) => (collection.features || [])
@@ -5810,7 +5929,7 @@
       if (!Number.isFinite(targetArea) || targetArea <= 0) throw new Error('面積を計算できませんでした');
       const ratio = targetArea / NAURU_AREA_KM2;
       const ratioLabel = formatRatio(ratio);
-      const targetLabel = historical ? result.target.shortName : result.target.name;
+      const targetLabel = historical ? result.target.shortName : comparisonTargetDisplayName(result.target);
       const targetPeriodLabel = historical ? '（1995年時点）' : '';
       const nauruSvg = document.getElementById('comparison-nauru-svg');
       const targetSvg = document.getElementById('comparison-target-svg');
@@ -5837,11 +5956,14 @@
       const groupContext = Array.isArray(result.target.groups) && result.target.groups.length
         ? `／${result.target.groups.join('・')}`
         : '';
+      const facilityScopeContext = attraction && result.target.facilityScopeLabel
+        ? `／${result.target.facilityScopeLabel}`
+        : '';
       context.textContent = historical
         ? `${result.target.prefecture}${result.target.parent ? `・${result.target.parent}` : ''}／${HISTORICAL_1995_DATE}`
         : country ? `${result.target.context}／国・地域`
           : natural ? `${administrativeContext}${groupContext}／${result.target.kind === 'island' ? '島' : '湖・池'}`
-            : attraction ? `${administrativeContext}${groupContext}／${result.target.subtypeLabel}${result.target.statusLabel ? `／${result.target.statusLabel}` : ''}` : '';
+            : attraction ? `${administrativeContext}${groupContext}／${result.target.subtypeLabel}${facilityScopeContext}${result.target.statusLabel ? `／${result.target.statusLabel}` : ''}` : '';
       document.getElementById('comparison-target-area').textContent = `面積 約${formatArea(targetArea)} km²`;
       document.getElementById('comparison-summary').textContent = `${targetLabel}${targetPeriodLabel}の面積は約${formatArea(targetArea)} km²。ナウル約${ratioLabel}個分です。`;
       const comparisonNote = document.getElementById('comparison-note');
@@ -5869,7 +5991,12 @@
         comparisonNote.append(countryBoundaryLink, ' の高精細データを表示。');
       } else if (natural || attraction) {
         comparisonNote.replaceChildren();
-        const hasOfficialArea = Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0;
+        const hasOfficialArea = attraction
+          ? Boolean(result.target.hasOfficialArea)
+          : Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0;
+        if (attraction && result.target.facilityRelationNote) {
+          comparisonNote.append(`施設関係：${result.target.facilityRelationNote}（表示上の区分であり、法的な所有権を示すものではありません。） `);
+        }
         if (hasOfficialArea) {
           comparisonNote.append('面積：');
           if (result.target.areaSourceUrl && result.target.areaSourceLabel) {

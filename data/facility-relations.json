@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "relations": [
+    {
+      "relation": "base-airfield",
+      "base": "way:28820825",
+      "airfield": "way:463103578"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:813527222",
+      "airfield": "way:245451491"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:79514545",
+      "airfield": "way:79514556"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:325639342",
+      "airfield": "way:325639264"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:218830956",
+      "airfield": "way:421590433"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "relation:6379113",
+      "airfield": "way:902053445"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:436103970",
+      "airfield": "way:902053982"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:531136672",
+      "airfield": "way:902046346"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:215941124",
+      "airfield": "way:846889170"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:401269296",
+      "airfield": "way:156753043"
+    },
+    {
+      "relation": "base-airfield",
+      "base": "way:401269296",
+      "airfield": "way:902048411"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "relation:6723874",
+      "airfield": "way:57008923"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "way:164887236",
+      "airfield": "way:356582794"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "way:59243453",
+      "airfield": "way:664900076"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "way:58066508",
+      "airfield": "way:54852557"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "way:142146685",
+      "airfield": "way:324129153"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "way:387285652",
+      "airfield": "way:57010868"
+    },
+    {
+      "relation": "shared-airfield",
+      "base": "way:937757279",
+      "airfield": "way:57008032"
+    }
+  ]
+}
