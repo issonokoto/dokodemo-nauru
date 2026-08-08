@@ -126,7 +126,7 @@ function reverseSegment(segment) {
   return { ...segment, nodes: segment.nodes.slice().reverse(), coords: segment.coords.slice().reverse() };
 }
 
-function joinRings(segments) {
+function joinSegmentChains(segments) {
   const remaining = new Map(segments.map((segment) => [segment.id, segment]));
   const endpointIndex = new Map();
   for (const segment of segments) {
@@ -151,12 +151,13 @@ function joinRings(segments) {
     }
     return null;
   };
-  const rings = [];
+  const chains = [];
   while (remaining.size) {
     const first = remaining.values().next().value;
     removeSegment(first);
     let nodes = first.nodes.slice();
     let coords = first.coords.map((point) => [...point]);
+    const chain = [first];
     let steps = 0;
     while (nodes[0] !== nodes[nodes.length - 1]) {
       const head = nodes[0];
@@ -171,19 +172,396 @@ function joinRings(segments) {
       if (joinsTail) {
         nodes = nodes.concat(oriented.nodes.slice(1));
         coords = coords.concat(oriented.coords.slice(1).map((point) => [...point]));
+        chain.push(oriented);
       } else {
         nodes = oriented.nodes.slice(0, -1).concat(nodes);
         coords = oriented.coords.slice(0, -1).map((point) => [...point]).concat(coords);
+        chain.unshift(oriented);
       }
       steps += 1;
       if (steps > segments.length) fail(`Too many ways while joining ${first.role} ring`);
     }
-    rings.push(cleanClosedRing(coords));
+    chains.push({ segments: chain, ring: cleanClosedRing(coords) });
   }
-  return rings;
+  return chains;
 }
 
-function relationGeometry(full, relationId) {
+function joinRings(segments) {
+  return joinSegmentChains(segments).map((chain) => chain.ring);
+}
+
+const COASTLINE_CELL_DEG = 0.05;
+const COASTLINE_CONTACT_MAX_KM = 0.05;
+
+function relationHasMaritimeOuter(full, relationId) {
+  const elements = Array.isArray(full.elements) ? full.elements : [];
+  const ways = new Map(elements.filter((item) => item.type === 'way').map((item) => [String(item.id), item]));
+  const relation = elements.find((item) => item.type === 'relation' && String(item.id) === String(relationId));
+  return Boolean((relation?.members ?? []).some((member) => {
+    if (member.type !== 'way' || member.role !== 'outer') return false;
+    const maritime = normalizedText(ways.get(String(member.ref))?.tags?.maritime);
+    return maritime === 'yes' || maritime === 'true';
+  }));
+}
+
+function relationMemberBbox(full, relationId) {
+  const elements = Array.isArray(full.elements) ? full.elements : [];
+  const nodes = new Map(elements.filter((item) => item.type === 'node').map((item) => [String(item.id), [Number(item.lon), Number(item.lat)]]));
+  const ways = new Map(elements.filter((item) => item.type === 'way').map((item) => [String(item.id), item]));
+  const relation = elements.find((item) => item.type === 'relation' && String(item.id) === String(relationId));
+  if (!relation) fail(`Relation ${relationId} is missing from the OSM response`);
+  const points = [];
+  for (const member of relation.members ?? []) {
+    if (member.type !== 'way') continue;
+    const way = ways.get(String(member.ref));
+    for (const nodeId of way?.nodes ?? []) {
+      const point = nodes.get(String(nodeId));
+      if (point) points.push(point);
+    }
+  }
+  if (!points.length) fail(`Relation ${relationId} has no way coordinates for coastline lookup`);
+  return [
+    Math.min(...points.map((point) => point[0])),
+    Math.min(...points.map((point) => point[1])),
+    Math.max(...points.map((point) => point[0])),
+    Math.max(...points.map((point) => point[1])),
+  ];
+}
+
+function coastlineQueryBbox(bbox) {
+  const longitudeSpan = bbox[2] - bbox[0];
+  const latitudeSpan = bbox[3] - bbox[1];
+  const buffer = Math.min(0.1, Math.max(0.01, Math.max(longitudeSpan, latitudeSpan) * 0.02));
+  return [
+    Math.max(-90, bbox[1] - buffer),
+    Math.max(-180, bbox[0] - buffer),
+    Math.min(90, bbox[3] + buffer),
+    Math.min(180, bbox[2] + buffer),
+  ];
+}
+
+function coastlineWaysFromResponse(response) {
+  const elements = Array.isArray(response?.elements) ? response.elements : [];
+  return elements.filter((item) => item.type === 'way' && Array.isArray(item.geometry) && item.geometry.length >= 2).map((item) => {
+    const coords = item.geometry.map((point) => [Number(point.lon), Number(point.lat)]);
+    return {
+      id: String(item.id),
+      coords,
+      closed: samePoint(coords[0], coords[coords.length - 1]),
+      bbox: [
+        Math.min(...coords.map((point) => point[0])),
+        Math.min(...coords.map((point) => point[1])),
+        Math.max(...coords.map((point) => point[0])),
+        Math.max(...coords.map((point) => point[1])),
+      ],
+    };
+  });
+}
+
+function coastlineGridKey(x, y) { return `${x}:${y}`; }
+
+function buildCoastlineIndex(response) {
+  const ways = coastlineWaysFromResponse(response);
+  if (!ways.length) fail('The coastline query returned no natural=coastline ways');
+  const minLon = Math.min(...ways.map((way) => way.bbox[0]));
+  const minLat = Math.min(...ways.map((way) => way.bbox[1]));
+  const cellSize = Math.max(COASTLINE_CELL_DEG, Math.min(1, Math.max(
+    Math.max(...ways.map((way) => way.bbox[2])) - minLon,
+    Math.max(...ways.map((way) => way.bbox[3])) - minLat,
+  ) / 100));
+  const grid = new Map();
+  const broad = new Set();
+  ways.forEach((way, index) => {
+    const minX = Math.floor(way.bbox[0] / cellSize);
+    const maxX = Math.floor(way.bbox[2] / cellSize);
+    const minY = Math.floor(way.bbox[1] / cellSize);
+    const maxY = Math.floor(way.bbox[3] / cellSize);
+    if ((maxX - minX + 1) * (maxY - minY + 1) > 10_000) {
+      broad.add(index);
+      return;
+    }
+    for (let x = minX; x <= maxX; x += 1) {
+      for (let y = minY; y <= maxY; y += 1) {
+        const key = coastlineGridKey(x, y);
+        if (!grid.has(key)) grid.set(key, new Set());
+        grid.get(key).add(index);
+      }
+    }
+  });
+  return { ways, grid, broad, cellSize };
+}
+
+function projectedPointOnSegment(point, start, end) {
+  const cosLat = Math.cos(point[1] * Math.PI / 180);
+  const ax = start[0] * cosLat;
+  const ay = start[1];
+  const bx = end[0] * cosLat;
+  const by = end[1];
+  const px = point[0] * cosLat;
+  const py = point[1];
+  const dx = bx - ax;
+  const dy = by - ay;
+  const denominator = dx * dx + dy * dy;
+  const t = denominator > 0 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / denominator)) : 0;
+  return [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t];
+}
+
+function coastlineCandidateIndices(index, point, maxDistanceKm) {
+  const centerX = Math.floor(point[0] / index.cellSize);
+  const centerY = Math.floor(point[1] / index.cellSize);
+  const radius = Math.max(2, Math.ceil((maxDistanceKm / 110) / index.cellSize) + 1);
+  const candidates = new Set(index.broad);
+  for (let x = centerX - radius; x <= centerX + radius; x += 1) {
+    for (let y = centerY - radius; y <= centerY + radius; y += 1) {
+      for (const wayIndex of index.grid.get(coastlineGridKey(x, y)) ?? []) candidates.add(wayIndex);
+    }
+  }
+  return candidates;
+}
+
+function nearestCoastlinePoint(point, index, { openOnly = true, maxDistanceKm = COASTLINE_CONTACT_MAX_KM } = {}) {
+  let best = null;
+  for (const wayIndex of coastlineCandidateIndices(index, point, maxDistanceKm)) {
+    const way = index.ways[wayIndex];
+    if (openOnly && way.closed) continue;
+    for (let i = 0; i < way.coords.length - 1; i += 1) {
+      const projected = projectedPointOnSegment(point, way.coords[i], way.coords[i + 1]);
+      const distanceKm = haversineKm(point, projected);
+      if (!best || distanceKm < best.distanceKm) {
+        const segmentStart = way.coords[i];
+        const segmentEnd = way.coords[i + 1];
+        const cosLat = Math.cos(point[1] * Math.PI / 180);
+        const dx = (segmentEnd[0] - segmentStart[0]) * cosLat;
+        const dy = segmentEnd[1] - segmentStart[1];
+        const px = (projected[0] - segmentStart[0]) * cosLat;
+        const py = projected[1] - segmentStart[1];
+        const denominator = dx * dx + dy * dy;
+        const t = denominator > 0 ? Math.max(0, Math.min(1, (px * dx + py * dy) / denominator)) : 0;
+        best = { wayId: way.id, wayIndex, segmentIndex: i, t, point: projected, distanceKm };
+      }
+    }
+  }
+  return best;
+}
+
+function findCoastlineContact(ring, startIndex, direction, coastlineIndex, label) {
+  const ringSize = ring.length - 1;
+  let best = null;
+  let nearRunMisses = 0;
+  for (let offset = 0; offset < ringSize; offset += 1) {
+    const index = ((startIndex + direction * offset) % ringSize + ringSize) % ringSize;
+    const parentPoint = ring[index];
+    const nearest = nearestCoastlinePoint(parentPoint, coastlineIndex, { openOnly: true });
+    if (nearest && nearest.distanceKm <= COASTLINE_CONTACT_MAX_KM) {
+      if (!best || nearest.distanceKm < best.distanceKm) best = { index, parentPoint, ...nearest };
+      nearRunMisses = 0;
+      continue;
+    }
+    if (best) {
+      nearRunMisses += 1;
+      if (nearRunMisses >= 2) return best;
+    }
+  }
+  if (best) return best;
+  fail(`Could not find a mainland coastline contact while resolving ${label}`);
+}
+
+function circularRingPath(ring, fromIndex, toIndex, direction = 1) {
+  const ringSize = ring.length - 1;
+  const points = [ring[fromIndex]];
+  let index = fromIndex;
+  let steps = 0;
+  while (index !== toIndex) {
+    index = ((index + direction) % ringSize + ringSize) % ringSize;
+    points.push(ring[index]);
+    steps += 1;
+    if (steps > ringSize) fail(`Could not close a circular relation path from ${fromIndex} to ${toIndex}`);
+  }
+  return points;
+}
+
+function coastlineWayPieces(way, marks) {
+  const boundaries = [{ position: 0, point: way.coords[0] }, ...marks, { position: way.coords.length - 1, point: way.coords[way.coords.length - 1] }]
+    .sort((a, b) => a.position - b.position);
+  const uniqueBoundaries = [];
+  for (const boundary of boundaries) {
+    const previous = uniqueBoundaries.at(-1);
+    if (previous && Math.abs(previous.position - boundary.position) < 1e-9) {
+      if (boundary.key) uniqueBoundaries[uniqueBoundaries.length - 1] = boundary;
+      continue;
+    }
+    uniqueBoundaries.push(boundary);
+  }
+  const pieces = [];
+  for (let i = 0; i < uniqueBoundaries.length - 1; i += 1) {
+    const start = uniqueBoundaries[i];
+    const end = uniqueBoundaries[i + 1];
+    if (end.position - start.position < 1e-9) continue;
+    const coords = [start.point];
+    for (let vertexIndex = 1; vertexIndex < way.coords.length - 1; vertexIndex += 1) {
+      if (vertexIndex > start.position + 1e-9 && vertexIndex < end.position - 1e-9) coords.push(way.coords[vertexIndex]);
+    }
+    coords.push(end.point);
+    const cleaned = cleanOpenLine(coords);
+    pieces.push({ id: `${way.id}:${i}`, coords: cleaned, start: cleaned[0], end: cleaned[cleaned.length - 1] });
+  }
+  return pieces;
+}
+
+function coastlinePath(coastlineIndex, startSnap, endSnap) {
+  const marksByWay = new Map();
+  for (const snap of [startSnap, endSnap]) {
+    if (!marksByWay.has(snap.wayId)) marksByWay.set(snap.wayId, []);
+    marksByWay.get(snap.wayId).push({ position: snap.segmentIndex + snap.t, point: snap.point, key: snap.wayId });
+  }
+  const edges = [];
+  for (const way of coastlineIndex.ways) {
+    if (way.closed) continue;
+    const pieces = coastlineWayPieces(way, marksByWay.get(way.id) ?? []);
+    for (const piece of pieces) {
+      edges.push({ ...piece, lengthKm: lineLengthKm({ type: 'LineString', coordinates: piece.coords }) });
+    }
+  }
+  const graph = new Map();
+  const addEdge = (key, edgeIndex) => {
+    if (!graph.has(key)) graph.set(key, []);
+    graph.get(key).push(edgeIndex);
+  };
+  edges.forEach((edge, index) => {
+    addEdge(coastlineGridKey(edge.start[0].toFixed(7), edge.start[1].toFixed(7)), index);
+    addEdge(coastlineGridKey(edge.end[0].toFixed(7), edge.end[1].toFixed(7)), index);
+  });
+  const pointKey = (point) => coastlineGridKey(point[0].toFixed(7), point[1].toFixed(7));
+  const startKey = pointKey(startSnap.point);
+  const endKey = pointKey(endSnap.point);
+  if (startKey === endKey) return [startSnap.point, endSnap.point];
+  const distances = new Map([[startKey, 0]]);
+  const previous = new Map();
+  const queue = [{ key: startKey, distance: 0 }];
+  while (queue.length) {
+    queue.sort((a, b) => a.distance - b.distance);
+    const current = queue.shift();
+    if (current.distance !== distances.get(current.key)) continue;
+    if (current.key === endKey) break;
+    for (const edgeIndex of graph.get(current.key) ?? []) {
+      const edge = edges[edgeIndex];
+      const start = pointKey(edge.start);
+      const end = pointKey(edge.end);
+      const nextKey = start === current.key ? end : start;
+      const nextDistance = current.distance + (edge.lengthKm ?? 0);
+      if (nextDistance >= (distances.get(nextKey) ?? Infinity)) continue;
+      distances.set(nextKey, nextDistance);
+      previous.set(nextKey, { key: current.key, edgeIndex, forward: start === current.key });
+      queue.push({ key: nextKey, distance: nextDistance });
+    }
+  }
+  if (!distances.has(endKey)) fail(`No connected OSM coastline path between ${startSnap.wayId} and ${endSnap.wayId}`);
+  const route = [];
+  let currentKey = endKey;
+  while (currentKey !== startKey) {
+    const step = previous.get(currentKey);
+    if (!step) fail('OSM coastline path reconstruction stopped before the contact point');
+    route.push(step);
+    currentKey = step.key;
+  }
+  route.reverse();
+  const points = [startSnap.point];
+  currentKey = startKey;
+  for (const step of route) {
+    const edge = edges[step.edgeIndex];
+    const oriented = step.forward ? edge.coords : edge.coords.slice().reverse();
+    points.push(...oriented.slice(1));
+    currentKey = pointKey(oriented.at(-1));
+  }
+  if (currentKey !== endKey) fail('OSM coastline path ended at an unexpected node');
+  points[points.length - 1] = [...endSnap.point];
+  return cleanOpenLine(points);
+}
+
+function pointInPolygonRings(point, polygon) {
+  return pointInRing(point, polygon[0]) && !polygon.slice(1).some((hole) => pointInRing(point, hole));
+}
+
+function applyAdministrativeLandMask({ basePolygons, outerChains, coastlineResponse }) {
+  const coastlineIndex = buildCoastlineIndex(coastlineResponse);
+  const maskedPolygons = [];
+  const contacts = [];
+  let maskedOuterCount = 0;
+  for (let chainIndex = 0; chainIndex < outerChains.length; chainIndex += 1) {
+    const chain = outerChains[chainIndex];
+    const polygon = basePolygons[chainIndex] ?? [chain.ring];
+    const ring = chain.ring;
+    const ranges = [];
+    let offset = 0;
+    for (const segment of chain.segments) {
+      const start = offset;
+      const end = offset + segment.coords.length - 1;
+      ranges.push({ start, end, maritime: ['yes', 'true'].includes(normalizedText(segment.tags?.maritime)) });
+      offset = end;
+    }
+    const maritimeRanges = ranges.filter((range) => range.maritime);
+    if (!maritimeRanges.length) {
+      maskedPolygons.push(polygon);
+      continue;
+    }
+    const ringSize = ring.length - 1;
+    const first = maritimeRanges[0];
+    const last = maritimeRanges.at(-1);
+    const contains = (position, start, end) => start <= end
+      ? position >= start && position <= end
+      : position >= start || position <= end;
+    const score = (start, end) => maritimeRanges.reduce((total, range) => total + (contains(range.start, start, end) ? range.end - range.start + 1 : 0), 0);
+    const directArc = { start: first.start, end: last.end, score: score(first.start, last.end) };
+    const wrappedArc = { start: last.start, end: first.end, score: score(last.start, first.end) };
+    const seaArc = wrappedArc.score > directArc.score ? wrappedArc : directArc;
+    const startContact = findCoastlineContact(ring, (seaArc.start - 1 + ringSize) % ringSize, -1, coastlineIndex, 'the start of a maritime boundary');
+    const endContact = findCoastlineContact(ring, (seaArc.end + 1) % ringSize, 1, coastlineIndex, 'the end of a maritime boundary');
+    const coast = coastlinePath(coastlineIndex, startContact, endContact);
+    coast[0] = [...startContact.parentPoint];
+    coast[coast.length - 1] = [...endContact.parentPoint];
+    const inland = circularRingPath(ring, endContact.index, startContact.index, 1);
+    const landRing = cleanClosedRing([...coast, ...inland.slice(1)]);
+    const holes = (polygon.slice(1) ?? []).filter((hole) => pointInRing(hole[0], landRing));
+    maskedPolygons.push([landRing, ...holes]);
+    maskedOuterCount += 1;
+    contacts.push({
+      outerIndex: chainIndex,
+      start: { parentIndex: startContact.index, point: startContact.parentPoint, coastlineWayId: startContact.wayId, distanceKm: Number(startContact.distanceKm.toFixed(6)) },
+      end: { parentIndex: endContact.index, point: endContact.parentPoint, coastlineWayId: endContact.wayId, distanceKm: Number(endContact.distanceKm.toFixed(6)) },
+      coastlineVertexCount: coast.length,
+      landVertexCount: landRing.length,
+    });
+  }
+  const landPolygons = maskedPolygons.slice();
+  const parentPolygons = basePolygons;
+  const acceptedIslandKeys = new Set(landPolygons.map((polygon) => polygon[0].map((point) => `${point[0].toFixed(7)},${point[1].toFixed(7)}`).join(';')));
+  let islandComponentCount = 0;
+  for (const way of coastlineIndex.ways.filter((candidate) => candidate.closed)) {
+    const islandRing = cleanClosedRing(way.coords);
+    if (!parentPolygons.some((polygon) => pointInPolygonRings(islandRing[0], polygon))) continue;
+    if (landPolygons.some((polygon) => pointInRing(islandRing[0], polygon[0]))) continue;
+    const islandKey = islandRing.map((point) => `${point[0].toFixed(7)},${point[1].toFixed(7)}`).join(';');
+    if (acceptedIslandKeys.has(islandKey)) continue;
+    acceptedIslandKeys.add(islandKey);
+    landPolygons.push([islandRing]);
+    islandComponentCount += 1;
+  }
+  return {
+    polygons: landPolygons,
+    audit: {
+      applied: true,
+      sourceMode: 'coastline-land-mask',
+      coastlineWayCount: coastlineIndex.ways.length,
+      coastlineOpenWayCount: coastlineIndex.ways.filter((way) => !way.closed).length,
+      coastlineClosedWayCount: coastlineIndex.ways.filter((way) => way.closed).length,
+      maskedOuterCount,
+      islandComponentCount,
+      contacts,
+    },
+  };
+}
+
+function relationGeometry(full, relationId, { coastlineResponse = null } = {}) {
   const elements = Array.isArray(full.elements) ? full.elements : [];
   const relations = new Map(elements.filter((item) => item.type === 'relation').map((item) => [String(item.id), item]));
   const relation = relations.get(String(relationId));
@@ -204,6 +582,7 @@ function relationGeometry(full, relationId) {
         role: member.role,
         nodes: way.nodes.map(String),
         coords,
+        tags: way.tags ?? {},
       });
     }
     if (!groups.outer.length) return [];
@@ -222,6 +601,21 @@ function relationGeometry(full, relationId) {
   const ringKey = (ring) => ring.map((point) => `${point[0].toFixed(7)},${point[1].toFixed(7)}`).join(';');
   const directSubareaMembers = (relation.members ?? []).filter((member) => member.type === 'relation' && member.role === 'subarea');
   const basePolygons = buildPolygons(relation);
+  const outerChains = joinSegmentChains((relation.members ?? [])
+    .map((member, memberIndex) => ({ member, memberIndex }))
+    .filter(({ member }) => member.type === 'way' && member.role === 'outer')
+    .map(({ member, memberIndex }) => {
+      const way = ways.get(String(member.ref));
+      if (!way) fail(`Missing way ${member.ref} referenced by relation ${relation.id}`);
+      const coords = way.nodes.map((nodeId) => nodes.get(String(nodeId)));
+      return {
+        id: `${relation.id}:outer:${memberIndex}:${member.ref}`,
+        role: 'outer',
+        nodes: way.nodes.map(String),
+        coords,
+        tags: way.tags ?? {},
+      };
+    }));
   if (!basePolygons.length && !directSubareaMembers.length) fail(`Relation ${relationId} has no outer ways`);
   const subareaAudit = {
     directRelationCount: directSubareaMembers.length,
@@ -277,6 +671,7 @@ function relationGeometry(full, relationId) {
 
   candidates.sort((a, b) => Math.abs(signedArea(b.polygon[0])) - Math.abs(signedArea(a.polygon[0])));
   let polygons;
+  let landMaskAudit = { applied: false, sourceMode: 'not-needed' };
   if (directSubareaMembers.length) {
     const acceptedKeys = new Set();
     polygons = [];
@@ -308,12 +703,21 @@ function relationGeometry(full, relationId) {
         areaKm2: Number(sphericalAreaKm2({ type: 'Polygon', coordinates: candidate.polygon }).toFixed(8)),
       });
     }
+    if (coastlineResponse) {
+      const masked = applyAdministrativeLandMask({ basePolygons: polygons, outerChains, coastlineResponse });
+      polygons = masked.polygons;
+      landMaskAudit = masked.audit;
+    }
   }
   subareaAudit.candidateComponentCount = candidates.length;
   const geometry = polygons.length === 1
     ? { type: 'Polygon', coordinates: polygons[0] }
     : { type: 'MultiPolygon', coordinates: polygons };
-  return { relation, geometry, subareaAudit };
+  if (landMaskAudit.applied) {
+    subareaAudit.sourceMode = landMaskAudit.sourceMode;
+    subareaAudit.landMask = landMaskAudit;
+  }
+  return { relation, geometry, subareaAudit, landMaskAudit };
 }
 
 function wayGeometry(full, wayId) {
@@ -538,6 +942,30 @@ function svgText(geometry, bbox, width, height, padding) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${viewWidth.toFixed(6)} ${viewHeight.toFixed(6)}" preserveAspectRatio="xMidYMid meet"><path d="${d}" ${pathStyle}/></svg>\n`;
 }
 
+async function loadCoastline(full, relationId, outputDir, stem, { reuseCache = false, keepRaw = false } = {}) {
+  const relationBbox = relationMemberBbox(full, relationId);
+  const queryBbox = coastlineQueryBbox(relationBbox);
+  const bboxText = queryBbox.map((value) => value.toFixed(6));
+  const query = `[out:json][timeout:25];way["natural"="coastline"](${bboxText[0]},${bboxText[1]},${bboxText[2]},${bboxText[3]});out geom;`;
+  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+  const cacheFile = `.${stem}.coastline-${sha256(query).slice(0, 16)}.json`;
+  const cachePath = path.join(outputDir, cacheFile);
+  let fetched;
+  let fromCache = false;
+  if (reuseCache) {
+    try {
+      const text = await fs.readFile(cachePath, 'utf8');
+      fetched = { text, json: JSON.parse(text) };
+      fromCache = true;
+    } catch (error) {
+      if (error.code !== 'ENOENT') fetched = null;
+    }
+  }
+  if (!fetched) fetched = await fetchJson(url);
+  if (keepRaw || reuseCache) await fs.writeFile(cachePath, fetched.text, 'utf8');
+  return { ...fetched, url, query, relationBbox, queryBbox, cacheFile, fromCache };
+}
+
 function usage() { console.error('Usage: node convert_osm_boundary.mjs --name NAME --context CONTEXT [--kind KIND] [--osm-type relation|way --osm-id ID] --output-dir DIR [--deep] [--no-svg] [--keep-raw] [--reuse-cache]'); }
 
 async function main() {
@@ -619,9 +1047,10 @@ async function main() {
   }
   let kind = requestedKind ?? priorMetadata?.kind ?? inferredKind ?? 'boundary';
   const resolvedContext = context || priorMetadata?.context || discoveredContext;
-  const boundaryDefinition = args['boundary-definition']
-    ? String(args['boundary-definition'])
-    : priorMetadata?.boundaryDefinition ?? (kind === 'administrative-area' ? '行政区域内の陸地。海域は含めず、本土と属島を独立した陸地ポリゴンとして保持する。' : null);
+  const explicitBoundaryDefinition = args['boundary-definition'] ? String(args['boundary-definition']) : null;
+  const defaultBoundaryDefinition = '行政区域内の陸地。海域は含めず、本土と属島を独立した陸地ポリゴンとして保持する。';
+  let boundaryDefinition = explicitBoundaryDefinition
+    ?? (kind === 'administrative-area' ? defaultBoundaryDefinition : (priorMetadata?.boundaryDefinition ?? null));
   const priorReferenceArea = priorMetadata?.referenceComparison?.referenceAreaKm2;
   const referenceAreaKm2 = args['reference-area-km2'] ? Number(args['reference-area-km2']) : (Number.isFinite(priorReferenceArea) ? priorReferenceArea : null);
   const rawCachePath = path.join(outputDir, `${stem}.osm-full.json`);
@@ -638,10 +1067,25 @@ async function main() {
   }
   if (!fetched) fetched = await fetchJson(objectUrl);
   if ((args['keep-raw'] || args['reuse-cache']) && !fromCache) await fs.writeFile(rawCachePath, fetched.text, 'utf8');
-  const built = apiType === 'relation' ? relationGeometry(fetched.json, osmId) : wayGeometry(fetched.json, osmId);
   if (!requestedKind && !priorMetadata?.kind && kind === 'boundary') {
-    kind = kindFromTags(built.relation?.tags ?? built.tags ?? {}) ?? kind;
+    const selected = fetched.json?.elements?.find((item) => item.type === apiType && String(item.id) === String(osmId));
+    kind = kindFromTags(selected?.tags ?? {}) ?? kind;
   }
+  if (!explicitBoundaryDefinition) boundaryDefinition = kind === 'administrative-area' ? defaultBoundaryDefinition : (priorMetadata?.boundaryDefinition ?? null);
+  const relation = apiType === 'relation'
+    ? fetched.json?.elements?.find((item) => item.type === 'relation' && String(item.id) === String(osmId))
+    : null;
+  const hasDirectSubarea = Boolean((relation?.members ?? []).some((member) => member.type === 'relation' && member.role === 'subarea'));
+  const needsCoastlineLandMask = apiType === 'relation'
+    && kind === 'administrative-area'
+    && relationHasMaritimeOuter(fetched.json, osmId)
+    && !hasDirectSubarea;
+  const coastline = needsCoastlineLandMask
+    ? await loadCoastline(fetched.json, osmId, outputDir, stem, { reuseCache: Boolean(args['reuse-cache']), keepRaw: Boolean(args['keep-raw']) })
+    : null;
+  const built = apiType === 'relation'
+    ? relationGeometry(fetched.json, osmId, { coastlineResponse: coastline?.json })
+    : wayGeometry(fetched.json, osmId);
   const geometry = built.geometry;
   const subareaAudit = built.subareaAudit ?? null;
   const areaGeometry = isAreaGeometry(geometry);
@@ -703,10 +1147,12 @@ async function main() {
     ? { supported: false, reason: 'An open LineString has no area to rasterize as a mask' }
     : { supported: true, recommendedWidth: maskDimensions.width, recommendedHeight: maskDimensions.height, aspectRatio: projectedAspectRatioValue, rendered: false };
   const validationChecks = areaGeometry
-    ? ['GeoJSON structure', 'closed rings', 'coordinate range', 'outer/inner assignment', 'disconnected land components preserved', 'subarea relation audit', 'aspect-preserving dimensions']
+    ? ['GeoJSON structure', 'closed rings', 'coordinate range', 'outer/inner assignment', 'disconnected land components preserved', 'subarea relation audit', ...(subareaAudit?.landMask?.applied ? ['coastline land mask and island extraction'] : []), 'aspect-preserving dimensions']
     : ['GeoJSON structure', 'coordinate range', 'OSM way node order preserved', 'open linear feature preserved', 'line preview dimensions recorded'];
   const validationStatus = lineGeometry
     ? 'passed-with-note'
+    : subareaAudit?.landMask?.applied
+      ? 'passed-with-coastline-land-mask'
     : subareaAudit?.directRelationCount
       ? 'passed-with-subarea-audit'
       : 'passed';
@@ -717,12 +1163,12 @@ async function main() {
     kind,
     context: resolvedContext,
     boundaryDefinition,
-    source: { osmType, osmId: Number(osmId), objectUrl, responseSha256: sha256(fetched.text), discovery, discoveryCacheFile: discoveryCacheFile ? path.basename(discoveryCacheFile) : null, fromCache, rawResponseFile: (args['keep-raw'] || args['reuse-cache']) ? `${stem}.osm-full.json` : null },
+    source: { osmType, osmId: Number(osmId), objectUrl, responseSha256: sha256(fetched.text), discovery, discoveryCacheFile: discoveryCacheFile ? path.basename(discoveryCacheFile) : null, fromCache, rawResponseFile: (args['keep-raw'] || args['reuse-cache']) ? `${stem}.osm-full.json` : null, coastline: coastline ? { url: coastline.url, query: coastline.query, relationBbox: coastline.relationBbox, queryBbox: coastline.queryBbox, responseSha256: sha256(coastline.text), fromCache: coastline.fromCache, responseFile: (args['keep-raw'] || args['reuse-cache']) ? coastline.cacheFile : null } : null },
     geometry: geometrySummary,
     referenceComparison: { referenceAreaKm2: Number.isFinite(referenceAreaKm2) ? referenceAreaKm2 : null, areaRatio, areaDifferencePercent },
     export: { svg: svgExport, pngMask: pngMaskExport },
     validation: { status: validationStatus, checks: validationChecks, deepChecksRequested: Boolean(args.deep), deepChecks, subareaAudit },
-    files: { geojson: `${stem}.geojson`, metadata: `${stem}.metadata.json`, previewSvg: args['no-svg'] ? null : `${stem}.preview.svg`, discoveryCache: discoveryCacheFile ? path.basename(discoveryCacheFile) : null },
+    files: { geojson: `${stem}.geojson`, metadata: `${stem}.metadata.json`, previewSvg: args['no-svg'] ? null : `${stem}.preview.svg`, discoveryCache: discoveryCacheFile ? path.basename(discoveryCacheFile) : null, coastlineResponse: coastline && (args['keep-raw'] || args['reuse-cache']) ? coastline.cacheFile : null },
   };
   await fs.writeFile(path.join(outputDir, `${stem}.metadata.json`), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
   const consoleSubareaAudit = subareaAudit ? {
@@ -735,6 +1181,9 @@ async function main() {
     missingRelationIds: subareaAudit.missingRelationIds,
     cycleCount: subareaAudit.cycleCount,
     sourceMode: subareaAudit.sourceMode,
+    landMaskApplied: Boolean(subareaAudit.landMask?.applied),
+    islandComponentCount: subareaAudit.landMask?.islandComponentCount ?? 0,
+    coastlineWayCount: subareaAudit.landMask?.coastlineWayCount ?? 0,
   } : null;
   console.log(JSON.stringify({ osm: `${osmType}:${osmId}`, geometry: geometry.type, componentCount: geometry.type === 'MultiPolygon' ? geometry.coordinates.length : (areaGeometry ? 1 : 0), areaKm2: areaKm2 == null ? null : Number(areaKm2.toFixed(6)), lineLengthKm: lineLength == null ? null : Number(lineLength.toFixed(6)), projectedAspectRatio: projectedAspectRatioValue, canvasAspectRatio: svgCanvasAspectRatioValue, validationStatus, subareaAudit: consoleSubareaAudit, fromCache, outputDir }, null, 2));
 }
