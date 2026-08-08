@@ -899,6 +899,17 @@
       color: #6a7f8e;
       font-size: 0.65rem;
     }
+    .search-builder-exclude-keyword {
+      border-color: #e2c7c7;
+      background: #fffafa;
+    }
+    .search-builder-exclude-keyword label {
+      color: #824848;
+    }
+    .search-builder-exclude-keyword input:focus {
+      border-color: #b35b5b;
+      box-shadow: 0 0 0 2px rgba(179, 91, 91, 0.12);
+    }
     .search-builder-summary {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -2195,8 +2206,8 @@
             </select>
             <button type="button" id="search-builder-open" class="search-builder-open" aria-haspopup="dialog">条件から探す</button>
             <div class="comparison-query-field">
-              <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
-              <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
+              <input id="comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索（例：千代田区、東京都）" autocomplete="off" title="名称や場所を文字で検索します。複雑な条件や除外は条件検索を使います" aria-description="通常検索は文字検索です。複雑な条件や除外は条件から探せます">
+              <p class="comparison-search-help">通常検索：文字　複雑な条件・除外は「条件から探す」</p>
             </div>
             <button type="button" id="btn-comparison-move" class="comparison-action">地図へ移動</button>
             <button type="button" id="btn-comparison-open" class="comparison-action primary">比較</button>
@@ -2304,8 +2315,8 @@
             <option value="land">農場・牧場・鉱山</option>
           </select>
           <div class="comparison-query-field">
-            <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="空白: AND／|: OR／-語: NOT（除外）" aria-description="空白でAND検索、縦線でOR検索、語の先頭のマイナスで除外検索ができます">
-            <p class="comparison-search-help">空白：AND　｜：OR　－語：除外</p>
+            <input id="mobile-comparison-search" class="comparison-search" list="comparison-targets" type="search" placeholder="市区町村・都道府県を検索" autocomplete="off" title="名称や場所を文字で検索します。複雑な条件や除外は条件検索を使います" aria-description="通常検索は文字検索です。複雑な条件や除外は条件から探せます">
+            <p class="comparison-search-help">通常検索：文字　複雑な条件・除外は「条件から探す」</p>
           </div>
           <button type="button" id="mobile-btn-comparison-move" class="comparison-action">移動</button>
           <button type="button" id="mobile-btn-comparison-open" class="comparison-action primary">比較</button>
@@ -2336,12 +2347,20 @@
       </header>
       <div class="search-builder-body">
         <div class="search-builder-keyword">
-          <label for="search-builder-keyword">名前・キーワード</label>
+          <label for="search-builder-keyword">含めるキーワード</label>
           <div class="search-builder-keyword-field">
             <input id="search-builder-keyword" type="search" autocomplete="off" placeholder="名称・場所・内容を検索" title="空白: AND／|: OR／-語: NOT（除外）" aria-describedby="search-builder-keyword-help">
             <button type="button" id="search-builder-keyword-clear" class="search-builder-keyword-clear" hidden>文字を消す</button>
           </div>
-          <p id="search-builder-keyword-help" class="search-builder-keyword-help">通常の検索欄から引き継ぎます　空白：AND　｜：OR　－語：除外</p>
+          <p id="search-builder-keyword-help" class="search-builder-keyword-help">通常の検索欄から引き継ぎます　空白：AND　｜：OR</p>
+        </div>
+        <div class="search-builder-keyword search-builder-exclude-keyword">
+          <label for="search-builder-exclude-keyword">除外するキーワード</label>
+          <div class="search-builder-keyword-field">
+            <input id="search-builder-exclude-keyword" type="search" autocomplete="off" placeholder="除外したい名称・場所・内容（複数可）" aria-describedby="search-builder-exclude-keyword-help">
+            <button type="button" id="search-builder-exclude-keyword-clear" class="search-builder-keyword-clear" hidden>除外語を消す</button>
+          </div>
+          <p id="search-builder-exclude-keyword-help" class="search-builder-keyword-help">空白・読点・改行で区切った語を除外します。含める語が空でも使えます</p>
         </div>
 
         <section class="search-builder-summary" aria-live="polite">
@@ -2450,7 +2469,7 @@
       </div>
       <footer class="search-builder-footer">
         <button type="button" id="search-builder-clear" class="search-builder-clear">条件をクリア</button>
-        <button type="button" id="search-builder-apply" class="search-builder-apply">検索欄に入れる</button>
+        <button type="button" id="search-builder-apply" class="search-builder-apply">条件を検索欄に入れる</button>
       </footer>
     </div>
   </div>
@@ -2772,8 +2791,10 @@
     let facilityRelationsPromise = null;
     const comparisonGeometryCache = new Map();
     let activeComparison = null;
+    let appliedComparisonConditionQuery = '';
     let searchBuilderTargets = [];
     let searchBuilderFreeText = '';
+    let searchBuilderExcludedFreeText = '';
     let searchBuilderResultLimit = 50;
     let searchBuilderSortKey = 'name';
     let searchBuilderSortDirection = 'asc';
@@ -4316,6 +4337,10 @@
       return String(value || '').replace(/[\s　]/g, '').toLowerCase();
     }
 
+    function hasComparisonSearchContent(value) {
+      return /[\p{L}\p{N}]/u.test(String(value || ''));
+    }
+
     const COMPARISON_PARTIAL_SEARCH_MIN_LENGTH = 2;
 
     function comparisonQueryLength(value) {
@@ -4375,7 +4400,7 @@
           token = token.slice(1);
         }
         const normalized = normalizeComparisonQuery(token);
-        if (!normalized) return;
+        if (!normalized || !hasComparisonSearchContent(normalized)) return;
         if (excluded) excludedTerms.push(normalized);
         else positiveGroups[positiveGroups.length - 1].push(normalized);
       });
@@ -4394,9 +4419,27 @@
       };
     }
 
+    function parsePlainComparisonSearch(value) {
+      const terms = String(value || '').trim().split(/[\s　]+/)
+        .map(normalizeComparisonQuery)
+        .filter(term => term && hasComparisonSearchContent(term));
+      const groups = terms.length ? [terms] : [];
+      return {
+        groups,
+        excludedTerms: [],
+        hasPositiveTerms: terms.length > 0,
+        partialReady: groups.length > 0 && groups.every(group =>
+          group.some(isReadyComparisonTerm)),
+        simpleQuery: terms.length === 1 ? terms[0] : '',
+        allowStructured: false
+      };
+    }
+
     function matchesComparisonSearch(target, parsedSearch) {
       const matchesTerm = term => {
-        const structured = structuredComparisonTerm(term);
+        const structured = parsedSearch.allowStructured === false
+          ? null
+          : structuredComparisonTerm(term);
         if (structured) {
           if (structured.field === '種類') {
             const requested = structured.value.split(/[,、]/).filter(Boolean);
@@ -4841,11 +4884,14 @@
       };
     }
 
-    function renderComparisonCatalogOptions(targets, value = '') {
+    function renderComparisonCatalogOptions(targets, value = '', conditionQuery = '') {
       const list = document.getElementById('comparison-targets');
       if (!list) return;
-      const parsedSearch = parseComparisonSearch(value);
-      if (!parsedSearch.partialReady) {
+      const parsedSearch = conditionQuery
+        ? parseComparisonSearch(conditionQuery)
+        : parsePlainComparisonSearch(value);
+      if ((parsedSearch.hasPositiveTerms && !parsedSearch.partialReady)
+        || (!parsedSearch.hasPositiveTerms && !parsedSearch.excludedTerms.length)) {
         list.replaceChildren();
         return;
       }
@@ -4958,6 +5004,7 @@
       }
       comparisonPeriod = nextPeriod;
       syncComparisonPeriod(comparisonPeriod);
+      appliedComparisonConditionQuery = '';
       syncComparisonSearch('');
       updateComparisonSearchPresentation();
       comparisonTargets = comparisonPeriod === 'current' ? PREFECTURES.slice() : [];
@@ -5057,7 +5104,11 @@
         const activeInput = document.activeElement && document.activeElement.classList.contains('comparison-search')
           ? document.activeElement
           : document.getElementById('comparison-search');
-        renderComparisonCatalogOptions(targets, activeInput ? activeInput.value : '');
+        renderComparisonCatalogOptions(
+          targets,
+          activeInput ? activeInput.value : '',
+          appliedComparisonConditionQuery
+        );
       }
       return targets;
     }
@@ -5092,17 +5143,38 @@
       searchBuilderState.excludeLocation = false;
       searchBuilderState.excludeArea = false;
       searchBuilderFreeText = '';
+      searchBuilderExcludedFreeText = '';
     }
 
     function readSearchBuilderQuery(value) {
       resetSearchBuilderState();
-      const freeTokens = [];
-      String(value || '').trim().split(/[\s　]+/).filter(Boolean).forEach(rawToken => {
-        const excluded = rawToken.startsWith('-') && rawToken.length > 1;
-        const token = excluded ? rawToken.slice(1) : rawToken;
+      const includeTokens = [];
+      const excludeTokens = [];
+      let negateNext = false;
+      const source = String(value || '')
+        .replace(/｜/g, '|')
+        .replace(/[－−]/g, '-');
+      source.split(/(\||[\s　]+)/).filter(token => token && !/^[\s　]+$/.test(token))
+        .forEach(rawToken => {
+        const upperToken = rawToken.toUpperCase();
+        if (rawToken === '|' || upperToken === 'OR') {
+          includeTokens.push('|');
+          return;
+        }
+        if (upperToken === 'AND') return;
+        if (upperToken === 'NOT') {
+          negateNext = true;
+          return;
+        }
+        const startsExcluded = rawToken.startsWith('-') && rawToken.length > 1;
+        const excluded = negateNext || startsExcluded;
+        negateNext = false;
+        const token = startsExcluded ? rawToken.slice(1) : rawToken;
+        const normalized = normalizeComparisonQuery(token);
+        if (!normalized || !hasComparisonSearchContent(normalized)) return;
         const structured = structuredComparisonTerm(token);
         if (!structured) {
-          freeTokens.push(rawToken);
+          (excluded ? excludeTokens : includeTokens).push(excluded ? token : rawToken);
           return;
         }
         if (structured.field === '種類') {
@@ -5131,12 +5203,25 @@
           searchBuilderState.excludeArea = excluded;
         }
       });
-      searchBuilderFreeText = freeTokens.join(' ');
+      const normalizedFreeText = includeTokens.join(' ').replace(/\s*\|\s*/g, ' | ').trim();
+      searchBuilderFreeText = parseComparisonSearch(normalizedFreeText).groups.length
+        ? normalizedFreeText
+        : '';
+      searchBuilderExcludedFreeText = excludeTokens.join(' ');
+    }
+
+    function parseSearchBuilderExclusionTerms(value) {
+      return String(value || '').split(/[\s　,、，|｜\r\n]+/)
+        .map(term => term.trim().replace(/^[-－−]+/, ''))
+        .map(normalizeComparisonQuery)
+        .filter(term => term && hasComparisonSearchContent(term));
     }
 
     function buildSearchBuilderQuery({ omitTypes = false } = {}) {
       const keyword = searchBuilderFreeText.trim();
       const tokens = keyword ? [keyword] : [];
+      tokens.push(...parseSearchBuilderExclusionTerms(searchBuilderExcludedFreeText)
+        .map(term => `-${term}`));
       if (!omitTypes && searchBuilderState.types.size) {
         tokens.push(
           `${searchBuilderState.excludeTypes ? '-' : ''}種類:${[...searchBuilderState.types].join(',')}`
@@ -5280,6 +5365,9 @@
       if (kind === 'keyword') {
         searchBuilderFreeText = '';
         syncSearchBuilderKeyword();
+      } else if (kind === 'excludedKeyword') {
+        searchBuilderExcludedFreeText = '';
+        syncSearchBuilderExcludedKeyword();
       } else if (kind === 'types') {
         searchBuilderState.types.clear();
         searchBuilderState.excludeTypes = false;
@@ -5305,6 +5393,15 @@
       const clear = document.getElementById('search-builder-keyword-clear');
       if (input && input.value !== searchBuilderFreeText) input.value = searchBuilderFreeText;
       if (clear) clear.hidden = !searchBuilderFreeText.trim();
+    }
+
+    function syncSearchBuilderExcludedKeyword() {
+      const input = document.getElementById('search-builder-exclude-keyword');
+      const clear = document.getElementById('search-builder-exclude-keyword-clear');
+      if (input && input.value !== searchBuilderExcludedFreeText) {
+        input.value = searchBuilderExcludedFreeText;
+      }
+      if (clear) clear.hidden = !searchBuilderExcludedFreeText.trim();
     }
 
     function searchBuilderCondition(label, value, exclusionKey, kind) {
@@ -5418,6 +5515,7 @@
         return;
       }
       selectedComparisonTarget = target;
+      appliedComparisonConditionQuery = '';
       syncComparisonSearch(target.name);
       renderComparisonCatalogOptions(comparisonTargets, target.name);
       closeSearchBuilder();
@@ -5486,12 +5584,21 @@
       if (!conditions || !count) return;
       const items = [];
       const keyword = searchBuilderFreeText.trim();
-      if (keyword) {
+      if (parseComparisonSearch(keyword).groups.length) {
         items.push(searchBuilderCondition(
-          '文字',
+          '含める',
           keyword,
           '',
           'keyword'
+        ));
+      }
+      const excludedKeywords = parseSearchBuilderExclusionTerms(searchBuilderExcludedFreeText);
+      if (excludedKeywords.length) {
+        items.push(searchBuilderCondition(
+          '除外',
+          excludedKeywords.join('・'),
+          '',
+          'excludedKeyword'
         ));
       }
       if (searchBuilderState.types.size) {
@@ -5549,6 +5656,7 @@
       document.getElementById('search-builder-area-min').value = searchBuilderState.minArea;
       document.getElementById('search-builder-area-max').value = searchBuilderState.maxArea;
       syncSearchBuilderKeyword();
+      syncSearchBuilderExcludedKeyword();
       renderSearchBuilderTypes();
       updateSearchBuilderMunicipalities();
       updateSearchBuilderSummary();
@@ -5596,27 +5704,36 @@
     async function applySearchBuilder() {
       const query = buildSearchBuilderQuery();
       const parsed = parseComparisonSearch(query);
-      if (!parsed.hasPositiveTerms) {
+      if (!query || (!parsed.hasPositiveTerms && !parsed.excludedTerms.length)) {
         showToast('検索する対象・場所・大きさを選んでください');
         return;
       }
       await setComparisonPeriod('all');
       selectedComparisonTarget = null;
+      appliedComparisonConditionQuery = query;
       syncComparisonSearch(query);
-      renderComparisonCatalogOptions(comparisonTargets, query);
+      renderComparisonCatalogOptions(comparisonTargets, query, query);
       closeSearchBuilder();
       showToast('選んだ条件を検索欄に入れました');
     }
 
     async function resolveComparisonTarget(value) {
-      const parsedSearch = parseComparisonSearch(value);
+      const conditionQuery = appliedComparisonConditionQuery
+        && String(value || '') === appliedComparisonConditionQuery
+        ? appliedComparisonConditionQuery
+        : '';
+      const parsedSearch = conditionQuery
+        ? parseComparisonSearch(conditionQuery)
+        : parsePlainComparisonSearch(value);
       if (!parsedSearch.hasPositiveTerms) {
-        if (parsedSearch.excludedTerms.length) {
+        if (parsedSearch.excludedTerms.length && !conditionQuery) {
           showToast('除外語だけでは検索できません');
           return null;
         }
-        showToast(`${comparisonCategoryLabel()}を入力してください`);
-        return null;
+        if (!parsedSearch.excludedTerms.length) {
+          showToast(`${comparisonCategoryLabel()}を入力してください`);
+          return null;
+        }
       }
       try {
         await loadComparisonCatalog(comparisonPeriod);
@@ -5630,7 +5747,7 @@
           normalizeComparisonQuery(target.name) === parsedSearch.simpleQuery ||
           normalizeComparisonQuery(target.shortName) === parsedSearch.simpleQuery)
         : [];
-      if (!parsedSearch.partialReady && exactMatches.length === 0) {
+      if (parsedSearch.hasPositiveTerms && !parsedSearch.partialReady && exactMatches.length === 0) {
         showToast('2文字以上の検索語を含めてください');
         return null;
       }
@@ -5653,11 +5770,12 @@
         return null;
       }
       if (!exact && matches.length > 1) {
-        renderComparisonCatalogOptions(comparisonTargets, value);
+        renderComparisonCatalogOptions(comparisonTargets, value, conditionQuery);
         showToast(`候補が${matches.length}件あります。候補から1件選んでください`);
         return null;
       }
       const target = exact || matches[0];
+      appliedComparisonConditionQuery = '';
       syncComparisonSearch(target.name);
       return target;
     }
@@ -6265,9 +6383,18 @@
         syncSearchBuilderKeyword();
         updateSearchBuilderSummary();
       });
+      document.getElementById('search-builder-exclude-keyword').addEventListener('input', event => {
+        searchBuilderExcludedFreeText = event.target.value;
+        syncSearchBuilderExcludedKeyword();
+        updateSearchBuilderSummary();
+      });
       document.getElementById('search-builder-keyword-clear').addEventListener('click', () => {
         clearSearchBuilderCondition('keyword');
         document.getElementById('search-builder-keyword').focus();
+      });
+      document.getElementById('search-builder-exclude-keyword-clear').addEventListener('click', () => {
+        clearSearchBuilderCondition('excludedKeyword');
+        document.getElementById('search-builder-exclude-keyword').focus();
       });
       document.getElementById('search-builder-clear-types').addEventListener('click', () => {
         searchBuilderState.types.clear();
@@ -6356,6 +6483,7 @@
         if (!input) return;
         let catalogTimer = null;
         input.addEventListener('input', () => {
+          appliedComparisonConditionQuery = '';
           if (selectedComparisonTarget
             && normalizeComparisonQuery(input.value)
               !== normalizeComparisonQuery(selectedComparisonTarget.name)) {
@@ -6363,7 +6491,7 @@
           }
           syncComparisonSearch(input.value);
           clearTimeout(catalogTimer);
-          const parsedSearch = parseComparisonSearch(input.value);
+          const parsedSearch = parsePlainComparisonSearch(input.value);
           if (!parsedSearch.partialReady) {
             renderComparisonCatalogOptions([], '');
             return;
@@ -6391,6 +6519,7 @@
       if (requestedComparison) {
         setComparisonPeriod(requestedComparison.period)
           .then(() => {
+            appliedComparisonConditionQuery = requestedComparison.query;
             syncComparisonSearch(requestedComparison.query);
             return handleComparisonAction('compare', 'comparison-search');
           })
