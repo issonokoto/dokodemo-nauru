@@ -3559,6 +3559,7 @@
 
       if (locked) {
         // 地図は動かさず、ナウルくんを現在の画面中央へ移して追従を再開する。
+        map.stop();
         const c = map.getCenter();
         center = { lat: c.lat, lng: c.lng };
         isNauruCenterLocked = true;
