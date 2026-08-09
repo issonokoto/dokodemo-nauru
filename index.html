@@ -304,10 +304,6 @@
     .nauru-motion-main img {
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
     }
-    @media (prefers-reduced-motion: reduce) {
-      .nauru-motion-trail,
-      .nauru-motion-aura { display: none; }
-    }
     .leaflet-control-attribution {
       position: fixed !important;
       left: 0 !important;
@@ -2141,7 +2137,7 @@
   </div>
 
   <div id="map"></div>
-  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-charge="0">
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-charge="0" data-motion-policy="always">
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="42"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="82"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="122"><img alt=""></span>
@@ -3069,9 +3065,6 @@
     let nauruMotionRelock = null;
     let nauruMotionDragging = false;
     let nauruMotionSource = '';
-    const nauruReducedMotionQuery = window.matchMedia
-      ? window.matchMedia('(prefers-reduced-motion: reduce)')
-      : { matches: false };
     let initialMapZoom = 12;
     let L_lon = NAURU_CENTER.lon;
     let L_lat = NAURU_CENTER.lat;
@@ -3620,7 +3613,7 @@
       const relocking = !!nauruMotionRelock;
       const speedStrength = Math.max(0, Math.min(1, (nauruMotionSpeed - 90) / 620));
       const boost = Math.max(0, Math.min(1, (nauruMotionFastMs - 420) / 1050));
-      const trailStrength = nauruReducedMotionQuery.matches ? 0 : Math.max(speedStrength, relocking ? 1 : 0);
+      const trailStrength = Math.max(speedStrength, relocking ? 1 : 0);
       const trailOpacity = [0.22, 0.14, 0.08];
 
       setNauruMotionCopyPosition(nauruMotionMain, nauruMotionOffset.x, nauruMotionOffset.y);
@@ -3672,13 +3665,8 @@
       const dt = Math.max(0, Math.min(50, nauruMotionLastFrame ? now - nauruMotionLastFrame : 16));
       nauruMotionLastFrame = now;
 
-      if (nauruReducedMotionQuery.matches) {
-        nauruMotionRelock = null;
-        nauruMotionOffset = { x: 0, y: 0 };
-        nauruMotionSpeed = 0;
-        nauruMotionFastMs = 0;
-        nauruMotionArrivalPulse = 0;
-      } else if (nauruMotionRelock) {
+      // この短い直接操作演出は OS の「動きを減らす」に左右されず、アプリ内で一貫して表示する。
+      if (nauruMotionRelock) {
         if (!nauruMotionRelock.startTime) nauruMotionRelock.startTime = now;
         const progress = Math.min(1, (now - nauruMotionRelock.startTime) / nauruMotionRelock.duration);
         const remaining = Math.pow(1 - progress, 3);
@@ -3886,10 +3874,10 @@
       ];
       nauruMotionOffset = { x: start.x, y: start.y };
       nauruMotionArrivalPulse = 0;
-      if (nauruReducedMotionQuery.matches || distance < 3) {
+      if (distance < 3) {
         nauruMotionRelock = null;
         nauruMotionOffset = { x: 0, y: 0 };
-        nauruMotionArrivalPulse = nauruReducedMotionQuery.matches ? 0 : 1;
+        nauruMotionArrivalPulse = 1;
       } else {
         nauruMotionRelock = {
           startX: start.x,
