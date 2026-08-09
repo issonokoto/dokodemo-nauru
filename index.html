@@ -3558,12 +3558,10 @@
       if (!map || locked === isNauruCenterLocked) return;
 
       if (locked) {
-        // 固定中のナウルくんの地点へ戻してから中央追従を再開する。
-        map.stop();
-        map.setView([center.lat, center.lng], map.getZoom(), { animate: false });
-        isNauruCenterLocked = true;
+        // 地図は動かさず、ナウルくんを現在の画面中央へ移して追従を再開する。
         const c = map.getCenter();
         center = { lat: c.lat, lng: c.lng };
+        isNauruCenterLocked = true;
       } else {
         // 解除した瞬間の地点にナウルくんを残す。
         const c = map.getCenter();
