@@ -273,8 +273,32 @@
     }
     .nauru-motion-aura img {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(1.035);
-      filter: saturate(1.3) brightness(1.32) blur(1px) drop-shadow(0 0 14px rgba(97, 222, 255, 0.92));
+      transform: translate(-50%, -50%) scale(1.055);
+      filter:
+        saturate(1.48)
+        brightness(1.55)
+        blur(1.35px)
+        drop-shadow(0 0 17px rgba(97, 222, 255, 0.98))
+        drop-shadow(0 0 30px rgba(245, 197, 66, 0.62));
+      will-change: opacity;
+    }
+    .nauru-motion-aura::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: calc(var(--nauru-motion-width, 1px) * 1.14);
+      height: calc(var(--nauru-motion-height, 1px) * 1.14);
+      border-radius: 48%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(255, 245, 154, 0.48) 0%,
+        rgba(97, 222, 255, 0.34) 46%,
+        rgba(97, 222, 255, 0) 74%
+      );
+      filter: blur(9px);
+      opacity: var(--nauru-motion-aura-opacity, 0);
+      transform: translate(-50%, -50%);
       will-change: opacity;
     }
     .nauru-motion-main img {
@@ -2117,7 +2141,7 @@
   </div>
 
   <div id="map"></div>
-  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00">
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-charge="0">
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="42"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="82"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="122"><img alt=""></span>
@@ -3038,6 +3062,7 @@
     let nauruMotionLastSample = null;
     let nauruMotionLastSampleTime = 0;
     let nauruMotionLastInputTime = 0;
+    let nauruMotionLastFastInputTime = 0;
     let nauruMotionSpeed = 0;
     let nauruMotionFastMs = 0;
     let nauruMotionArrivalPulse = 0;
@@ -3576,13 +3601,25 @@
       return nauruMotionHistory[0] || { x: nauruMotionOffset.x, y: nauruMotionOffset.y };
     }
 
+    function getNauruMotionImpulse(dx, dy) {
+      // 地図とは逆側へ一瞬遅らせ、ナウルくんが中央を追いかける動きにする。
+      return {
+        x: Math.max(-12, Math.min(12, -dx * 0.78)),
+        y: Math.max(-12, Math.min(12, -dy * 0.78))
+      };
+    }
+
+    function getNauruMotionFastStrength(speed) {
+      return Math.max(0, Math.min(1, (speed - 145) / 330));
+    }
+
     function renderNauruMotion(now) {
       const stage = getNauruMotionStage();
       if (!stage) return;
 
       const relocking = !!nauruMotionRelock;
       const speedStrength = Math.max(0, Math.min(1, (nauruMotionSpeed - 90) / 620));
-      const boost = Math.max(0, Math.min(1, (nauruMotionFastMs - 700) / 1100));
+      const boost = Math.max(0, Math.min(1, (nauruMotionFastMs - 420) / 1050));
       const trailStrength = nauruReducedMotionQuery.matches ? 0 : Math.max(speedStrength, relocking ? 1 : 0);
       const trailOpacity = [0.22, 0.14, 0.08];
 
@@ -3598,11 +3635,18 @@
 
       const auraImage = nauruMotionAura && nauruMotionAura.querySelector('img');
       if (auraImage) {
-        const aura = Math.min(0.62, boost * 0.48 + nauruMotionArrivalPulse * 0.30);
+        const glowPulse = boost > 0 ? 0.88 + Math.sin(now / 105) * 0.12 : 1;
+        const aura = Math.min(0.82, (boost * 0.70 + nauruMotionArrivalPulse * 0.30) * glowPulse);
         auraImage.style.opacity = String(aura * silhouetteOpacity);
+        nauruMotionAura.style.setProperty('--nauru-motion-aura-opacity', String(aura * silhouetteOpacity));
       }
       const mainImage = nauruMotionMain && nauruMotionMain.querySelector('img');
-      if (mainImage) mainImage.style.opacity = String(silhouetteOpacity);
+      if (mainImage) {
+        mainImage.style.opacity = String(silhouetteOpacity);
+        mainImage.style.filter = boost > 0.01
+          ? `saturate(${(1 + boost * 0.28).toFixed(2)}) brightness(${(1 + boost * 0.16).toFixed(2)}) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18)) drop-shadow(0 0 ${(5 + boost * 9).toFixed(1)}px rgba(97, 222, 255, ${(boost * 0.72).toFixed(2)}))`
+          : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18))';
+      }
 
       stage.dataset.motionState = relocking
         ? 'relock'
@@ -3612,6 +3656,7 @@
             ? 'trail'
             : 'idle';
       stage.dataset.boost = boost.toFixed(2);
+      stage.dataset.charge = String(Math.round(nauruMotionFastMs));
       stage.dataset.offsetX = nauruMotionOffset.x.toFixed(2);
       stage.dataset.offsetY = nauruMotionOffset.y.toFixed(2);
     }
@@ -3656,12 +3701,12 @@
       if (sinceInput > 90 && !nauruMotionRelock) {
         nauruMotionSpeed *= Math.exp(-dt / 125);
       }
-      const fastGesture = !nauruMotionRelock
-        && nauruMotionDragging
-        && sinceInput < 120
-        && nauruMotionSpeed > 260;
-      if (!fastGesture) {
-        const chargeDecay = sinceInput < 520 ? 0.5 : 1.65;
+      const sinceFastInput = now - nauruMotionLastFastInputTime;
+      const fastGestureGrace = !nauruMotionRelock
+        && nauruMotionLastFastInputTime > 0
+        && sinceFastInput < 650;
+      if (!fastGestureGrace) {
+        const chargeDecay = sinceFastInput < 1400 ? 0.45 : 1.4;
         nauruMotionFastMs = Math.max(0, nauruMotionFastMs - dt * chargeDecay);
       }
       nauruMotionArrivalPulse *= Math.exp(-dt / 190);
@@ -3708,9 +3753,11 @@
         nauruMotionRelock = null;
         nauruMotionSpeed = 0;
         nauruMotionFastMs = 0;
+        nauruMotionLastFastInputTime = 0;
         nauruMotionArrivalPulse = 0;
         stage.dataset.motionState = 'idle';
         stage.dataset.boost = '0.00';
+        stage.dataset.charge = '0';
       }
     }
 
@@ -3777,17 +3824,22 @@
         const dt = Math.max(8, Math.min(80, now - nauruMotionLastSampleTime));
         const dx = panePosition.x - nauruMotionLastSample.x;
         const dy = panePosition.y - nauruMotionLastSample.y;
-        const impulseX = Math.max(-12, Math.min(12, dx * 0.78));
-        const impulseY = Math.max(-12, Math.min(12, dy * 0.78));
-        nauruMotionOffset.x = Math.max(-32, Math.min(32, nauruMotionOffset.x + impulseX));
-        nauruMotionOffset.y = Math.max(-32, Math.min(32, nauruMotionOffset.y + impulseY));
+        const motionDistance = Math.hypot(dx, dy);
+        const impulse = getNauruMotionImpulse(dx, dy);
+        nauruMotionOffset.x = Math.max(-32, Math.min(32, nauruMotionOffset.x + impulse.x));
+        nauruMotionOffset.y = Math.max(-32, Math.min(32, nauruMotionOffset.y + impulse.y));
         const instantSpeed = Math.hypot(dx, dy) * 1000 / dt;
         nauruMotionSpeed = nauruMotionSpeed * 0.58 + instantSpeed * 0.42;
         nauruMotionLastInputTime = now;
-        if (nauruMotionDragging && nauruMotionSpeed > 260) {
-          nauruMotionFastMs = Math.min(2200, nauruMotionFastMs + dt);
-        } else {
-          nauruMotionFastMs = Math.max(0, nauruMotionFastMs - dt * 0.5);
+        const fastStrength = getNauruMotionFastStrength(Math.max(instantSpeed, nauruMotionSpeed));
+        if (nauruMotionDragging && fastStrength > 0) {
+          // 指を離す短い間隔は維持し、複数回の素早いスワイプでも発光まで蓄積する。
+          const distanceCharge = motionDistance * (0.62 + fastStrength * 0.16);
+          nauruMotionFastMs = Math.min(
+            2200,
+            nauruMotionFastMs + distanceCharge + dt * (0.6 + fastStrength * 1.4)
+          );
+          nauruMotionLastFastInputTime = now;
         }
         nauruMotionHistory.push({ time: now, x: nauruMotionOffset.x, y: nauruMotionOffset.y });
         while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 220) {
