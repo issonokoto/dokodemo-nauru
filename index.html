@@ -235,6 +235,55 @@
     .nauru-lock-open { display: none; }
     .nauru-lock-toggle[aria-pressed="false"] .nauru-lock-closed { display: none; }
     .nauru-lock-toggle[aria-pressed="false"] .nauru-lock-open { display: block; }
+    #nauru-motion-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 650;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      contain: strict;
+    }
+    #nauru-motion-stage.is-visible { opacity: 1; }
+    .nauru-motion-copy {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      will-change: transform;
+    }
+    .nauru-motion-copy img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: block;
+      width: var(--nauru-motion-width, 1px);
+      height: var(--nauru-motion-height, 1px);
+      max-width: none;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .nauru-motion-trail img {
+      opacity: 0;
+      filter: saturate(1.18) brightness(1.12) drop-shadow(0 0 5px rgba(94, 218, 255, 0.62));
+      will-change: opacity;
+    }
+    .nauru-motion-aura img {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1.035);
+      filter: saturate(1.3) brightness(1.32) blur(1px) drop-shadow(0 0 14px rgba(97, 222, 255, 0.92));
+      will-change: opacity;
+    }
+    .nauru-motion-main img {
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .nauru-motion-trail,
+      .nauru-motion-aura { display: none; }
+    }
     .leaflet-control-attribution {
       position: fixed !important;
       left: 0 !important;
@@ -2068,6 +2117,13 @@
   </div>
 
   <div id="map"></div>
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00">
+    <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="42"><img alt=""></span>
+    <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="82"><img alt=""></span>
+    <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="122"><img alt=""></span>
+    <span class="nauru-motion-copy nauru-motion-aura"><img alt=""></span>
+    <span class="nauru-motion-copy nauru-motion-main"><img alt=""></span>
+  </div>
   <div id="disaster-relief-banner" role="region" aria-label="災害義援金の案内" aria-hidden="true">
     <a class="disaster-relief-link" href="https://www.pref.kumamoto.jp/soshiki/27/274572.html" target="_blank" rel="noopener noreferrer">
       <span class="disaster-relief-mark" aria-hidden="true">♥</span>
@@ -2971,6 +3027,26 @@
     let isZooming = false;
     let isNauruCenterLocked = true;
     let nauruLockButton = null;
+    let nauruMotionStage = null;
+    let nauruMotionTrails = [];
+    let nauruMotionAura = null;
+    let nauruMotionMain = null;
+    let nauruMotionFrame = null;
+    let nauruMotionLastFrame = 0;
+    let nauruMotionOffset = { x: 0, y: 0 };
+    let nauruMotionHistory = [];
+    let nauruMotionLastSample = null;
+    let nauruMotionLastSampleTime = 0;
+    let nauruMotionLastInputTime = 0;
+    let nauruMotionSpeed = 0;
+    let nauruMotionFastMs = 0;
+    let nauruMotionArrivalPulse = 0;
+    let nauruMotionRelock = null;
+    let nauruMotionDragging = false;
+    let nauruMotionSource = '';
+    const nauruReducedMotionQuery = window.matchMedia
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : { matches: false };
     let initialMapZoom = 12;
     let L_lon = NAURU_CENTER.lon;
     let L_lat = NAURU_CENTER.lat;
@@ -3477,8 +3553,306 @@
       if (polygonLayer && map.hasLayer(polygonLayer)) map.removeLayer(polygonLayer);
     }
 
+    function getNauruMotionStage() {
+      if (nauruMotionStage) return nauruMotionStage;
+      nauruMotionStage = document.getElementById('nauru-motion-stage');
+      if (!nauruMotionStage) return null;
+      nauruMotionTrails = Array.from(nauruMotionStage.querySelectorAll('.nauru-motion-trail'));
+      nauruMotionAura = nauruMotionStage.querySelector('.nauru-motion-aura');
+      nauruMotionMain = nauruMotionStage.querySelector('.nauru-motion-main');
+      return nauruMotionStage;
+    }
+
+    function setNauruMotionCopyPosition(copy, x, y) {
+      if (!copy) return;
+      copy.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+    }
+
+    function sampleNauruMotionHistory(now, age) {
+      const target = now - age;
+      for (let i = nauruMotionHistory.length - 1; i >= 0; i--) {
+        if (nauruMotionHistory[i].time <= target) return nauruMotionHistory[i];
+      }
+      return nauruMotionHistory[0] || { x: nauruMotionOffset.x, y: nauruMotionOffset.y };
+    }
+
+    function renderNauruMotion(now) {
+      const stage = getNauruMotionStage();
+      if (!stage) return;
+
+      const relocking = !!nauruMotionRelock;
+      const speedStrength = Math.max(0, Math.min(1, (nauruMotionSpeed - 90) / 620));
+      const boost = Math.max(0, Math.min(1, (nauruMotionFastMs - 700) / 1100));
+      const trailStrength = nauruReducedMotionQuery.matches ? 0 : Math.max(speedStrength, relocking ? 1 : 0);
+      const trailOpacity = [0.22, 0.14, 0.08];
+
+      setNauruMotionCopyPosition(nauruMotionMain, nauruMotionOffset.x, nauruMotionOffset.y);
+      setNauruMotionCopyPosition(nauruMotionAura, nauruMotionOffset.x, nauruMotionOffset.y);
+      nauruMotionTrails.forEach((copy, index) => {
+        const age = Number(copy.dataset.trailAge) || (42 + index * 40);
+        const point = sampleNauruMotionHistory(now, age);
+        setNauruMotionCopyPosition(copy, point.x, point.y);
+        const img = copy.querySelector('img');
+        if (img) img.style.opacity = String(trailOpacity[index] * trailStrength * silhouetteOpacity);
+      });
+
+      const auraImage = nauruMotionAura && nauruMotionAura.querySelector('img');
+      if (auraImage) {
+        const aura = Math.min(0.62, boost * 0.48 + nauruMotionArrivalPulse * 0.30);
+        auraImage.style.opacity = String(aura * silhouetteOpacity);
+      }
+      const mainImage = nauruMotionMain && nauruMotionMain.querySelector('img');
+      if (mainImage) mainImage.style.opacity = String(silhouetteOpacity);
+
+      stage.dataset.motionState = relocking
+        ? 'relock'
+        : boost > 0.05
+          ? 'boost'
+          : trailStrength > 0.08
+            ? 'trail'
+            : 'idle';
+      stage.dataset.boost = boost.toFixed(2);
+      stage.dataset.offsetX = nauruMotionOffset.x.toFixed(2);
+      stage.dataset.offsetY = nauruMotionOffset.y.toFixed(2);
+    }
+
+    function runNauruMotionFrame(now) {
+      nauruMotionFrame = null;
+      const stage = getNauruMotionStage();
+      if (!stage || !stage.classList.contains('is-visible')) {
+        nauruMotionLastFrame = 0;
+        return;
+      }
+
+      const dt = Math.max(0, Math.min(50, nauruMotionLastFrame ? now - nauruMotionLastFrame : 16));
+      nauruMotionLastFrame = now;
+
+      if (nauruReducedMotionQuery.matches) {
+        nauruMotionRelock = null;
+        nauruMotionOffset = { x: 0, y: 0 };
+        nauruMotionSpeed = 0;
+        nauruMotionFastMs = 0;
+        nauruMotionArrivalPulse = 0;
+      } else if (nauruMotionRelock) {
+        if (!nauruMotionRelock.startTime) nauruMotionRelock.startTime = now;
+        const progress = Math.min(1, (now - nauruMotionRelock.startTime) / nauruMotionRelock.duration);
+        const remaining = Math.pow(1 - progress, 3);
+        nauruMotionOffset.x = nauruMotionRelock.startX * remaining;
+        nauruMotionOffset.y = nauruMotionRelock.startY * remaining;
+        nauruMotionSpeed = Math.hypot(nauruMotionRelock.startX, nauruMotionRelock.startY)
+          / Math.max(0.001, nauruMotionRelock.duration / 1000) * (1 - progress);
+        if (progress >= 1) {
+          nauruMotionRelock = null;
+          nauruMotionOffset = { x: 0, y: 0 };
+          nauruMotionArrivalPulse = 1;
+        }
+      } else {
+        const decay = Math.exp(-dt / 96);
+        nauruMotionOffset.x *= decay;
+        nauruMotionOffset.y *= decay;
+      }
+
+      const sinceInput = now - nauruMotionLastInputTime;
+      if (sinceInput > 90 && !nauruMotionRelock) {
+        nauruMotionSpeed *= Math.exp(-dt / 125);
+      }
+      const fastGesture = !nauruMotionRelock
+        && nauruMotionDragging
+        && sinceInput < 120
+        && nauruMotionSpeed > 260;
+      if (!fastGesture) {
+        const chargeDecay = sinceInput < 520 ? 0.5 : 1.65;
+        nauruMotionFastMs = Math.max(0, nauruMotionFastMs - dt * chargeDecay);
+      }
+      nauruMotionArrivalPulse *= Math.exp(-dt / 190);
+
+      nauruMotionHistory.push({ time: now, x: nauruMotionOffset.x, y: nauruMotionOffset.y });
+      while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 220) {
+        nauruMotionHistory.shift();
+      }
+      renderNauruMotion(now);
+
+      const offsetDistance = Math.hypot(nauruMotionOffset.x, nauruMotionOffset.y);
+      const keepAnimating = !!nauruMotionRelock
+        || nauruMotionDragging
+        || nauruMotionSpeed > 2
+        || offsetDistance > 0.12
+        || nauruMotionFastMs > 0.5
+        || nauruMotionArrivalPulse > 0.01;
+      if (keepAnimating) {
+        nauruMotionFrame = requestAnimationFrame(runNauruMotionFrame);
+      } else {
+        nauruMotionLastFrame = 0;
+        nauruMotionOffset = { x: 0, y: 0 };
+        nauruMotionHistory = [{ time: now, x: 0, y: 0 }];
+        renderNauruMotion(now);
+      }
+    }
+
+    function ensureNauruMotionFrame() {
+      if (!nauruMotionFrame) nauruMotionFrame = requestAnimationFrame(runNauruMotionFrame);
+    }
+
+    function setNauruMotionVisible(visible) {
+      const stage = getNauruMotionStage();
+      if (!stage) return;
+      stage.classList.toggle('is-visible', !!visible);
+      if (visible) {
+        renderNauruMotion(performance.now());
+      } else {
+        if (nauruMotionFrame) cancelAnimationFrame(nauruMotionFrame);
+        nauruMotionFrame = null;
+        nauruMotionLastFrame = 0;
+        nauruMotionOffset = { x: 0, y: 0 };
+        nauruMotionHistory = [];
+        nauruMotionRelock = null;
+        nauruMotionSpeed = 0;
+        nauruMotionFastMs = 0;
+        nauruMotionArrivalPulse = 0;
+        stage.dataset.motionState = 'idle';
+        stage.dataset.boost = '0.00';
+      }
+    }
+
+    function setNauruMotionSource(url) {
+      const stage = getNauruMotionStage();
+      if (!stage || !url || nauruMotionSource === url) return;
+      nauruMotionSource = url;
+      stage.querySelectorAll('img').forEach(img => { img.src = url; });
+    }
+
+    function updateNauruMotionGeometry(bounds) {
+      const stage = getNauruMotionStage();
+      if (!stage || !map || !bounds) return false;
+      const northWest = map.latLngToContainerPoint(bounds.getNorthWest());
+      const southEast = map.latLngToContainerPoint(bounds.getSouthEast());
+      const width = Math.max(1, Math.abs(southEast.x - northWest.x));
+      const height = Math.max(1, Math.abs(southEast.y - northWest.y));
+      // 極端な拡大時は巨大なフィルター画像を重ねず、通常の Leaflet レイヤーへ戻す。
+      const renderable = width <= 2200 && height <= 2200;
+      stage.style.setProperty('--nauru-motion-width', `${width.toFixed(2)}px`);
+      stage.style.setProperty('--nauru-motion-height', `${height.toFixed(2)}px`);
+      stage.dataset.width = width.toFixed(2);
+      stage.dataset.height = height.toFixed(2);
+      stage.dataset.renderable = renderable ? 'true' : 'false';
+      return renderable;
+    }
+
+    function refreshLockedNauruMotionGeometry() {
+      if (!map || !isNauruCenterLocked || getSilhouetteMode() !== 'kun') return false;
+      updateScaleOnly();
+      const renderable = updateNauruMotionGeometry(physicalBoundsAt(center.lat, center.lng));
+      if (!renderable) {
+        setNauruMotionVisible(false);
+        if (imageLayer) imageLayer.setOpacity(silhouetteOpacity);
+        return false;
+      }
+      setNauruMotionVisible(true);
+      return true;
+    }
+
+    function resetNauruMotionSample() {
+      if (!map) return;
+      const panePosition = map._getMapPanePos
+        ? map._getMapPanePos()
+        : L.DomUtil.getPosition(map.getPane('mapPane'));
+      nauruMotionLastSample = { x: panePosition.x, y: panePosition.y, zoom: map.getZoom() };
+      nauruMotionLastSampleTime = performance.now();
+    }
+
+    function recordNauruMotionSample() {
+      if (!map || !isNauruCenterLocked || isZooming || getSilhouetteMode() !== 'kun') return;
+      const now = performance.now();
+      if (!nauruMotionDragging && now - nauruMotionLastInputTime > 180) {
+        resetNauruMotionSample();
+        return;
+      }
+
+      const zoom = map.getZoom();
+      // ドラッグ中は中心座標より先に mapPane が動くため、画面上の実移動量から速度を取る。
+      const panePosition = map._getMapPanePos
+        ? map._getMapPanePos()
+        : L.DomUtil.getPosition(map.getPane('mapPane'));
+      if (nauruMotionLastSample && nauruMotionLastSample.zoom === zoom) {
+        const dt = Math.max(8, Math.min(80, now - nauruMotionLastSampleTime));
+        const dx = panePosition.x - nauruMotionLastSample.x;
+        const dy = panePosition.y - nauruMotionLastSample.y;
+        const impulseX = Math.max(-12, Math.min(12, dx * 0.78));
+        const impulseY = Math.max(-12, Math.min(12, dy * 0.78));
+        nauruMotionOffset.x = Math.max(-32, Math.min(32, nauruMotionOffset.x + impulseX));
+        nauruMotionOffset.y = Math.max(-32, Math.min(32, nauruMotionOffset.y + impulseY));
+        const instantSpeed = Math.hypot(dx, dy) * 1000 / dt;
+        nauruMotionSpeed = nauruMotionSpeed * 0.58 + instantSpeed * 0.42;
+        nauruMotionLastInputTime = now;
+        if (nauruMotionDragging && nauruMotionSpeed > 260) {
+          nauruMotionFastMs = Math.min(2200, nauruMotionFastMs + dt);
+        } else {
+          nauruMotionFastMs = Math.max(0, nauruMotionFastMs - dt * 0.5);
+        }
+        nauruMotionHistory.push({ time: now, x: nauruMotionOffset.x, y: nauruMotionOffset.y });
+        while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 220) {
+          nauruMotionHistory.shift();
+        }
+        renderNauruMotion(now);
+      }
+      nauruMotionLastSample = { x: panePosition.x, y: panePosition.y, zoom: zoom };
+      nauruMotionLastSampleTime = now;
+      ensureNauruMotionFrame();
+    }
+
+    function getNauruRelockOffset() {
+      if (!map) return { x: 0, y: 0 };
+      const size = map.getSize();
+      const target = L.point(size.x / 2, size.y / 2);
+      let source = map.latLngToContainerPoint([center.lat, center.lng]);
+      let dx = source.x - target.x;
+      let dy = source.y - target.y;
+      if (!Number.isFinite(dx) || !Number.isFinite(dy)) return { x: 0, y: 0 };
+
+      const maxX = Math.max(24, size.x / 2 - 24);
+      const maxY = Math.max(24, size.y / 2 - 24);
+      if (Math.abs(dx) > maxX || Math.abs(dy) > maxY) {
+        const scaleX = Math.abs(dx) > 0 ? maxX / Math.abs(dx) : Infinity;
+        const scaleY = Math.abs(dy) > 0 ? maxY / Math.abs(dy) : Infinity;
+        const edgeScale = Math.min(1, scaleX, scaleY);
+        dx *= edgeScale;
+        dy *= edgeScale;
+      }
+      return { x: dx, y: dy };
+    }
+
+    function startNauruRelockMotion(startOffset) {
+      const stage = getNauruMotionStage();
+      if (!stage || stage.dataset.renderable === 'false' || getSilhouetteMode() !== 'kun') return;
+      setNauruMotionVisible(true);
+      const start = startOffset || { x: 0, y: 0 };
+      const distance = Math.hypot(start.x, start.y);
+      const now = performance.now();
+      nauruMotionHistory = [
+        { time: now - 130, x: start.x, y: start.y },
+        { time: now, x: start.x, y: start.y }
+      ];
+      nauruMotionOffset = { x: start.x, y: start.y };
+      nauruMotionArrivalPulse = 0;
+      if (nauruReducedMotionQuery.matches || distance < 3) {
+        nauruMotionRelock = null;
+        nauruMotionOffset = { x: 0, y: 0 };
+        nauruMotionArrivalPulse = nauruReducedMotionQuery.matches ? 0 : 1;
+      } else {
+        nauruMotionRelock = {
+          startX: start.x,
+          startY: start.y,
+          startTime: 0,
+          duration: Math.max(200, Math.min(360, 190 + distance * 0.18))
+        };
+      }
+      renderNauruMotion(now);
+      ensureNauruMotionFrame();
+    }
+
     function hideImage() {
       if (imageLayer && map.hasLayer(imageLayer)) map.removeLayer(imageLayer);
+      setNauruMotionVisible(false);
     }
 
     const DISASTER_RELIEF_CAMPAIGNS = [
@@ -3560,18 +3934,32 @@
       if (locked) {
         // 地図は動かさず、ナウルくんを現在の画面中央へ移して追従を再開する。
         map.stop();
+        const relockOffset = getNauruRelockOffset();
         const c = map.getCenter();
         center = { lat: c.lat, lng: c.lng };
         isNauruCenterLocked = true;
+        const motionStage = getNauruMotionStage();
+        if (getSilhouetteMode() === 'kun'
+          && imageLayer
+          && motionStage?.dataset.renderable !== 'false') {
+          imageLayer.setOpacity(0);
+        }
+        updateNauruLockButton();
+        updatePolygon();
+        startNauruRelockMotion(relockOffset);
       } else {
         // 解除した瞬間の地点にナウルくんを残す。
         const c = map.getCenter();
         center = { lat: c.lat, lng: c.lng };
         isNauruCenterLocked = false;
+        if (getSilhouetteMode() === 'kun' && imageLayer) {
+          imageLayer.setBounds(physicalBoundsAt(center.lat, center.lng));
+          imageLayer.setOpacity(silhouetteOpacity);
+        }
+        setNauruMotionVisible(false);
+        updateNauruLockButton();
+        updatePolygon();
       }
-
-      updateNauruLockButton();
-      updatePolygon();
       if (announce !== false) {
         showToast(locked
           ? 'ナウルくんを中央に固定しました'
@@ -4213,9 +4601,14 @@
         const bounds = physicalBoundsAt(center.lat, center.lng);
         const opacity = silhouetteOpacity;
 
+        setNauruMotionSource(url);
+        const motionRenderable = updateNauruMotionGeometry(bounds);
+        const useMotionStage = isNauruCenterLocked
+          && getSilhouetteMode() === 'kun'
+          && motionRenderable;
         if (!imageLayer) {
           imageLayer = L.imageOverlay(url, bounds, {
-            opacity: opacity,
+            opacity: useMotionStage ? 0 : opacity,
             interactive: false,
             zIndex: 450
           }).addTo(map);
@@ -4226,7 +4619,12 @@
             imageLayer.setUrl(url);
           }
           imageLayer.setBounds(bounds);
-          imageLayer.setOpacity(opacity);
+          imageLayer.setOpacity(useMotionStage ? 0 : opacity);
+        }
+        if (useMotionStage) {
+          setNauruMotionVisible(true);
+        } else {
+          setNauruMotionVisible(false);
         }
         // Leaflet の位置 transform は一切触らない
       } catch (e) {
@@ -6742,6 +7140,11 @@
       if (mobileBtnAddSpot) mobileBtnAddSpot.addEventListener('click', addCustomSpotFromCenter);
 
       map.on('zoomstart', () => { isZooming = true; });
+      map.on('zoom', () => {
+        if (isNauruCenterLocked && getSilhouetteMode() === 'kun') {
+          refreshLockedNauruMotionGeometry();
+        }
+      });
       map.on('zoomend', () => {
         isZooming = false;
         const c = map.getCenter();
@@ -6749,14 +7152,25 @@
         updatePolygon();
       });
 
+      map.on('dragstart', () => {
+        nauruMotionDragging = true;
+        resetNauruMotionSample();
+        ensureNauruMotionFrame();
+      });
+      map.on('dragend', () => {
+        nauruMotionDragging = false;
+        ensureNauruMotionFrame();
+      });
+
       let moveRaf = null;
       map.on('move', () => {
         if (isZooming || !isNauruCenterLocked) return;
+        recordNauruMotionSample();
         const c = map.getCenter();
         center = { lat: c.lat, lng: c.lng };
         if (!moveRaf) {
           moveRaf = requestAnimationFrame(() => {
-            updatePolygon();
+            if (!refreshLockedNauruMotionGeometry()) updatePolygon();
             moveRaf = null;
           });
         }
@@ -6764,6 +7178,10 @@
 
       map.on('moveend', () => {
         const c = map.getCenter();
+        if (isNauruCenterLocked) {
+          center = { lat: c.lat, lng: c.lng };
+          if (!refreshLockedNauruMotionGeometry()) updatePolygon();
+        }
         updateDisasterReliefBanner(c);
         const MAX_LAT = 84.5;
         if (c.lat > MAX_LAT + 0.05) {
