@@ -1,206 +1,170 @@
 ---
 name: osm-boundary-conversion
-description: Resolve and verify OSM-derived boundaries for islands, lakes, linear water features, parks, administrative areas, and site footprints, then preserve canonical GeoJSON plus metadata and export-ready specifications for SVG, PNG masks, raster tiles, KML, or other image/data outputs. Use when a boundary or named feature must be selected from OSM, Nominatim, or Overpass, reconstructed from relations, checked against place/area/context, converted, or saved into a project catalog.
+description: Resolve and verify OSM-derived boundaries for islands, lakes, linear water features, parks, administrative areas, and site footprints, then save canonical GeoJSON, reproducibility metadata, and aspect-correct SVG/export specifications. Use when selecting an OSM/Nominatim object, rebuilding a relation, excluding sea from an administrative boundary, preserving islands and holes, converting a boundary to image-ready data, or auditing a prior OSM conversion.
 ---
 
 # OSM Boundary Conversion
 
-## Purpose
+## Goal
 
-Use a verified vector boundary as the source of truth and derive images or other formats from it. Keep the source identity, boundary meaning, geometry checks, and export transform together so the result can be reproduced later.
+Create a reproducible vector boundary first, then derive SVG, masks, tiles, KML, or other outputs from it. Never treat a search preview, bounding box, or screenshot as canonical geometry.
 
-## Workflow
+The default meaning of an administrative-area output is land inside the administrative relation, excluding surrounding sea while preserving islands, holes, enclaves, and disconnected land components. A natural island is its landmass. An open water feature remains a line unless a separate closed water-area object is verified.
 
-### 1. Define what the boundary means
+## Required outputs
 
-Before querying OSM, record:
+For each accepted target, keep:
 
-- target feature and aliases;
-- boundary kind: island/landmass, lake or water surface, linear water feature, park, administrative area, facility footprint, or another explicitly named concept;
-- whether surrounding water, territorial waters, enclaves, islands, and holes are included;
-- geographic context and an expected order of magnitude for area;
-- required output formats, coordinate reference system, image dimensions, and whether exact georeferencing is required.
+- `R<ID>.geojson` or `W<ID>.geojson`: unsimplified WGS84 canonical geometry;
+- `.metadata.json`: source identity, query and response hashes, boundary definition, geometry checks, area/length, export transform, and file hashes;
+- `.preview.svg` unless `--no-svg` was requested;
+- raw OSM/coastline responses and their source receipts when `--keep-raw` or `--reuse-cache` is used.
 
-If the request does not distinguish a natural feature from an administrative boundary, keep both as candidates and state the choice. Do not silently use whichever same-name result appears first.
+Never join an island to the mainland, close an open line into an invented area, or retain a maritime sea polygon because coastline reconstruction failed.
 
-### 2. Discover candidates
+## Standard workflow
 
-Use Nominatim for human-readable candidate discovery. For the initial lookup, do not request `polygon_geojson=1`: geometry in the discovery response is a large, avoidable transfer. Default to `format=jsonv2&addressdetails=1&extratags=1&namedetails=1&limit=5`, retain the returned `osm_type`, `osm_id`, display name, tags, address context, and query, and fetch complete geometry only after selecting a candidate. Request polygon geometry only when identity is still ambiguous and only for the smallest necessary candidate set.
+### 1. Define and identify the target
 
-Use Overpass or the OSM API when the task needs tagged-element discovery, a closed way, or complete relation members and geometry. Query by name plus context, coordinates, or relevant tags; do not treat a name-only match as proof of identity. Respect public-service rate limits, send a descriptive User-Agent, cache responses, and retry transient errors with backoff.
+Record the intended kind and inclusion rules before fetching geometry:
 
-Use the direct Nominatim/OSM HTTP endpoints for this workflow. Do not use generic web search, browser page scraping, or a search result page to reach an OSM API endpoint; those add latency and make the request harder to bound.
+- `administrative-area`, `island`, `water`, `park`, `facility`, or another explicit kind;
+- surrounding sea included or excluded;
+- islands, holes, enclaves, territorial water, and artificial land included or excluded;
+- country, prefecture/state, municipality, nearby landmark, and expected scale.
 
-Typical tags to inspect include `type=multipolygon`, `boundary=administrative`, `natural=coastline`, `natural=water`, `water=lake`, `type=strait`, `place=island`, `leisure=park`, and the feature's local name tags. Tags are evidence, not a substitute for checking the actual geometry and intended definition.
+For a name lookup, use Nominatim only for candidate discovery. Request `jsonv2`, address details, extra tags, and name details, but not `polygon_geojson=1` by default. A candidate must match the name, kind, and every supplied context token. Stop on ambiguity; do not select the first same-name result.
 
-The bundled converter recognizes both administrative and natural-feature candidates. Use `--kind administrative-area`, `--kind island`, `--kind water` (or a water subtype such as `lake`, `strait`, `river`, or `bay`), or `--kind park` when the intended boundary is known. Without `--kind`, it infers a supported kind from the Nominatim category/type and still stops on tied candidates instead of choosing the first same-name result.
+Prefer a verified `osmType` plus `osmId`. It skips discovery and pins regeneration to the intended object.
 
-Use a fast path when a verified `osmType` and `osmId` are already available: skip Nominatim name search, fetch the complete pinned object once, and validate the result locally. Treat alternate geometries such as Geolonia, Natural Earth, or WDPA as optional comparisons, not required steps on every run. Put a bounded timeout on network requests, avoid unbounded retry/sleep loops, and reuse a local response cache when the source revision has not changed.
+### 2. Use the bundled converter
 
-Use three execution modes:
-
-- **Quick (default):** one Nominatim discovery request when no ID is supplied, one complete OSM object request, and, only for an administrative relation whose outer ways include `maritime=yes`, one bounded `natural=coastline` bbox request. Then run local geometry checks and save canonical GeoJSON plus metadata and SVG/export specifications. Quick mode is a hard stop: do not open web search, query an official-area page, compare Natural Earth/WDPA, request a second candidate, run `--deep`, render a PNG, or repeat a successful request. Do not add `--keep-raw` unless raw reproducibility was requested; save the result as soon as the local checks pass.
-- **Deep (opt-in):** official-area lookup, alternate-source comparison, PNG preview, or visual inspection only when the user requests it, the quick checks are ambiguous, or the feature is unusually complex.
-- **Fallback:** if a bounded request fails or exceeds its timeout, stop that request, report the exact stage, and use a documented alternate source only when appropriate. Do not silently start a long chain of retries.
-
-For a new name-based request, target completion within roughly 10 seconds and hard-stop the normal two-request network budget at 30 seconds: one discovery request and one full-object request, with at most one bounded coastline request only when an administrative relation actually exposes a maritime outer way. Once an ID is fixed, never repeat discovery for the same run. On a repeat run, pass `--reuse-cache`; the bundled converter reuses the pinned target, discovery response, full OSM response, and coastline response without contacting Nominatim again. Do not hardcode a city, island, water body, OSM ID, area, or special-case correction into the workflow; the same candidate, context, kind, and geometry checks must work for any place.
-
-When this skill folder contains `scripts/convert_osm_boundary.mjs`, use that bundled converter first instead of writing a new boundary-assembly script. Typical commands are:
+Use `scripts/convert_osm_boundary.mjs`; do not write a second reconstruction script. Keep one shared cache directory so separate outputs can reuse the same verified responses.
 
 ```text
-node scripts/convert_osm_boundary.mjs --name "豊中市" --context "大阪府 日本" --output-dir outputs
-node scripts/convert_osm_boundary.mjs --osm-type relation --osm-id 358672 --name "豊中市" --output-dir outputs
-node scripts/convert_osm_boundary.mjs --name "淡路島" --kind island --context "兵庫県 日本" --output-dir outputs
-node scripts/convert_osm_boundary.mjs --name "琵琶湖" --kind water --context "滋賀県 日本" --output-dir outputs
-node scripts/convert_osm_boundary.mjs --name "明石海峡" --kind water --context "兵庫県 日本" --output-dir outputs
-node scripts/convert_osm_boundary.mjs --osm-type way --osm-id 1442885134 --name "明石海峡" --kind water --output-dir outputs
-node scripts/convert_osm_boundary.mjs --name "姫路市" --kind administrative-area --context "兵庫県 日本" --output-dir outputs --reuse-cache
-node scripts/convert_osm_boundary.mjs --osm-type relation --osm-id 358672 --output-dir outputs --reuse-cache
+node scripts/convert_osm_boundary.mjs --name "豊中市" --kind administrative-area --context "大阪府 日本" --output-dir outputs --cache-dir .osm-boundary-cache --reuse-cache --deep
+node scripts/convert_osm_boundary.mjs --osm-type relation --osm-id 900329 --name "神戸市" --kind administrative-area --context "兵庫県 日本" --output-dir outputs --cache-dir .osm-boundary-cache --reuse-cache --deep
+node scripts/convert_osm_boundary.mjs --name "淡路島" --kind island --context "兵庫県 日本" --output-dir outputs --cache-dir .osm-boundary-cache --reuse-cache --deep
+node scripts/convert_osm_boundary.mjs --osm-type way --osm-id 1442885134 --name "明石海峡" --kind water --output-dir outputs --cache-dir .osm-boundary-cache --reuse-cache --deep
 ```
 
-The bundled converter performs the bounded HTTP requests, relation/way assembly, administrative land-only coastline masking, GeoJSON save, metadata save, and aspect-preserving SVG/export specification. For a maritime administrative relation it records the coastline query, hash, contact points, island count, and `sourceMode: coastline-land-mask` in metadata; if the coastline path cannot be connected, it stops instead of emitting a sea-filled polygon. It stores a small discovery cache and, with `--reuse-cache`, reuses the pinned target, discovery response, full OSM response, and coastline response for same-request regeneration. Omit `--reuse-cache` when a fresh source revision is required. Use `--deep` only when deeper checks are requested or the quick result is ambiguous; do not reimplement its core algorithm in the task workspace. A closed way or relation becomes a `Polygon`/`MultiPolygon`; an open way is preserved as a `LineString` with a line preview and an explicit `pngMask.supported=false` record. It is never silently closed into an invented area.
+Use `--keep-raw` for a fresh reproducible fetch. Use `--reuse-cache` for normal regeneration; it also retains newly fetched raw responses. Omit cache reuse only when a fresh OSM revision is required.
 
-When a request names several nearby features, create one target entry per intended feature (name, kind, context, and optional verified OSM ID), resolve and save each independently, and write a small manifest linking the entries. Keep the city/administrative area, each island, and each water feature as separate objects unless the user explicitly requests a union. A failed or rejected candidate must remain visible in the manifest; do not silently substitute a same-name feature or merge a surrounding water body into a land boundary.
+If the sandbox refuses to execute a Node main script from the installed skill directory, materialize `convert_osm_boundary.mjs` and its test file once under the approved workspace, verify their SHA-256 hashes match the skill copies, and execute that single workspace copy. Do not use `eval`, create several ad-hoc converter copies, or repeat the same EPERM command.
 
-### 3. Select and pin the correct OSM object
+### 3. Keep acquisition bounded
 
-Compare every viable candidate on all of the following:
+The converter:
 
-1. exact or alias name and language tags;
-2. country, prefecture, municipality, or nearby landmark context;
-3. tags and object type appropriate to the requested boundary (`boundary=administrative`, `place=island`, `natural=water`, `water=lake`, and similar);
-4. centroid and bounding box;
-5. polygon or multipolygon shape, including holes and disconnected parts;
-6. rough area and plausibility against an official or trusted reference.
+1. fetches only the parent relation and member ways with inline geometry;
+2. expands to direct `subarea` relations only when the parent has no resolvable outer geometry;
+3. requests coastline data only for a maritime administrative boundary;
+4. starts alternate public Overpass endpoints with a short stagger, accepts the first success, and cancels the rest;
+5. writes retrieval attempts and cache source receipts.
 
-Accept only a candidate that passes the checks. Store the stable `osmType` and `osmId` (for example, `relation:123` or `way:456`) with the output. If no candidate passes, report the ambiguity and request a better identifier or use an explicitly documented alternate source.
+This is intentionally not an unbounded retry loop. If all endpoints fail, report the exact stage and keep any completed cache. A later run with `--reuse-cache` must not refetch completed stages.
 
-### 4. Fetch and normalize complete geometry
+Respect OSM public-service limits and attribution. Do not add generic web searches, browser scraping, official-area research, Natural Earth, or WDPA to every normal conversion. Those are targeted comparisons, not mandatory network work.
 
-For a relation, fetch the full relation and its members, preserve `outer` and `inner` roles, and reconstruct the multipolygon from complete ways. For a closed way, require matching first and last node IDs. For an open way, preserve the ordered nodes as a `LineString`; never auto-close a linear feature such as a named strait. A recognized water feature may therefore be either an area or a line: the former can produce an area mask, while the latter gets a canonical line GeoJSON/SVG and an explicit no-mask status. Never use a bounding box or a simplified search preview as the final geometry.
+## Geometry invariants
 
-Normalize all coordinates to GeoJSON order `[longitude, latitude]`. Handle antimeridian crossings deliberately, preserve holes, remove only exact duplicate consecutive points, and keep enough vertices for the intended scale. Do not simplify before the unsimplified geometry has been saved or checksummed.
+### Relations and ways
 
-For large or complex relations that time out or return an unusable polygon, try a bounded alternate OSM endpoint or a smaller, explicitly scoped query. If OSM remains unusable, a source such as Natural Earth or WDPA may be used only as a documented fallback; record the reason, source identity, and changed boundary definition, and never label the fallback as OSM geometry.
+- Rebuild relation rings from complete member ways and preserve `outer`/`inner` roles.
+- Join ways by node identity; fail on an open area ring or missing member.
+- Normalize outer rings counterclockwise and holes clockwise.
+- Assign each hole to the smallest containing outer polygon.
+- Preserve a closed way as a polygon and an open way as a `LineString` in OSM node order.
+- Reject out-of-range coordinates, zero-area rings, duplicate rings, holes outside outers, and self-intersections.
 
-### 5. Validate before saving derivatives
+### Parent and subarea relations
 
-Run checks appropriate to the feature and output scale:
+Use a complete parent boundary as canonical. Direct subareas are an audit or a fallback, not an automatic replacement for the parent.
 
-- valid JSON and GeoJSON structure;
-- `Polygon` or `MultiPolygon` geometry with non-empty, closed rings, or a `LineString` whose ordered nodes are preserved;
-- correct outer/inner winding or library-normalized winding;
-- no self-intersections, broken relation joins, accidental duplicate rings, or holes outside their outer ring;
-- plausible bounding box, centroid, and coordinate range;
-- geodesic or equal-area projected area, with holes subtracted;
-- comparison with official/reference area and the intended boundary meaning;
-- area preservation after any simplification, with a stated tolerance;
-- serialized SVG precision at the intended canvas size; keep the measured worst-case coordinate quantization error at or below 0.25 output pixel;
-- visual overlay or rendered preview at the target scale.
+If the parent has no outer geometry, assemble direct subarea components. Permit shared borders, but reject positive-area overlap or partial conflicts. Do not call a subarea-derived result canonical while overlap remains unresolved.
 
-In Quick mode, perform the structural, ring, coordinate, area-plausibility, and aspect-ratio checks locally. Do not block the save on a fresh official website, Geolonia, or raster-renderer request when those references are not already cached; record them as optional checks instead.
+### Maritime administrative boundaries
 
-For global features, do not calculate area with a flat longitude/latitude shoelace formula without accounting for projection and antimeridian behavior. A large area mismatch is a signal to revisit the candidate and definition, not something to hide by changing metadata.
+OSM administrative outer ways may use `maritime=yes` to close a relation through sea. For these:
 
-Keep ratio meanings separate. `areaRatio = geometryArea / referenceArea` and `areaDifferencePercent` describe area agreement; they do not describe an image's shape. For an image, record at least `coordinateBboxAspectRatio = longitudeSpan / latitudeSpan`, `projectedAspectRatio = longitudeSpan * cos(centerLatitude) / latitudeSpan`, and the actual canvas ratio. Never answer a visual "比率" question with an area ratio.
+- detect maritime ways on the parent and, when direct subareas are the required fallback, on those direct subareas;
+- find exact administrative-boundary/coastline intersections, including intersections inside segments;
+- follow `natural=coastline` in OSM direction, where land lies on the left;
+- support coastlines split across many open ways and coastlines stored as one closed way;
+- replace one contiguous maritime arc with the real coastline;
+- add closed or multi-way coastline rings contained by the administrative polygon as independent islands;
+- deduplicate islands without changing their coordinates;
+- fail on missing contacts, a disconnected coastline graph, multiple ambiguous maritime arcs, or a land mask with no polygons.
 
-### 6. Save a canonical, reproducible data record
+Do not append an island to a mainland ring. The result must be a proper `MultiPolygon` when disconnected land exists.
 
-Save the canonical vector feature first. Prefer one detailed geometry file plus a lightweight catalog entry when a project has a catalog/detail split. Use stable names based on the pinned source ID, such as `R123.geojson` for a relation and `W456.geojson` for a way, unless the host project has a stronger naming convention.
+## Validation
 
-At minimum, preserve these properties alongside the geometry:
+Before reporting success, verify:
 
-```json
-{
-  "id": "stable-project-id",
-  "name": "display name",
-  "kind": "island",
-  "context": "country or regional context",
-  "aliases": ["alternate name"],
-  "osmType": "relation",
-  "osmId": 123,
-  "boundaryDefinition": "land area excluding surrounding water",
-  "boundarySourceLabel": "OpenStreetMap",
-  "boundarySourceUrl": "https://www.openstreetmap.org/relation/123",
-  "sourceQuery": "name and context used for discovery",
-  "fetchedAt": "ISO-8601 timestamp",
-  "geometryAreaKm2": 0,
-  "officialAreaKm2": null,
-  "geometryFile": "path/to/detail.geojson",
-  "coordinateSystem": "WGS84 / EPSG:4326",
-  "license": "OpenStreetMap contributors, ODbL"
-}
-```
+- candidate name, kind, context, OSM type, and OSM ID;
+- valid GeoJSON structure and `[longitude, latitude]` order;
+- closed non-zero area rings, correct winding, valid holes, and no duplicate rings;
+- zero polygon self-intersections; the converter runs this check for area geometry even without `--deep`;
+- disconnected land and islands are retained as separate polygon components;
+- spherical area or line length is plausible for the selected definition;
+- optional official/reference area uses `geometryArea / referenceArea`, with the source identified;
+- geometry and final GeoJSON SHA-256 hashes are recorded;
+- SVG quantization and canvas-ratio bounds pass.
 
-Add `geometryAreaKm2`, `bbox`, validation status, simplification tolerance, and reference-area source when available. Preserve raw API responses or a checksum in a research cache when reproducibility matters, but keep large caches out of the public catalog unless they are intentionally part of the project.
+For complex coastlines, parent-from-subarea fallbacks, tiny facilities, or any disputed output, use `--deep` and inspect the SVG visually. Check missing islands, filled sea, holes, cropping, flipped latitude, stair steps, and stretched proportions. Numerical success does not replace visual inspection when the shape is in question.
 
-For SVG derivatives, also preserve `width`, `height`, `viewBox`, `coordinatePrecision`, and `quantizationErrorPx` in metadata. These describe numeric serialization precision, not geometric simplification, and must not replace the canonical unsimplified GeoJSON or its area checks.
+## SVG and raster rules
 
-For Dokodemo Nauru, inspect the current nested `github-dokodemo-nauru` repository before writing. The established pattern is a catalog under `data/` with detailed files under a feature-specific directory, metadata such as `osmType`, `osmId`, `geometryFile`, and source attribution, and local audit scripts under `scripts/`. Re-check current paths and schema rather than assuming an old revision is unchanged.
+The converter maps WGS84 geometry to a pixel-space SVG viewBox using one local equirectangular x/y scale and y-axis inversion. It does not round geographic coordinates into a low-precision viewBox.
 
-### 7. Derive image and other outputs from the vector
+Keep these meanings separate:
 
-Treat GeoJSON or another validated vector as canonical; never make a screenshot the only saved boundary. For each derivative, save the transform specification with the output:
+- `coordinateBboxAspectRatio`: longitude span divided by latitude span;
+- `projectedAspectRatio`: longitude span corrected by `cos(centerLatitude)`, divided by latitude span;
+- SVG `aspectRatio`: actual canvas width divided by height;
+- `areaRatio`: geometry area divided by a reference area.
 
-- **SVG:** choose a projection or planar transform, map the target bounds to the viewBox, preserve holes as subpaths, and document whether y-axis inversion was applied. Serialize mapped coordinates with enough precision that rounding error is at or below 0.25 output pixel at the target canvas; never apply a fixed three-decimal format to a small geographic-unit viewBox. Record `coordinatePrecision`, measured `quantizationErrorPx`, and any scale-specific simplification tolerance. For a `LineString`, emit a stroked path without closing it.
-- **PNG/TIFF mask:** choose width, height, bounds, background, fill/alpha convention, antialiasing, and pixel-to-coordinate transform. Use transparency or a documented mask value outside the boundary. If exact geographic placement is needed, use GeoTIFF or a world-file/sidecar rather than an unreferenced PNG.
-  An open `LineString` is not an area mask; keep the vector and line preview and report that a mask is unsupported unless a separately verified closed water boundary is selected.
-- **Raster tiles or MBTiles:** record zoom range, tile scheme, projection, source geometry version, and simplification rule.
-- **KML, GeoPackage, TopoJSON, or other formats:** preserve CRS, holes, feature identity, attribution, and the conversion tool/version.
+The actual canvas ratio must stay within the recorded maximum error from the projected content ratio. A square request must use padding/letterboxing with one scale, never independent x/y stretching.
 
-Render a preview and inspect it for flipped latitude, cropped edges, missing holes, antimeridian seams, disconnected pieces, and geometry extending outside the expected bounds when a visual preview is requested or needed. Keep vector and raster filenames/version identifiers linked. Do not generate a PNG merely to validate an SVG or GeoJSON structure; a PNG preview is Deep mode unless the user explicitly asks for a raster image.
+SVG is a derivative of canonical GeoJSON. Preserve pixel-space `viewBox`, width, height, padding, coordinate precision, quantization error, projection, and y-axis direction in metadata. An open line receives a stroked SVG and `pngMask.supported=false`.
 
-For aspect-preserving output, use one projected x/y scale and derive dimensions from the projected ratio. Make the SVG canvas ratio agree with the projected content ratio within rounding tolerance. If a square canvas is explicitly required, letterbox or pad it while keeping one scale; never map longitude and latitude independently to the full square. Derive raster dimensions from the same ratio, for example a projected ratio of `1.3919` with a long edge of `2048` becomes approximately `2048×1471`, not `2048×2048`.
+## Multiple targets
 
-### 8. Report provenance and hand off
+Resolve each city, island, lake, strait, park, or facility independently. Keep one target record per intended feature and create a manifest only when the request contains several targets. Do not silently merge nearby features or substitute a rejected same-name object.
 
-Return a compact receipt containing the accepted OSM object, rejected or ambiguous candidates, source URLs and retrieval time, boundary definition, validation results, output paths, export settings, and any fallback or manual correction. If publication is requested, stage only the reviewed files, preserve unrelated worktree changes, and verify the remote raw files and live site separately from local validation.
+## Publication and handoff
 
-## Decision rules
+Return a compact receipt with:
 
-- Prefer an explicit verified OSM ID over a fresh name search.
-- Prefer full OSM relation/member geometry over a Nominatim preview for the final vector.
-- Use area as a plausibility check, never as the sole identity criterion.
-- When an explicit ID is pinned, do not repeat discovery or unrelated reference downloads during ordinary regeneration.
-- In Quick mode, keep network work to one discovery request plus one complete-object request, plus one bounded coastline bbox request only when a maritime administrative outer way requires it; do not add official-site, Geolonia, or PNG requests unless they are needed or requested.
-- Distinguish natural land, water surface, administrative territory, protected-area designation, and facility footprint; they are not interchangeable.
-- Use Natural Earth, WDPA, or another source only as a declared fallback or composite source, with its own attribution and metadata.
-- Save vector first, then rasterize or convert; preserve the conversion settings.
-- Report area ratio, coordinate-bbox ratio, projected content ratio, and canvas ratio as separate named values.
-- Do not delete an old geometry or overwrite a raw cache until the replacement, catalog references, and rendered preview have passed validation.
+- accepted OSM object and boundary definition;
+- retrieval URL(s), cache use, response hashes, and timestamp;
+- geometry type, components, islands, area/length, integrity checks, and reference comparison;
+- GeoJSON/SVG paths and hashes;
+- fallback, unresolved audit, or manual decision, if any.
 
-## Failure handling
+When publishing, stage only reviewed skill/output files and preserve unrelated worktree changes. Verify the remote branch/file after pushing; local generation alone is not publication.
 
-- **Same-name wrong object:** repeat with context, coordinates, aliases, and explicit OSM IDs; reject the result instead of accepting the first polygon.
-- **Water or island is not recognized:** check the Nominatim `category`/`type` (`water`/`lake`, `place`/`island`) and retry with `--kind water` or `--kind island`; do not require `boundary=administrative` for natural features.
-- **Named water feature is a line:** keep the `natural=strait`/other linear OSM object as a `LineString`, emit its GeoJSON and line preview, and mark area-mask export unsupported. If a filled water surface is required, select a separately verified closed area relation/way; never turn an open way into a fake triangle by adding its first point.
-- **Island includes a country or territorial water:** inspect tags and area definition, compare the shape with a trusted reference, and choose a landmass relation or documented alternate source.
-- **Lake or park is missing or split:** query `natural=water`, `water=*`, relation members, and nearby coordinates; keep separate features separate unless the requested definition is a group boundary.
-- **Relation/API timeout:** retry a bounded endpoint/query with backoff, then document a fallback; do not silently replace the source.
-- **Administrative relation contains sea:** inspect outer-way `maritime=yes`; fetch one bounded `natural=coastline` bbox, snap the two land/sea contacts, replace only the maritime arc, and keep closed coastline ways inside the original relation as separate island components. If any contact or coastline graph join is missing, fail the conversion rather than retaining the parent sea polygon.
-- **Geometry looks plausible but renders wrong:** check `[lon, lat]` order, ring closure, projection, y-axis direction, antimeridian handling, and hole winding before changing the data.
-- **The boundary looks blocky or stair-stepped:** inspect SVG coordinate serialization before changing OSM geometry; compare `quantizationErrorPx` with the 0.25-pixel bound, then increase precision or use a pixel-based viewBox. Keep the detailed GeoJSON unchanged.
-- **The output is square or too narrow:** inspect the actual SVG `width`, `height`, and `viewBox`, then compare canvas ratio with projected content ratio; remove independent x/y normalization and recompute raster dimensions from one projected scale.
-- **A ratio answer seems contradictory:** label whether it is area, coordinate-bbox, projected-content, or canvas ratio before making a conclusion.
-- **Simplification changes the result:** reduce tolerance or retain the detailed geometry and generate a scale-specific derivative; record the measured area ratio.
-- **Attribution is missing:** stop the export handoff and restore OSM/ODbL or alternate-source attribution in the data and receipt.
+## Failure rules
 
-## Keep execution bounded
-
-- Prefer an existing reusable converter or one compact deterministic helper. Do not build a long bespoke reconstruction, rasterization, and audit script in several exploratory stages when the canonical OSM response can be processed directly.
-- After one successful fetch and one successful local validation, save the outputs and report them. Do not fetch the same relation again solely to recalculate a hash, redraw a preview, or repeat a check already recorded in metadata.
-- Do not copy the bundled converter into multiple temporary locations or retry the same path/runtime error in a loop. A skill-path or sandbox permission error is an execution-environment issue: report it once, use the approved workspace runtime/permission path, and continue with the single bounded request.
-- Do not turn a Quick request into a research workflow because an area reference is absent. Save `referenceAreaKm2: null` and state that the optional comparison was not requested.
-- If a required step is still running after its budget, stop and report the stage and elapsed time; do not continue silently or ask the user to wait without a concrete diagnostic.
+- Wrong same-name object: strengthen context or pin an OSM ID; never accept by name alone.
+- Administrative area contains sea: require the coastline land mask; never label the sea-filled relation as land.
+- Island missing: inspect closed and multi-way coastline rings and containment; never draw or attach an island manually.
+- Direct subareas overlap: stop and report the conflicting relation/component.
+- Coastline direction or graph is broken: stop instead of reversing an arbitrary shortest path.
+- SVG looks coarse: inspect pixel-space serialization and quantization before simplifying or changing OSM geometry.
+- SVG looks stretched: compare projected content ratio with actual canvas ratio; never use area ratio as an image ratio.
+- Public endpoint timeout: keep completed caches, allow the bounded staggered alternatives, then stop. Do not start an open-ended retry chain.
+- Skill-folder EPERM: materialize one hash-identical workspace copy and continue there.
 
 ## Final checklist
 
-- [ ] Boundary definition and inclusion/exclusion rules are written down.
-- [ ] Candidate identity is pinned by verified `osmType` and `osmId`, or the alternate source is explicit.
-- [ ] Complete polygon/multipolygon geometry is saved in GeoJSON coordinate order.
-- [ ] Geometry, area, bounds, holes, and target-scale rendering have been checked.
-- [ ] SVG serialization precision is measured and `quantizationErrorPx` is within the target-scale bound, or an exception is documented.
-- [ ] Canonical metadata, provenance, license, and retrieval time are present.
-- [ ] SVG/PNG/raster/export settings and georeferencing sidecars are saved where needed.
-- [ ] Catalog references and output paths are consistent.
-- [ ] Only reviewed files are handed off for publication; unrelated changes remain untouched.
+- [ ] Boundary meaning and inclusion rules are explicit.
+- [ ] Candidate is pinned and context-validated.
+- [ ] Canonical GeoJSON is unsimplified and checksummed.
+- [ ] Sea is excluded from land outputs; islands and holes remain separate and intact.
+- [ ] Rings, overlaps, self-intersections, area/length, and coordinate range pass.
+- [ ] SVG uses one projected scale and passes quantization/canvas-ratio bounds.
+- [ ] Visual inspection is complete when shape quality is disputed or complex.
+- [ ] Metadata contains provenance, cache receipts, license, validation, and export settings.
+- [ ] Only reviewed files are published.

@@ -1,4 +1,4 @@
 interface:
   display_name: "OSM境界データ変換"
-  short_description: "OSM境界を検証して画像化可能なデータへ保存・再利用"
-  default_prompt: "Use $osm-boundary-conversion to identify and validate an OSM boundary, then save canonical GeoJSON and export metadata."
+  short_description: "OSMの陸地・水域・行政境界を検証しGeoJSONとSVGへ変換"
+  default_prompt: "$osm-boundary-conversion を使い、対象の正しいOSM境界を選定・検証し、再現可能なGeoJSONと高精度SVGとして保存してください。"
