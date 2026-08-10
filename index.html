@@ -75,12 +75,14 @@
     .leaflet-container { background: transparent; }
     .leaflet-layer.nauru-map-detail-layer { transition: opacity 80ms ease; }
     .leaflet-layer.nauru-map-bootstrap-layer { transition: opacity 220ms ease; }
+    .leaflet-layer.nauru-map-bootstrap-quality-layer { transition: opacity 120ms ease; }
     .leaflet-layer.nauru-map-detail-layer-ready { opacity: 1 !important; }
     .leaflet-layer.nauru-map-bootstrap-layer-leaving { opacity: 0 !important; }
     @media (prefers-reduced-motion: reduce) {
       #map-boot-shell { transition: none; }
       .leaflet-layer.nauru-map-detail-layer,
-      .leaflet-layer.nauru-map-bootstrap-layer { transition: none; }
+      .leaflet-layer.nauru-map-bootstrap-layer,
+      .leaflet-layer.nauru-map-bootstrap-quality-layer { transition: none; }
     }
     #disaster-relief-banner {
       position: fixed;
@@ -3246,11 +3248,14 @@
     let map = null;
     let baseLayer = null;
     let basemapBootstrapLayer = null;
+    let basemapBootstrapQualityLayer = null;
     let basemapBootstrapRemovalTimer = null;
     let basemapTransitionTimer = null;
     let basemapBootstrapPrefetchTimer = null;
     const basemapBootstrapPrefetchedTiles = new Set();
     const basemapBootstrapPrefetchInFlight = new Map();
+    const basemapBootstrapQualityPrefetchedTiles = new Set();
+    const basemapBootstrapQualityPrefetchInFlight = new Map();
     let basemapRequestId = 0;
     let bootMapShellHidden = false;
     let polygonLayer = null;
@@ -3448,35 +3453,72 @@
       if (requestId !== null && requestId !== basemapRequestId) return;
       clearTimeout(basemapBootstrapRemovalTimer);
       basemapBootstrapRemovalTimer = null;
-      const layer = basemapBootstrapLayer;
-      if (!layer) return;
+      const layers = [basemapBootstrapLayer, basemapBootstrapQualityLayer].filter(Boolean);
+      if (!layers.length) return;
       if (!immediate) {
-        const container = layer.getContainer && layer.getContainer();
-        if (container) container.classList.add('nauru-map-bootstrap-layer-leaving');
+        layers.forEach(layer => {
+          const container = layer.getContainer && layer.getContainer();
+          if (container) container.classList.add('nauru-map-bootstrap-layer-leaving');
+        });
         basemapBootstrapRemovalTimer = window.setTimeout(() => {
-          if (map && map.hasLayer(layer)) map.removeLayer(layer);
-          if (basemapBootstrapLayer === layer) basemapBootstrapLayer = null;
+          layers.forEach(layer => {
+            if (map && map.hasLayer(layer)) map.removeLayer(layer);
+          });
+          if (layers.includes(basemapBootstrapLayer)) basemapBootstrapLayer = null;
+          if (layers.includes(basemapBootstrapQualityLayer)) basemapBootstrapQualityLayer = null;
           basemapBootstrapRemovalTimer = null;
         }, 220);
         return;
       }
-      if (map && map.hasLayer(layer)) map.removeLayer(layer);
-      if (basemapBootstrapLayer === layer) basemapBootstrapLayer = null;
+      layers.forEach(layer => {
+        if (map && map.hasLayer(layer)) map.removeLayer(layer);
+      });
+      if (layers.includes(basemapBootstrapLayer)) basemapBootstrapLayer = null;
+      if (layers.includes(basemapBootstrapQualityLayer)) basemapBootstrapQualityLayer = null;
+    }
+
+    function ensureBasemapBootstrapPanes() {
+      if (!map) return;
+      if (!map.getPane('nauruBootstrapPane')) map.createPane('nauruBootstrapPane');
+      if (!map.getPane('nauruBootstrapQualityPane')) map.createPane('nauruBootstrapQualityPane');
+      map.getPane('nauruBootstrapPane').style.zIndex = '190';
+      map.getPane('nauruBootstrapQualityPane').style.zIndex = '195';
     }
 
     function ensureBasemapBootstrapLayer() {
       if (!map || !usesMobileLayout()) return null;
       if (basemapBootstrapLayer && map.hasLayer(basemapBootstrapLayer)) return basemapBootstrapLayer;
+      ensureBasemapBootstrapPanes();
       const bootLayer = createBasemapTileLayer(BASEMAPS.osm, 0, {
         maxNativeZoom: 6,
         maxZoom: 19,
         keepBuffer: 4,
         updateWhenIdle: false,
         updateWhenZooming: false,
+        pane: 'nauruBootstrapPane',
         className: 'nauru-map-bootstrap-layer'
       });
       basemapBootstrapLayer = bootLayer.addTo(map);
       return bootLayer;
+    }
+
+    function ensureBasemapBootstrapQualityLayer() {
+      if (!map || !usesMobileLayout()) return null;
+      if (basemapBootstrapQualityLayer && map.hasLayer(basemapBootstrapQualityLayer)) {
+        return basemapBootstrapQualityLayer;
+      }
+      ensureBasemapBootstrapPanes();
+      const qualityLayer = createBasemapTileLayer(BASEMAPS.osm, 0, {
+        maxNativeZoom: 8,
+        maxZoom: 19,
+        keepBuffer: 2,
+        updateWhenIdle: false,
+        updateWhenZooming: false,
+        pane: 'nauruBootstrapQualityPane',
+        className: 'nauru-map-bootstrap-quality-layer'
+      });
+      basemapBootstrapQualityLayer = qualityLayer.addTo(map);
+      return qualityLayer;
     }
 
     function buildBasemapBootstrapTileUrl(x, y, zoom) {
@@ -3493,10 +3535,8 @@
         .replace('{y}', String(clampedY));
     }
 
-    function prefetchBasemapBootstrapArea() {
+    function prefetchBasemapTiles(zoom, radius, prefetchedTiles, inFlightTiles) {
       if (!map || !usesMobileLayout()) return;
-      const zoom = 6;
-      const radius = 3;
       const worldSize = 2 ** zoom;
       const tilePoint = map.project(map.getCenter(), zoom).divideBy(256).floor();
       const tiles = [];
@@ -3509,19 +3549,36 @@
       tiles.forEach(({ x, y }) => {
         if (y < 0 || y >= worldSize) return;
         const url = buildBasemapBootstrapTileUrl(x, y, zoom);
-        if (basemapBootstrapPrefetchedTiles.has(url) || basemapBootstrapPrefetchInFlight.has(url)) return;
+        if (prefetchedTiles.has(url) || inFlightTiles.has(url)) return;
         const image = new Image();
         image.decoding = 'async';
         image.crossOrigin = 'anonymous';
         image.fetchPriority = 'low';
         image.onload = () => {
-          basemapBootstrapPrefetchInFlight.delete(url);
-          basemapBootstrapPrefetchedTiles.add(url);
+          inFlightTiles.delete(url);
+          prefetchedTiles.add(url);
         };
-        image.onerror = () => basemapBootstrapPrefetchInFlight.delete(url);
-        basemapBootstrapPrefetchInFlight.set(url, image);
+        image.onerror = () => inFlightTiles.delete(url);
+        inFlightTiles.set(url, image);
         image.src = url;
       });
+    }
+
+    function prefetchBasemapBootstrapArea() {
+      if (!map || !usesMobileLayout()) return;
+      // 現在位置の近くはz8、さらに外側はz6で先読みして、画質と範囲を両立する。
+      prefetchBasemapTiles(
+        8,
+        2,
+        basemapBootstrapQualityPrefetchedTiles,
+        basemapBootstrapQualityPrefetchInFlight
+      );
+      prefetchBasemapTiles(
+        6,
+        3,
+        basemapBootstrapPrefetchedTiles,
+        basemapBootstrapPrefetchInFlight
+      );
     }
 
     function scheduleBasemapBootstrapPrefetch(delay = 0) {
@@ -3561,6 +3618,7 @@
       const detailLayers = [primaryLayer];
       primaryLayer.once('load', () => {
         hideBootMapShell();
+        ensureBasemapBootstrapQualityLayer();
         scheduleBasemapBootstrapPrefetch();
       });
       if (fadeFromBootstrap) {
@@ -3583,6 +3641,7 @@
         detailLayers.push(fallbackLayer);
         fallbackLayer.once('load', () => {
           hideBootMapShell();
+          ensureBasemapBootstrapQualityLayer();
           scheduleBasemapBootstrapPrefetch();
         });
         if (fadeFromBootstrap) {
