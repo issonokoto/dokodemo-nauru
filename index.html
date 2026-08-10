@@ -12,6 +12,11 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin>
+  <link rel="dns-prefetch" href="//tile.openstreetmap.org">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
@@ -41,7 +46,17 @@
       background: #061525;
       overflow: hidden;
     }
-    #map { position: absolute; inset: 0; z-index: 0; }
+    #map { position: absolute; inset: 0; z-index: 0; background: #b8d8e7; }
+    .leaflet-layer.nauru-map-detail-layer,
+    .leaflet-layer.nauru-map-bootstrap-layer {
+      transition: opacity 220ms ease;
+    }
+    .leaflet-layer.nauru-map-detail-layer-ready { opacity: 1 !important; }
+    .leaflet-layer.nauru-map-bootstrap-layer-leaving { opacity: 0 !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .leaflet-layer.nauru-map-detail-layer,
+      .leaflet-layer.nauru-map-bootstrap-layer { transition: none; }
+    }
     #disaster-relief-banner {
       position: fixed;
       top: max(0.65rem, env(safe-area-inset-top));
@@ -3202,6 +3217,10 @@
 
     let map = null;
     let baseLayer = null;
+    let basemapBootstrapLayer = null;
+    let basemapBootstrapRemovalTimer = null;
+    let basemapTransitionTimer = null;
+    let basemapRequestId = 0;
     let polygonLayer = null;
     let imageLayer = null;
     let geoData = NAURU_RINGS;
@@ -3367,31 +3386,18 @@
       return Math.max(smallestLevel, Math.min(selectedLevel, largestLevel));
     }
 
-    function createBasemapTileLayer(cfg, textLevel) {
+    function createBasemapTileLayer(cfg, textLevel, overrides = {}) {
       const tileScale = Math.pow(2, textLevel);
       return L.tileLayer(cfg.url, {
         ...cfg.options,
         tileSize: 256 * tileScale,
         zoomOffset: -textLevel,
-        crossOrigin: 'anonymous'
+        crossOrigin: 'anonymous',
+        ...overrides
       });
     }
 
-    function setBasemap(key) {
-      if (!map || !BASEMAPS[key]) return;
-      const cfg = BASEMAPS[key];
-      const textLevel = getBasemapTextLevel(key);
-      if (baseLayer) map.removeLayer(baseLayer);
-      const primaryLayer = createBasemapTileLayer(cfg, textLevel);
-      if (cfg.fallback && BASEMAPS[cfg.fallback]) {
-        const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel);
-        baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
-      } else {
-        baseLayer = primaryLayer.addTo(map);
-      }
-      activeBasemapTextLevel = textLevel;
-      if (polygonLayer) polygonLayer.bringToFront();
-      if (imageLayer) imageLayer.bringToFront();
+    function syncBasemapControls(key) {
       currentBasemap = key;
       const sel = document.getElementById('basemap-select');
       if (sel && sel.value !== key) sel.value = key;
@@ -3404,6 +3410,103 @@
         if (option) mapSummary.textContent = `${option.textContent}・文字 ${sizeLabel}`;
       }
       try { localStorage.setItem('nauru_basemap', key); } catch (_) {}
+    }
+
+    function removeBasemapBootstrapLayer(immediate = false, requestId = null) {
+      if (requestId !== null && requestId !== basemapRequestId) return;
+      clearTimeout(basemapBootstrapRemovalTimer);
+      basemapBootstrapRemovalTimer = null;
+      const layer = basemapBootstrapLayer;
+      if (!layer) return;
+      if (!immediate) {
+        const container = layer.getContainer && layer.getContainer();
+        if (container) container.classList.add('nauru-map-bootstrap-layer-leaving');
+        basemapBootstrapRemovalTimer = window.setTimeout(() => {
+          if (map && map.hasLayer(layer)) map.removeLayer(layer);
+          if (basemapBootstrapLayer === layer) basemapBootstrapLayer = null;
+          basemapBootstrapRemovalTimer = null;
+        }, 220);
+        return;
+      }
+      if (map && map.hasLayer(layer)) map.removeLayer(layer);
+      if (basemapBootstrapLayer === layer) basemapBootstrapLayer = null;
+    }
+
+    function applyBasemap(key, requestId, fadeFromBootstrap = false) {
+      if (!map || !BASEMAPS[key] || requestId !== basemapRequestId) return;
+      const cfg = BASEMAPS[key];
+      const textLevel = getBasemapTextLevel(key);
+      if (baseLayer) map.removeLayer(baseLayer);
+      const primaryLayer = createBasemapTileLayer(cfg, textLevel, fadeFromBootstrap
+        ? { className: 'nauru-map-detail-layer' }
+        : {});
+      const detailLayers = [primaryLayer];
+      if (fadeFromBootstrap) {
+        primaryLayer.options.className = 'nauru-map-detail-layer';
+        primaryLayer.setOpacity(0);
+        const revealDetail = () => {
+          if (requestId !== basemapRequestId) return;
+          primaryLayer.setOpacity(1);
+          const container = primaryLayer.getContainer && primaryLayer.getContainer();
+          if (container) container.classList.add('nauru-map-detail-layer-ready');
+          removeBasemapBootstrapLayer(false, requestId);
+        };
+        primaryLayer.once('load', revealDetail);
+      }
+      if (cfg.fallback && BASEMAPS[cfg.fallback]) {
+        const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel, fadeFromBootstrap
+          ? { className: 'nauru-map-detail-layer' }
+          : {});
+        detailLayers.push(fallbackLayer);
+        if (fadeFromBootstrap) {
+          // 淡色地図などが遅い場合も、詳細なフォールバックが届けば殻を外す。
+          fallbackLayer.once('load', () => removeBasemapBootstrapLayer(false, requestId));
+        }
+        baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
+      } else {
+        baseLayer = primaryLayer.addTo(map);
+      }
+      if (fadeFromBootstrap) {
+        detailLayers.forEach(layer => {
+          const container = layer.getContainer && layer.getContainer();
+          if (container) container.classList.add('nauru-map-detail-layer');
+        });
+      }
+      activeBasemapTextLevel = textLevel;
+      if (polygonLayer) polygonLayer.bringToFront();
+      if (imageLayer) imageLayer.bringToFront();
+      syncBasemapControls(key);
+    }
+
+    function setBasemap(key, { bootstrap = false } = {}) {
+      if (!map || !BASEMAPS[key]) return;
+      const requestId = ++basemapRequestId;
+      clearTimeout(basemapTransitionTimer);
+      basemapTransitionTimer = null;
+      if (baseLayer) {
+        map.removeLayer(baseLayer);
+        baseLayer = null;
+      }
+      removeBasemapBootstrapLayer(true);
+      syncBasemapControls(key);
+
+      if (bootstrap && usesMobileLayout()) {
+        const bootLayer = createBasemapTileLayer(BASEMAPS.osm, 0, {
+          maxNativeZoom: 5,
+          maxZoom: 19,
+          keepBuffer: 0,
+          updateWhenIdle: true,
+          updateWhenZooming: false,
+          className: 'nauru-map-bootstrap-layer'
+        });
+        basemapBootstrapLayer = bootLayer.addTo(map);
+        basemapTransitionTimer = window.setTimeout(() => {
+          basemapTransitionTimer = null;
+          applyBasemap(key, requestId, true);
+        }, 140);
+        return;
+      }
+      applyBasemap(key, requestId, false);
     }
 
     function setMapTextScale(value, persist = true, refresh = true) {
@@ -7265,7 +7368,7 @@
       });
     }
 
-    window.onload = function () {
+    window.addEventListener('DOMContentLoaded', () => {
       map = L.map('map', {
         center: [center.lat, center.lng],
         zoom: initialMapZoom,
@@ -7299,7 +7402,7 @@
         } catch (_) {}
       }
       setMapTextScale(mapTextScale, false, false);
-      setBasemap(initialBasemap);
+      setBasemap(initialBasemap, { bootstrap: true });
 
       document.getElementById('basemap-select').addEventListener('change', (e) => {
         setBasemap(e.target.value);
@@ -7804,7 +7907,7 @@
       updatePolygon();
       updateUI();
       document.getElementById('loading-overlay').style.display = 'none';
-    };
+    });
   </script>
 </body>
 </html>
