@@ -164,7 +164,7 @@
       color: #0a2744;
       outline: none;
     }
-    @media (max-width: 767.98px) {
+    @media (max-width: 1023.98px) {
       #disaster-relief-banner { width: min(94vw, 420px); }
       .disaster-relief-link { padding: 0.68rem 0.55rem 0.68rem 0.72rem; }
       .disaster-relief-mark { width: 2.1rem; height: 2.1rem; font-size: 1rem; }
@@ -197,7 +197,7 @@
       filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.28));
     }
     #map-share-logo .app-logo { width: clamp(150px, 22vw, 250px); }
-    @media (max-width: 767.98px), (max-height: 500px) and (orientation: landscape) {
+    @media (max-width: 1023.98px), (max-height: 500px) and (orientation: landscape) {
       #map-screen-logo { width: clamp(108px, 32vw, 145px); }
     }
     /* Leaflet dark chrome */
@@ -1739,7 +1739,7 @@
     #app-ui {
       display: contents;
     }
-    @media (max-width: 767.98px), (max-height: 500px) and (orientation: landscape) {
+    @media (max-width: 1023.98px), (max-height: 500px) and (orientation: landscape) {
       :root { --map-credit-height: 3.25rem; }
       #app-ui {
         display: block;
@@ -2235,7 +2235,7 @@
         display: none !important;
       }
     }
-    @media (max-width: 767.98px) {
+    @media (max-width: 1023.98px) {
       #search-builder-modal {
         align-items: stretch;
         padding: 0;
@@ -2945,7 +2945,7 @@
     const HISTORICAL_1995_TOPOLOGY_URL = './data/jp-city-1995.topojson';
     const HISTORICAL_1995_DETAIL_BASE = 'https://geoshape.ex.nii.ac.jp/city/topojson/19951001';
     const HISTORICAL_1995_DATE = '1995年10月1日時点';
-    const MOBILE_LAYOUT_QUERY = '(max-width: 767.98px), (max-height: 500px) and (orientation: landscape)';
+    const MOBILE_LAYOUT_QUERY = '(max-width: 1023.98px), (max-height: 500px) and (orientation: landscape)';
     const usesMobileLayout = () => window.matchMedia(MOBILE_LAYOUT_QUERY).matches;
     const PREFECTURES = [
       ['01','北海道'], ['02','青森県'], ['03','岩手県'], ['04','宮城県'], ['05','秋田県'], ['06','山形県'], ['07','福島県'], ['08','茨城県'], ['09','栃木県'], ['10','群馬県'],
