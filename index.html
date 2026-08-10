@@ -268,18 +268,30 @@
     }
     .nauru-motion-trail img {
       opacity: 0;
-      filter: saturate(1.18) brightness(1.12) drop-shadow(0 0 5px rgba(94, 218, 255, 0.62));
+      filter: saturate(1.06) brightness(1.18) drop-shadow(0 0 6px rgba(255, 255, 255, 0.82));
       will-change: opacity;
     }
     .nauru-motion-aura img {
       opacity: 0;
       transform: translate(-50%, -50%) scale(1.055);
       filter:
-        saturate(1.48)
-        brightness(1.55)
-        blur(1.35px)
-        drop-shadow(0 0 17px rgba(97, 222, 255, 0.98))
-        drop-shadow(0 0 30px rgba(245, 197, 66, 0.62));
+        brightness(0)
+        invert(1)
+        blur(1.2px)
+        drop-shadow(0 0 14px rgba(255, 255, 255, 1))
+        drop-shadow(0 0 30px rgba(255, 255, 255, 0.84));
+      will-change: opacity;
+    }
+    .nauru-motion-overdrive img {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1.09);
+      filter:
+        brightness(0)
+        invert(1)
+        blur(2px)
+        drop-shadow(0 0 20px rgba(255, 255, 255, 1))
+        drop-shadow(0 0 44px rgba(255, 255, 255, 0.94));
+      mix-blend-mode: screen;
       will-change: opacity;
     }
     .nauru-motion-aura::before {
@@ -292,12 +304,33 @@
       border-radius: 48%;
       background: radial-gradient(
         ellipse at center,
-        rgba(255, 245, 154, 0.48) 0%,
-        rgba(97, 222, 255, 0.34) 46%,
-        rgba(97, 222, 255, 0) 74%
+        rgba(255, 255, 255, 0.56) 0%,
+        rgba(255, 255, 255, 0.38) 46%,
+        rgba(255, 255, 255, 0) 74%
       );
-      filter: blur(9px);
+      filter: blur(10px);
       opacity: var(--nauru-motion-aura-opacity, 0);
+      transform: translate(-50%, -50%);
+      will-change: opacity;
+    }
+    .nauru-motion-aura::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: calc(var(--nauru-motion-width, 1px) * 1.52);
+      height: calc(var(--nauru-motion-height, 1px) * 1.52);
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(255, 255, 255, 0.52) 0%,
+        rgba(255, 255, 255, 0.38) 38%,
+        rgba(255, 255, 255, 0.20) 58%,
+        rgba(255, 255, 255, 0) 78%
+      );
+      filter: blur(18px);
+      mix-blend-mode: screen;
+      opacity: var(--nauru-motion-overdrive-opacity, 0);
       transform: translate(-50%, -50%);
       will-change: opacity;
     }
@@ -2137,11 +2170,12 @@
   </div>
 
   <div id="map"></div>
-  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-charge="0" data-motion-policy="always">
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-motion-policy="always">
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="42"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="82"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="122"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-aura"><img alt=""></span>
+    <span class="nauru-motion-copy nauru-motion-overdrive"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-main"><img alt=""></span>
   </div>
   <div id="disaster-relief-banner" role="region" aria-label="災害義援金の案内" aria-hidden="true">
@@ -3050,6 +3084,7 @@
     let nauruMotionStage = null;
     let nauruMotionTrails = [];
     let nauruMotionAura = null;
+    let nauruMotionOverdrive = null;
     let nauruMotionMain = null;
     let nauruMotionFrame = null;
     let nauruMotionLastFrame = 0;
@@ -3577,6 +3612,7 @@
       if (!nauruMotionStage) return null;
       nauruMotionTrails = Array.from(nauruMotionStage.querySelectorAll('.nauru-motion-trail'));
       nauruMotionAura = nauruMotionStage.querySelector('.nauru-motion-aura');
+      nauruMotionOverdrive = nauruMotionStage.querySelector('.nauru-motion-overdrive');
       nauruMotionMain = nauruMotionStage.querySelector('.nauru-motion-main');
       return nauruMotionStage;
     }
@@ -3613,42 +3649,57 @@
       const relocking = !!nauruMotionRelock;
       const speedStrength = Math.max(0, Math.min(1, (nauruMotionSpeed - 90) / 620));
       const boost = Math.max(0, Math.min(1, (nauruMotionFastMs - 420) / 1050));
+      const overdrive = Math.max(0, Math.min(1, (nauruMotionFastMs - 1550) / 1050));
       const trailStrength = Math.max(speedStrength, relocking ? 1 : 0);
       const trailOpacity = [0.22, 0.14, 0.08];
+      const effectOpacity = Math.sqrt(Math.max(0, Math.min(1, silhouetteOpacity)));
 
       setNauruMotionCopyPosition(nauruMotionMain, nauruMotionOffset.x, nauruMotionOffset.y);
       setNauruMotionCopyPosition(nauruMotionAura, nauruMotionOffset.x, nauruMotionOffset.y);
+      setNauruMotionCopyPosition(nauruMotionOverdrive, nauruMotionOffset.x, nauruMotionOffset.y);
       nauruMotionTrails.forEach((copy, index) => {
         const age = Number(copy.dataset.trailAge) || (42 + index * 40);
         const point = sampleNauruMotionHistory(now, age);
         setNauruMotionCopyPosition(copy, point.x, point.y);
         const img = copy.querySelector('img');
-        if (img) img.style.opacity = String(trailOpacity[index] * trailStrength * silhouetteOpacity);
+        if (img) img.style.opacity = String(trailOpacity[index] * trailStrength * effectOpacity);
       });
 
       const auraImage = nauruMotionAura && nauruMotionAura.querySelector('img');
+      const glowPulse = boost > 0 ? 0.95 + Math.sin(now / 190) * 0.05 : 1;
+      const overdrivePulse = overdrive > 0 ? 0.94 + Math.sin(now / 260) * 0.06 : 1;
+      const aura = Math.min(0.92, (boost * 0.72 + overdrive * 0.12 + nauruMotionArrivalPulse * 0.30) * glowPulse);
+      const overdriveAura = Math.min(0.94, overdrive * overdrivePulse * 0.94);
+      const overdriveImage = nauruMotionOverdrive && nauruMotionOverdrive.querySelector('img');
       if (auraImage) {
-        const glowPulse = boost > 0 ? 0.88 + Math.sin(now / 105) * 0.12 : 1;
-        const aura = Math.min(0.82, (boost * 0.70 + nauruMotionArrivalPulse * 0.30) * glowPulse);
-        auraImage.style.opacity = String(aura * silhouetteOpacity);
-        nauruMotionAura.style.setProperty('--nauru-motion-aura-opacity', String(aura * silhouetteOpacity));
+        auraImage.style.opacity = String(aura * effectOpacity);
+      }
+      if (overdriveImage) {
+        overdriveImage.style.opacity = String(Math.min(0.78, overdrive * overdrivePulse * 0.78) * effectOpacity);
+      }
+      if (nauruMotionAura) {
+        nauruMotionAura.style.setProperty('--nauru-motion-aura-opacity', String(aura * effectOpacity));
+        nauruMotionAura.style.setProperty('--nauru-motion-overdrive-opacity', String(overdriveAura * effectOpacity));
       }
       const mainImage = nauruMotionMain && nauruMotionMain.querySelector('img');
       if (mainImage) {
         mainImage.style.opacity = String(silhouetteOpacity);
         mainImage.style.filter = boost > 0.01
-          ? `saturate(${(1 + boost * 0.28).toFixed(2)}) brightness(${(1 + boost * 0.16).toFixed(2)}) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18)) drop-shadow(0 0 ${(5 + boost * 9).toFixed(1)}px rgba(97, 222, 255, ${(boost * 0.72).toFixed(2)}))`
+          ? `saturate(${(1 + boost * 0.12).toFixed(2)}) brightness(${(1 + boost * 0.14 + overdrive * 0.26).toFixed(2)}) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18)) drop-shadow(0 0 ${(6 + boost * 10 + overdrive * 8).toFixed(1)}px rgba(255, 255, 255, ${(boost * 0.68 + overdrive * 0.22).toFixed(2)})) drop-shadow(0 0 ${(18 + overdrive * 16).toFixed(1)}px rgba(255, 255, 255, ${(overdrive * 0.72).toFixed(2)}))`
           : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18))';
       }
 
       stage.dataset.motionState = relocking
         ? 'relock'
-        : boost > 0.05
-          ? 'boost'
-          : trailStrength > 0.08
-            ? 'trail'
-            : 'idle';
+        : overdrive > 0.05
+          ? 'overdrive'
+          : boost > 0.05
+            ? 'boost'
+            : trailStrength > 0.08
+              ? 'trail'
+              : 'idle';
       stage.dataset.boost = boost.toFixed(2);
+      stage.dataset.overdrive = overdrive.toFixed(2);
       stage.dataset.charge = String(Math.round(nauruMotionFastMs));
       stage.dataset.offsetX = nauruMotionOffset.x.toFixed(2);
       stage.dataset.offsetY = nauruMotionOffset.y.toFixed(2);
@@ -3745,6 +3796,7 @@
         nauruMotionArrivalPulse = 0;
         stage.dataset.motionState = 'idle';
         stage.dataset.boost = '0.00';
+        stage.dataset.overdrive = '0.00';
         stage.dataset.charge = '0';
       }
     }
@@ -3824,7 +3876,7 @@
           // 指を離す短い間隔は維持し、複数回の素早いスワイプでも発光まで蓄積する。
           const distanceCharge = motionDistance * (0.62 + fastStrength * 0.16);
           nauruMotionFastMs = Math.min(
-            2200,
+            3000,
             nauruMotionFastMs + distanceCharge + dt * (0.6 + fastStrength * 1.4)
           );
           nauruMotionLastFastInputTime = now;
