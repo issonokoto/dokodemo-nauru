@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 180" preserveAspectRatio="none">
+  <title>起動用の簡易地図</title>
+  <defs>
+    <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9e4ee"/>
+      <stop offset="1" stop-color="#a9d1e0"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#75abc0" stroke-opacity=".34" stroke-width=".45"/>
+    </pattern>
+  </defs>
+  <rect width="360" height="180" fill="url(#ocean)"/>
+  <rect width="360" height="180" fill="url(#grid)"/>
+  <g fill="#dce9c9" stroke="#8baea7" stroke-width=".55" stroke-linejoin="round">
+    <path d="M7 39 15 31 29 28 40 22 55 24 64 31 61 39 53 42 48 50 40 54 32 50 27 55 19 51 17 45 9 44Z"/>
+    <path d="M55 55 64 55 71 62 77 68 82 78 78 88 71 91 68 101 62 98 60 88 55 83 53 73 48 67Z"/>
+    <path d="M85 91 94 96 101 106 106 118 103 130 98 139 94 151 88 157 84 149 85 139 80 130 82 119 78 111 82 101Z"/>
+    <path d="M135 38 141 31 151 29 158 33 168 32 178 37 187 36 195 42 204 43 213 49 224 50 236 57 248 58 258 66 271 68 280 75 292 76 303 84 314 86 325 94 337 96 348 103 343 111 331 112 322 108 313 111 302 106 294 110 283 105 273 109 263 103 253 106 243 100 234 101 228 94 217 96 208 88 198 89 190 81 181 81 174 73 164 75 156 66 146 67 140 58 132 54Z"/>
+    <path d="M150 55 157 58 160 67 157 75 151 82 147 93 141 103 136 115 130 124 124 121 123 111 128 102 127 92 132 83 132 73 139 65 142 57Z"/>
+    <path d="M250 124 261 119 273 121 282 127 294 129 305 136 310 145 302 151 291 149 283 154 273 149 263 150 256 143 248 141 245 133Z"/>
+    <path d="M312 39 319 38 324 43 322 48 315 47 311 43Z"/>
+    <path d="M326 56 331 54 335 58 332 63 327 62Z"/>
+    <path d="M314 104 317 103 319 106 316 108Z"/>
+    <path d="M321 108 324 107 326 110 323 112Z"/>
+  </g>
+  <g fill="#cddfb9" stroke="#8baea7" stroke-width=".4" stroke-linejoin="round">
+    <path d="M116 42 121 38 127 40 131 46 128 52 122 53 118 49Z"/>
+    <path d="M126 34 130 31 135 33 134 37 129 39Z"/>
+    <path d="M337 70 341 69 345 72 342 76 338 75Z"/>
+  </g>
+  <g fill="none" stroke="#f6fbf8" stroke-opacity=".55" stroke-width=".45">
+    <path d="M0 30H360M0 60H360M0 90H360M0 120H360M0 150H360"/>
+    <path d="M30 0V180M60 0V180M90 0V180M120 0V180M150 0V180M180 0V180M210 0V180M240 0V180M270 0V180M300 0V180M330 0V180"/>
+  </g>
+  <g fill="#e8f0da" stroke="#8baea7" stroke-width=".38">
+    <path d="M321 48 323 45 325 47 324 51 322 53 320 51Z"/>
+    <path d="M326 52 329 50 331 53 329 56 327 55Z"/>
+    <path d="M331 58 334 57 336 60 334 63 332 62Z"/>
+    <path d="M336 65 339 64 341 67 339 70 337 69Z"/>
+  </g>
+</svg>

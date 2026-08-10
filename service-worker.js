@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v80';
+const CACHE_NAME = 'dokodemo-nauru-v81';
 const STATIC_SHELL = [
   './index.html',
   './game/index.html',
@@ -12,6 +12,7 @@ const STATIC_SHELL = [
   './data/search-area-index.json',
   './data/facility-relations.json',
   './nauru_kun_outline.png',
+  './assets/nauru-boot-map.svg',
   './assets/dokodemo-nauru-logo-transparent-v3.png',
   './icons/icon-192.png',
   './icons/icon-512.png',

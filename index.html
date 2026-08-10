@@ -12,11 +12,17 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="preload" href="./assets/nauru-boot-map.svg" as="image" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin>
   <link rel="dns-prefetch" href="//tile.openstreetmap.org">
+  <style>
+    html {
+      background: #b8d8e7 url('./assets/nauru-boot-map.svg') center / 100% 100% no-repeat;
+    }
+  </style>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
@@ -43,10 +49,30 @@
     html, body { width: 100%; max-width: 100%; height: 100%; margin: 0; overflow: hidden; }
     body {
       font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-      background: #061525;
+      background-color: #061525;
       overflow: hidden;
     }
-    #map { position: absolute; inset: 0; z-index: 0; background: #b8d8e7; }
+    html.nauru-boot-map-complete,
+    body.nauru-boot-map-complete { background-image: none; }
+    #map-boot-shell {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: #b8d8e7;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 280ms ease;
+    }
+    #map-boot-shell img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+    #map-boot-shell.is-hidden { opacity: 0; }
+    #map { position: absolute; inset: 0; z-index: 1; background: transparent; }
+    .leaflet-container { background: transparent; }
     .leaflet-layer.nauru-map-detail-layer,
     .leaflet-layer.nauru-map-bootstrap-layer {
       transition: opacity 220ms ease;
@@ -54,6 +80,7 @@
     .leaflet-layer.nauru-map-detail-layer-ready { opacity: 1 !important; }
     .leaflet-layer.nauru-map-bootstrap-layer-leaving { opacity: 0 !important; }
     @media (prefers-reduced-motion: reduce) {
+      #map-boot-shell { transition: none; }
       .leaflet-layer.nauru-map-detail-layer,
       .leaflet-layer.nauru-map-bootstrap-layer { transition: none; }
     }
@@ -2288,6 +2315,9 @@
     <div class="text-ocean-300 text-xs mt-2">面積わずか約 21 km²</div>
   </div>
 
+  <div id="map-boot-shell" aria-hidden="true">
+    <img src="./assets/nauru-boot-map.svg" alt="" width="360" height="180" decoding="async">
+  </div>
   <div id="map"></div>
   <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="off" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-track="hidden" data-track-opacity="0.00" data-track-length="0" data-track-segments="0" data-track-shape="energy-plume" data-track-head-width="0" data-track-mid-width-ratio="0.00" data-track-curves="0" data-track-tips="0" data-effects="off" data-motion-policy="always">
     <svg class="nauru-motion-light-track" aria-hidden="true" focusable="false">
@@ -3221,6 +3251,7 @@
     let basemapBootstrapRemovalTimer = null;
     let basemapTransitionTimer = null;
     let basemapRequestId = 0;
+    let bootMapShellHidden = false;
     let polygonLayer = null;
     let imageLayer = null;
     let geoData = NAURU_RINGS;
@@ -3432,6 +3463,19 @@
       if (basemapBootstrapLayer === layer) basemapBootstrapLayer = null;
     }
 
+    function hideBootMapShell() {
+      if (bootMapShellHidden) return;
+      bootMapShellHidden = true;
+      document.documentElement.classList.add('nauru-boot-map-complete');
+      if (document.body) document.body.classList.add('nauru-boot-map-complete');
+      const shell = document.getElementById('map-boot-shell');
+      if (!shell) return;
+      shell.classList.add('is-hidden');
+      window.setTimeout(() => {
+        if (shell.parentNode) shell.remove();
+      }, 300);
+    }
+
     function applyBasemap(key, requestId, fadeFromBootstrap = false) {
       if (!map || !BASEMAPS[key] || requestId !== basemapRequestId) return;
       const cfg = BASEMAPS[key];
@@ -3441,6 +3485,7 @@
         ? { className: 'nauru-map-detail-layer' }
         : {});
       const detailLayers = [primaryLayer];
+      primaryLayer.once('load', hideBootMapShell);
       if (fadeFromBootstrap) {
         primaryLayer.options.className = 'nauru-map-detail-layer';
         primaryLayer.setOpacity(0);
@@ -3458,9 +3503,13 @@
           ? { className: 'nauru-map-detail-layer' }
           : {});
         detailLayers.push(fallbackLayer);
+        fallbackLayer.once('load', hideBootMapShell);
         if (fadeFromBootstrap) {
           // 淡色地図などが遅い場合も、詳細なフォールバックが届けば殻を外す。
-          fallbackLayer.once('load', () => removeBasemapBootstrapLayer(false, requestId));
+          fallbackLayer.once('load', () => {
+            hideBootMapShell();
+            removeBasemapBootstrapLayer(false, requestId);
+          });
         }
         baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
       } else {
