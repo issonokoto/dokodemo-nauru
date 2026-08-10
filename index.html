@@ -214,6 +214,9 @@
     .nauru-lock-control {
       margin-bottom: 10px !important;
     }
+    .nauru-settings-control {
+      margin-bottom: 10px !important;
+    }
     .nauru-lock-toggle {
       position: relative;
       display: grid;
@@ -277,6 +280,33 @@
     .nauru-lock-open { display: none; }
     .nauru-lock-toggle[aria-pressed="false"] .nauru-lock-closed { display: none; }
     .nauru-lock-toggle[aria-pressed="false"] .nauru-lock-open { display: block; }
+    .nauru-settings-toggle {
+      display: grid;
+      place-items: center;
+      box-sizing: border-box;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #0a2744;
+      cursor: pointer;
+    }
+    .nauru-settings-toggle:hover { background: #f7f3ea; }
+    .nauru-settings-toggle:focus-visible {
+      outline: 3px solid #0b72d9;
+      outline-offset: 2px;
+    }
+    .nauru-settings-toggle svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
     #nauru-motion-stage {
       position: fixed;
       inset: 0;
@@ -722,7 +752,7 @@
       border: 1px solid rgba(245, 197, 66, 0.35);
       background: linear-gradient(155deg, rgba(10, 39, 68, 0.94), rgba(6, 21, 37, 0.92));
       color: #f5c542;
-      font-size: 11px;
+      font-size: 18px;
       font-weight: 700;
       cursor: pointer;
       box-shadow: 0 8px 24px rgba(0,0,0,0.3);
@@ -730,12 +760,22 @@
       align-items: center;
       justify-content: center;
       transition: transform 0.12s, filter 0.12s;
-      line-height: 1.05;
+      line-height: 1;
       text-align: center;
-      padding: 2px;
+      padding: 0;
     }
     .dock-btn:hover { transform: scale(1.06); filter: brightness(1.08); }
-    .dock-btn.sns { font-size: 10px; letter-spacing: -0.02em; }
+    .dock-btn.sns { font-size: 17px; letter-spacing: 0; }
+    .dock-icon {
+      display: block;
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
     .pop-card {
       position: absolute;
       z-index: 2100;
@@ -858,8 +898,85 @@
       transition: opacity 0.25s, transform 0.25s;
       pointer-events: none;
     }
-    #notice-modal.hidden-modal { display: none; }
-    #notice-modal.fade-out { opacity: 0; }
+    #notice-modal.hidden-modal,
+    #settings-modal.hidden-modal { display: none; }
+    #notice-modal.fade-out,
+    #settings-modal.fade-out { opacity: 0; }
+    .settings-switch {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 0.7rem;
+      border: 1px solid rgba(126, 200, 227, 0.24);
+      border-radius: 0.75rem;
+      background: rgba(7, 31, 53, 0.66);
+      color: #efe6d4;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .settings-switch:hover,
+    .settings-switch:focus-visible {
+      border-color: rgba(245, 197, 66, 0.72);
+      outline: none;
+    }
+    .settings-switch[aria-checked="true"] {
+      border-color: rgba(245, 197, 66, 0.62);
+      background: rgba(17, 53, 79, 0.86);
+      box-shadow: inset 0 0 18px rgba(245, 197, 66, 0.08);
+    }
+    .settings-switch-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.08rem;
+    }
+    .settings-switch-copy strong {
+      color: #f5c542;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .settings-switch-copy small {
+      color: #7ec8e3;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+    .settings-switch-state {
+      min-width: 2rem;
+      color: #8ea9ba;
+      font: 700 10px/1 monospace;
+      text-align: right;
+    }
+    .settings-switch[aria-checked="true"] .settings-switch-state { color: #f5c542; }
+    .settings-switch-track {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      border-radius: 999px;
+      background: #526775;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.34);
+      transition: background 0.15s;
+    }
+    .settings-switch-track::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f7f3ea;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.32);
+      transition: transform 0.16s;
+    }
+    .settings-switch[aria-checked="true"] .settings-switch-track {
+      background: #d7a612;
+    }
+    .settings-switch[aria-checked="true"] .settings-switch-track::after {
+      transform: translateX(16px);
+    }
     aside.panel,
     .ui-main-panel {
       scrollbar-width: thin;
@@ -2209,12 +2326,14 @@
       body.m-editing #mobile-edit-dock {
         transform: translate(-50%, 0);
       }
-      #notice-modal {
+      #notice-modal,
+      #settings-modal {
         align-items: stretch;
         padding: 0.5rem;
         overflow-y: auto;
       }
-      #notice-modal > .panel {
+      #notice-modal > .panel,
+      #settings-modal > .panel {
         max-height: calc(100dvh - 1rem);
         margin: auto;
         padding: 0.85rem;
@@ -2222,12 +2341,14 @@
         display: flex;
         flex-direction: column;
       }
-      #notice-modal > .panel > div:nth-child(2) {
+      #notice-modal > .panel > div:nth-child(2),
+      #settings-modal > .panel > div:nth-child(2) {
         min-height: 0;
         padding-right: 0.25rem;
         overflow-y: auto;
       }
-      #close-notice-btn {
+      #close-notice-btn,
+      #close-settings-btn {
         flex: 0 0 auto;
         margin-top: 0.55rem;
       }
@@ -2571,9 +2692,21 @@
 
   <!-- スクショ & SNS（PC: 左下 / スマホ: シート内に横並び） -->
   <div class="side-dock" id="side-dock">
-    <button type="button" id="btn-screenshot" class="dock-btn" title="スクリーンショット">📷 保存</button>
-    <button type="button" id="btn-share-x" class="dock-btn sns" title="Xに投稿">𝕏</button>
-    <button type="button" id="btn-share-other" class="dock-btn sns" title="その他の共有先">その他</button>
+    <button type="button" id="btn-screenshot" class="dock-btn" title="スクリーンショットを保存" aria-label="スクリーンショットを保存">
+      <svg class="dock-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5.5h2l1.2-1.8h1.6L14 5.5h2.2A2.8 2.8 0 0 1 19 8.3v8.4a2.8 2.8 0 0 1-2.8 2.8H7.8A2.8 2.8 0 0 1 5 16.7V8.3a2.8 2.8 0 0 1 2.8-2.8Z"></path>
+        <circle cx="12" cy="12.5" r="3.1"></circle>
+      </svg>
+    </button>
+    <button type="button" id="btn-share-x" class="dock-btn sns" title="Xに投稿" aria-label="Xに投稿">𝕏</button>
+    <button type="button" id="btn-share-other" class="dock-btn sns" title="その他の共有先" aria-label="その他の共有先">
+      <svg class="dock-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="18" cy="5" r="2"></circle>
+        <circle cx="6" cy="12" r="2"></circle>
+        <circle cx="18" cy="19" r="2"></circle>
+        <path d="m7.8 11 8.4-5M7.8 13l8.4 5"></path>
+      </svg>
+    </button>
   </div>
   </div><!-- /#app-ui -->
 
@@ -2919,20 +3052,49 @@
           <p class="text-ocean-300 leading-relaxed">画像を保存したい場合だけ「📷 保存」を使ってください。</p>
         </div>
       </div>
-      <div class="mt-4 rounded-xl border border-white/10 bg-black/25 p-3">
-        <div class="flex items-center justify-between gap-3">
-          <p class="text-xs font-semibold text-sand-50">地図キャッシュ</p>
-          <span id="map-cache-status" class="text-[10px] text-ocean-300">確認中…</span>
-        </div>
-        <p class="mt-1 text-[11px] leading-relaxed text-ocean-300">
-          表示した標準地図を端末に残し、次回の表示を速くします。端末の空き容量が少ない場合は削除されることがあります。
-        </p>
-        <button id="clear-map-cache-btn" type="button" class="mt-2 rounded-lg border border-ocean-300/30 bg-ocean-900/80 px-3 py-1.5 text-[11px] font-semibold text-ocean-200 transition hover:border-gold-500/50 hover:text-gold-300 disabled:cursor-wait disabled:opacity-60">
-          保存した地図を削除
-        </button>
-      </div>
       <button id="close-notice-btn" type="button" class="mt-5 w-full py-2.5 rounded-xl font-semibold text-ocean-950 bg-gradient-to-r from-gold-400 to-gold-600 hover:brightness-110 active:scale-[0.98] transition">
         はじめる
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div id="settings-modal" class="fixed inset-0 z-[3000] flex items-center justify-center bg-ocean-950/70 backdrop-blur-sm p-4 transition-opacity duration-300 hidden-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" aria-hidden="true">
+    <div class="panel rounded-2xl max-w-md w-full p-5 sm:p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-gold-400 text-xl" aria-hidden="true">⚙</span>
+        <h2 id="settings-title" class="text-base sm:text-lg font-bold text-sand-50">設定</h2>
+      </div>
+      <div class="text-sm text-sand-100/85 leading-relaxed space-y-3">
+        <section class="rounded-xl border border-white/10 bg-black/25 p-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold text-sand-50">地図キャッシュ</p>
+              <p id="settings-map-cache-status" class="mt-0.5 text-[10px] text-ocean-300">確認中…</p>
+            </div>
+            <span class="rounded-full border border-gold-500/25 px-2 py-1 text-[10px] font-semibold text-gold-300">標準地図</span>
+          </div>
+          <p class="mt-2 text-[11px] leading-relaxed text-ocean-300">
+            表示した標準地図をこのブラウザ・アプリに残し、次回の表示を速くします。端末の空き容量が少ない場合は、OSやブラウザにより削除されることがあります。
+          </p>
+          <button id="map-cache-toggle" type="button" class="settings-switch mt-3" role="switch" aria-checked="true" aria-describedby="map-cache-toggle-note">
+            <span class="settings-switch-copy">
+              <strong>地図キャッシュを使う</strong>
+              <small id="map-cache-toggle-note">表示した地図を保存します</small>
+            </span>
+            <span id="map-cache-toggle-state" class="settings-switch-state">ON</span>
+            <span class="settings-switch-track" aria-hidden="true"></span>
+          </button>
+          <button id="settings-clear-map-cache-btn" type="button" class="mt-2 rounded-lg border border-ocean-300/30 bg-ocean-900/80 px-3 py-1.5 text-[11px] font-semibold text-ocean-200 transition hover:border-gold-500/50 hover:text-gold-300 disabled:cursor-wait disabled:opacity-60">
+            保存した地図を削除
+          </button>
+        </section>
+        <p class="rounded-xl border border-white/10 bg-black/20 p-3 text-[11px] leading-relaxed text-ocean-300">
+          見た目・透明度・地図の種類・文字サイズなどの設定は、このブラウザに保存されます。ブラウザのサイトデータを削除すると一緒に消えます。
+        </p>
+      </div>
+      <button id="close-settings-btn" type="button" class="mt-5 w-full py-2.5 rounded-xl font-semibold text-ocean-950 bg-gradient-to-r from-gold-400 to-gold-600 hover:brightness-110 active:scale-[0.98] transition">
+        閉じる
       </button>
     </div>
   </div>
@@ -3048,6 +3210,11 @@
       xlarge: { level: 2, label: '特大' }
     };
     const MAP_TILE_CACHE_NAME = 'dokodemo-nauru-map-tiles-v1';
+    const MAP_TILE_CACHE_ENABLED_STORAGE_KEY = 'nauru_map_cache_enabled';
+    function readMapTileCacheEnabled() {
+      try { return localStorage.getItem(MAP_TILE_CACHE_ENABLED_STORAGE_KEY) !== '0'; } catch (_) { return true; }
+    }
+    let mapTileCacheEnabled = readMapTileCacheEnabled();
     let mapTileCachePromise = null;
     let mapTileCacheGeneration = 0;
     const mapTileBlobPromises = new Map();
@@ -3287,6 +3454,8 @@
     let isZooming = false;
     let isNauruCenterLocked = true;
     let nauruLockButton = null;
+    let nauruSettingsButton = null;
+    let openSettingsModalHandler = null;
     let nauruMotionStage = null;
     let nauruMotionLightTrack = null;
     let nauruMotionTrackGradient = null;
@@ -3332,6 +3501,7 @@
     let showReticle = true;
     let sharedUserBoundaryStyle = null;
     const NAURU_MOTION_EFFECTS_STORAGE_KEY = 'nauru_motion_effects';
+    const NAURU_CENTER_LOCK_STORAGE_KEY = 'nauru_center_locked';
 
     function getActiveSwatch() {
       return SWATCH_BY_ID[activeSwatchId] || SWATCH_BY_ID['k-original'];
@@ -3480,6 +3650,10 @@
           }
           finish(new Error(`Map tile failed: ${url}`));
         };
+        if (!mapTileCacheEnabled) {
+          tile.src = url;
+          return tile;
+        }
         getMapTileBlob(url).then(blob => {
           if (finished) return;
           objectUrl = URL.createObjectURL(blob);
@@ -3503,6 +3677,11 @@
     }
 
     async function fetchMapTileBlob(url) {
+      if (!mapTileCacheEnabled) {
+        const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+        if (!response.ok) throw new Error(`Map tile request failed: ${response.status}`);
+        return response.blob();
+      }
       const generation = mapTileCacheGeneration;
       const cache = await getMapTileCache();
       if (cache) {
@@ -3538,15 +3717,16 @@
 
     async function getMapTileCacheStatus() {
       const cache = await getMapTileCache();
-      if (!cache) return { supported: false, count: 0 };
+      if (!cache) return { supported: false, count: 0, enabled: mapTileCacheEnabled };
       try {
         const requests = await cache.keys();
         return {
           supported: true,
-          count: requests.filter(request => /tile\.openstreetmap\.org/.test(request.url)).length
+          count: requests.filter(request => /tile\.openstreetmap\.org/.test(request.url)).length,
+          enabled: mapTileCacheEnabled
         };
       } catch (_) {
-        return { supported: true, count: 0 };
+        return { supported: true, count: 0, enabled: mapTileCacheEnabled };
       }
     }
 
@@ -3558,22 +3738,50 @@
       return deleted;
     }
 
-    async function updateMapTileCacheStatus() {
-      const status = document.getElementById('map-cache-status');
-      if (!status) return;
-      const result = await getMapTileCacheStatus();
-      if (!result.supported) {
-        status.textContent = 'この環境では未対応';
-      } else if (result.count) {
-        status.textContent = `${result.count}枚保存中`;
-      } else {
-        status.textContent = 'まだ保存なし';
+    function syncMapTileCacheControls() {
+      const toggle = document.getElementById('map-cache-toggle');
+      const state = document.getElementById('map-cache-toggle-state');
+      const note = document.getElementById('map-cache-toggle-note');
+      if (toggle) toggle.setAttribute('aria-checked', mapTileCacheEnabled ? 'true' : 'false');
+      if (state) state.textContent = mapTileCacheEnabled ? 'ON' : 'OFF';
+      if (note) note.textContent = mapTileCacheEnabled
+        ? '表示した地図を保存します'
+        : '地図を保存せず、毎回ネットワークから読み込みます';
+    }
+
+    function setMapTileCacheEnabled(enabled, persist = true) {
+      const next = !!enabled;
+      if (next !== mapTileCacheEnabled && !next) {
+        mapTileCacheGeneration += 1;
+        mapTileBlobPromises.clear();
       }
+      mapTileCacheEnabled = next;
+      if (persist) {
+        try { localStorage.setItem(MAP_TILE_CACHE_ENABLED_STORAGE_KEY, next ? '1' : '0'); } catch (_) {}
+      }
+      syncMapTileCacheControls();
+    }
+
+    async function updateMapTileCacheStatus() {
+      const statuses = [
+        document.getElementById('map-cache-status'),
+        document.getElementById('settings-map-cache-status')
+      ].filter(Boolean);
+      if (!statuses.length) return;
+      const result = await getMapTileCacheStatus();
+      const label = !result.supported
+        ? 'この環境では未対応'
+        : result.count
+          ? `${result.count}枚保存中`
+          : 'まだ保存なし';
+      statuses.forEach(status => { status.textContent = label; });
     }
 
     window.__nauruMapTileCache = {
       getStatus: getMapTileCacheStatus,
-      clear: clearMapTileCache
+      clear: clearMapTileCache,
+      isEnabled: () => mapTileCacheEnabled,
+      setEnabled: setMapTileCacheEnabled
     };
 
     function syncBasemapControls(key) {
@@ -4880,6 +5088,7 @@
         updateNauruLockButton();
         updatePolygon();
       }
+      try { localStorage.setItem(NAURU_CENTER_LOCK_STORAGE_KEY, locked ? '1' : '0'); } catch (_) {}
       if (announce !== false) {
         showToast(locked
           ? 'ナウルくんを中央に固定しました'
@@ -4910,6 +5119,35 @@
         L.DomEvent.on(button, 'click', event => {
           L.DomEvent.stop(event);
           setNauruCenterLocked(!isNauruCenterLocked, true);
+        });
+        return container;
+      };
+      return control;
+    }
+
+    function createNauruSettingsControl() {
+      const control = L.control({ position: 'bottomright' });
+      control.onAdd = function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar nauru-settings-control');
+        const button = L.DomUtil.create('button', 'nauru-settings-toggle', container);
+        button.type = 'button';
+        button.dataset.testid = 'settings-toggle';
+        button.setAttribute('aria-label', '設定を開く');
+        button.setAttribute('aria-controls', 'settings-modal');
+        button.setAttribute('aria-expanded', 'false');
+        button.title = '設定';
+        button.innerHTML = `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z"/>
+            <path d="m19.1 13.4 1.1.8-1.7 2.9-1.3-.6a7.4 7.4 0 0 1-1.7 1l.1 1.5h-3.4l-.2-1.5a7.4 7.4 0 0 1-1.8-1l-1.3.6-1.7-2.9 1.2-.8a7.3 7.3 0 0 1 0-2.1l-1.2-.8 1.7-2.9 1.3.6a7.4 7.4 0 0 1 1.8-1L12.2 5h3.4l.1 1.5a7.4 7.4 0 0 1 1.7 1l1.3-.6 1.7 2.9-1.1.8a7.3 7.3 0 0 1-.2 2.1Z"/>
+          </svg>`;
+
+        nauruSettingsButton = button;
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+        L.DomEvent.on(button, 'click', event => {
+          L.DomEvent.stop(event);
+          if (typeof openSettingsModalHandler === 'function') openSettingsModalHandler(button);
         });
         return container;
       };
@@ -5122,6 +5360,7 @@
       const hideEls = [
         document.querySelector('.leaflet-control-zoom'),
         document.querySelector('.nauru-lock-control'),
+        document.querySelector('.nauru-settings-control'),
         document.querySelector('aside.panel'),
         document.getElementById('bottom-bar'),
         document.getElementById('side-dock'),
@@ -5132,6 +5371,7 @@
         document.getElementById('map-screen-logo'),
         document.getElementById('disaster-relief-banner'),
         document.getElementById('notice-modal'),
+        document.getElementById('settings-modal'),
         document.getElementById('loading-overlay')
       ].filter(Boolean);
       const prev = hideEls.map(el => el.style.visibility);
@@ -5314,7 +5554,11 @@
     function setOtherShareReady(ready) {
       const desktop = document.getElementById('btn-share-other');
       const mobile = document.getElementById('mobile-btn-share-other');
-      if (desktop) desktop.textContent = ready ? '共有を開く' : 'その他';
+      if (desktop) {
+        const label = ready ? '共有を開く' : 'その他の共有先';
+        desktop.title = label;
+        desktop.setAttribute('aria-label', label);
+      }
       if (mobile) mobile.textContent = ready ? 'もう一度押して共有' : 'その他の共有';
     }
 
@@ -7689,6 +7933,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      try { isNauruCenterLocked = localStorage.getItem(NAURU_CENTER_LOCK_STORAGE_KEY) !== '0'; } catch (_) {}
       map = L.map('map', {
         center: [center.lat, center.lng],
         zoom: initialMapZoom,
@@ -7698,6 +7943,7 @@
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
       createNauruLockControl().addTo(map);
+      createNauruSettingsControl().addTo(map);
 
       const disasterReliefBanner = document.getElementById('disaster-relief-banner');
       const disasterReliefClose = disasterReliefBanner && disasterReliefBanner.querySelector('.disaster-relief-close');
@@ -8189,23 +8435,27 @@
       });
 
       const noticeModal = document.getElementById('notice-modal');
+      const settingsModal = document.getElementById('settings-modal');
       const helpButton = document.getElementById('btn-help');
       const closeNoticeButton = document.getElementById('close-notice-btn');
-      const clearMapCacheButton = document.getElementById('clear-map-cache-btn');
+      const closeSettingsButton = document.getElementById('close-settings-btn');
+      const mapCacheToggle = document.getElementById('map-cache-toggle');
+      const settingsClearMapCacheButton = document.getElementById('settings-clear-map-cache-btn');
       const NOTICE_STORAGE_KEY = 'nauru_notice_v1_seen';
       let noticeReturnFocus = null;
       let noticeCloseTimer = 0;
-      const openModal = (trigger = null) => {
+      let settingsReturnFocus = null;
+      let settingsCloseTimer = 0;
+      const openNoticeModal = (trigger = null) => {
         clearTimeout(noticeCloseTimer);
         noticeReturnFocus = trigger || document.activeElement;
         noticeModal.classList.remove('hidden-modal');
         requestAnimationFrame(() => noticeModal.classList.remove('fade-out'));
         noticeModal.setAttribute('aria-hidden', 'false');
         helpButton.setAttribute('aria-expanded', 'true');
-        updateMapTileCacheStatus();
         closeNoticeButton.focus();
       };
-      const closeModal = () => {
+      const closeNoticeModal = () => {
         try { localStorage.setItem(NOTICE_STORAGE_KEY, '1'); } catch (_) {}
         noticeModal.classList.add('fade-out');
         noticeModal.setAttribute('aria-hidden', 'true');
@@ -8215,29 +8465,63 @@
           if (noticeReturnFocus && typeof noticeReturnFocus.focus === 'function') noticeReturnFocus.focus();
         }, 280);
       };
-      helpButton.addEventListener('click', () => openModal(helpButton));
-      closeNoticeButton.addEventListener('click', closeModal);
-      if (clearMapCacheButton) {
-        clearMapCacheButton.addEventListener('click', async () => {
-          clearMapCacheButton.disabled = true;
+      const openSettingsModal = (trigger = null) => {
+        clearTimeout(settingsCloseTimer);
+        settingsReturnFocus = trigger || document.activeElement;
+        settingsModal.classList.remove('hidden-modal');
+        requestAnimationFrame(() => settingsModal.classList.remove('fade-out'));
+        settingsModal.setAttribute('aria-hidden', 'false');
+        if (nauruSettingsButton) nauruSettingsButton.setAttribute('aria-expanded', 'true');
+        syncMapTileCacheControls();
+        updateMapTileCacheStatus();
+        closeSettingsButton.focus();
+      };
+      const closeSettingsModal = () => {
+        settingsModal.classList.add('fade-out');
+        settingsModal.setAttribute('aria-hidden', 'true');
+        if (nauruSettingsButton) nauruSettingsButton.setAttribute('aria-expanded', 'false');
+        settingsCloseTimer = setTimeout(() => {
+          settingsModal.classList.add('hidden-modal');
+          if (settingsReturnFocus && typeof settingsReturnFocus.focus === 'function') settingsReturnFocus.focus();
+        }, 280);
+      };
+      openSettingsModalHandler = openSettingsModal;
+      syncMapTileCacheControls();
+      helpButton.addEventListener('click', () => openNoticeModal(helpButton));
+      closeNoticeButton.addEventListener('click', closeNoticeModal);
+      closeSettingsButton.addEventListener('click', closeSettingsModal);
+      mapCacheToggle.addEventListener('click', () => {
+        setMapTileCacheEnabled(!mapTileCacheEnabled);
+        updateMapTileCacheStatus();
+        showToast(`地図キャッシュを${mapTileCacheEnabled ? 'ON' : 'OFF'}にしました`);
+      });
+      if (settingsClearMapCacheButton) {
+        settingsClearMapCacheButton.addEventListener('click', async () => {
+          settingsClearMapCacheButton.disabled = true;
           try {
             await clearMapTileCache();
             await updateMapTileCacheStatus();
             showToast('保存した地図を削除しました');
           } finally {
-            clearMapCacheButton.disabled = false;
+            settingsClearMapCacheButton.disabled = false;
           }
         });
       }
       noticeModal.addEventListener('click', (e) => {
-        if (e.target === noticeModal) closeModal();
+        if (e.target === noticeModal) closeNoticeModal();
       });
       noticeModal.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Escape') closeNoticeModal();
+      });
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeSettingsModal();
+      });
+      settingsModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSettingsModal();
       });
       let noticeSeen = false;
       try { noticeSeen = localStorage.getItem(NOTICE_STORAGE_KEY) === '1'; } catch (_) {}
-      if (!noticeSeen) openModal();
+      if (!noticeSeen) openNoticeModal();
 
       buildCityBar();
       updatePolygon();

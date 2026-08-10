@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v82';
+const CACHE_NAME = 'dokodemo-nauru-v83';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './index.html',
