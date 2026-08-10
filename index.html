@@ -3463,6 +3463,21 @@
       if (basemapBootstrapLayer === layer) basemapBootstrapLayer = null;
     }
 
+    function ensureBasemapBootstrapLayer() {
+      if (!map || !usesMobileLayout()) return null;
+      if (basemapBootstrapLayer && map.hasLayer(basemapBootstrapLayer)) return basemapBootstrapLayer;
+      const bootLayer = createBasemapTileLayer(BASEMAPS.osm, 0, {
+        maxNativeZoom: 5,
+        maxZoom: 19,
+        keepBuffer: 4,
+        updateWhenIdle: false,
+        updateWhenZooming: false,
+        className: 'nauru-map-bootstrap-layer'
+      });
+      basemapBootstrapLayer = bootLayer.addTo(map);
+      return bootLayer;
+    }
+
     function hideBootMapShell() {
       if (bootMapShellHidden) return;
       bootMapShellHidden = true;
@@ -3494,7 +3509,6 @@
           primaryLayer.setOpacity(1);
           const container = primaryLayer.getContainer && primaryLayer.getContainer();
           if (container) container.classList.add('nauru-map-detail-layer-ready');
-          removeBasemapBootstrapLayer(false, requestId);
         };
         primaryLayer.once('load', revealDetail);
       }
@@ -3508,7 +3522,6 @@
           // 淡色地図などが遅い場合も、詳細なフォールバックが届けば殻を外す。
           fallbackLayer.once('load', () => {
             hideBootMapShell();
-            removeBasemapBootstrapLayer(false, requestId);
           });
         }
         baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
@@ -3536,19 +3549,12 @@
         map.removeLayer(baseLayer);
         baseLayer = null;
       }
-      removeBasemapBootstrapLayer(true);
+      if (usesMobileLayout()) ensureBasemapBootstrapLayer();
+      else removeBasemapBootstrapLayer(true);
       syncBasemapControls(key);
 
       if (bootstrap && usesMobileLayout()) {
-        const bootLayer = createBasemapTileLayer(BASEMAPS.osm, 0, {
-          maxNativeZoom: 5,
-          maxZoom: 19,
-          keepBuffer: 0,
-          updateWhenIdle: true,
-          updateWhenZooming: false,
-          className: 'nauru-map-bootstrap-layer'
-        });
-        basemapBootstrapLayer = bootLayer.addTo(map);
+        ensureBasemapBootstrapLayer();
         basemapTransitionTimer = window.setTimeout(() => {
           basemapTransitionTimer = null;
           applyBasemap(key, requestId, true);
