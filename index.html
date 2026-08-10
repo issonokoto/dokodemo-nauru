@@ -3248,6 +3248,9 @@
     let basemapBootstrapLayer = null;
     let basemapBootstrapRemovalTimer = null;
     let basemapTransitionTimer = null;
+    let basemapBootstrapPrefetchTimer = null;
+    const basemapBootstrapPrefetchedTiles = new Set();
+    const basemapBootstrapPrefetchInFlight = new Map();
     let basemapRequestId = 0;
     let bootMapShellHidden = false;
     let polygonLayer = null;
@@ -3476,6 +3479,62 @@
       return bootLayer;
     }
 
+    function buildBasemapBootstrapTileUrl(x, y, zoom) {
+      const cfg = BASEMAPS.osm;
+      const worldSize = 2 ** zoom;
+      const wrappedX = ((x % worldSize) + worldSize) % worldSize;
+      const clampedY = Math.max(0, Math.min(worldSize - 1, y));
+      const subdomains = String(cfg.options.subdomains || 'abc');
+      const subdomain = subdomains[(wrappedX + clampedY) % subdomains.length];
+      return cfg.url
+        .replace('{s}', subdomain)
+        .replace('{z}', String(zoom))
+        .replace('{x}', String(wrappedX))
+        .replace('{y}', String(clampedY));
+    }
+
+    function prefetchBasemapBootstrapArea() {
+      if (!map || !usesMobileLayout()) return;
+      const zoom = 5;
+      const radius = 2;
+      const worldSize = 2 ** zoom;
+      const tilePoint = map.project(map.getCenter(), zoom).divideBy(256).floor();
+      const tiles = [];
+      for (let dy = -radius; dy <= radius; dy += 1) {
+        for (let dx = -radius; dx <= radius; dx += 1) {
+          tiles.push({ x: tilePoint.x + dx, y: tilePoint.y + dy, distance: Math.abs(dx) + Math.abs(dy) });
+        }
+      }
+      tiles.sort((a, b) => a.distance - b.distance);
+      tiles.forEach(({ x, y }) => {
+        if (y < 0 || y >= worldSize) return;
+        const url = buildBasemapBootstrapTileUrl(x, y, zoom);
+        if (basemapBootstrapPrefetchedTiles.has(url) || basemapBootstrapPrefetchInFlight.has(url)) return;
+        const image = new Image();
+        image.decoding = 'async';
+        image.crossOrigin = 'anonymous';
+        image.fetchPriority = 'low';
+        image.onload = () => {
+          basemapBootstrapPrefetchInFlight.delete(url);
+          basemapBootstrapPrefetchedTiles.add(url);
+        };
+        image.onerror = () => basemapBootstrapPrefetchInFlight.delete(url);
+        basemapBootstrapPrefetchInFlight.set(url, image);
+        image.src = url;
+      });
+    }
+
+    function scheduleBasemapBootstrapPrefetch(delay = 0) {
+      if (!map || !usesMobileLayout()) return;
+      clearTimeout(basemapBootstrapPrefetchTimer);
+      basemapBootstrapPrefetchTimer = window.setTimeout(() => {
+        basemapBootstrapPrefetchTimer = null;
+        const run = () => prefetchBasemapBootstrapArea();
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 600 });
+        else run();
+      }, delay);
+    }
+
     function hideBootMapShell() {
       if (bootMapShellHidden) return;
       bootMapShellHidden = true;
@@ -3500,7 +3559,10 @@
       if (fadeFromBootstrap) detailLayerOverrides.className = 'nauru-map-detail-layer';
       const primaryLayer = createBasemapTileLayer(cfg, textLevel, detailLayerOverrides);
       const detailLayers = [primaryLayer];
-      primaryLayer.once('load', hideBootMapShell);
+      primaryLayer.once('load', () => {
+        hideBootMapShell();
+        scheduleBasemapBootstrapPrefetch();
+      });
       if (fadeFromBootstrap) {
         primaryLayer.setOpacity(0);
         let detailRevealed = false;
@@ -3519,7 +3581,10 @@
       if (cfg.fallback && BASEMAPS[cfg.fallback]) {
         const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel, detailLayerOverrides);
         detailLayers.push(fallbackLayer);
-        fallbackLayer.once('load', hideBootMapShell);
+        fallbackLayer.once('load', () => {
+          hideBootMapShell();
+          scheduleBasemapBootstrapPrefetch();
+        });
         if (fadeFromBootstrap) {
           // 淡色地図などが遅い場合も、詳細なフォールバックが届けば殻を外す。
           fallbackLayer.once('load', () => {
@@ -7820,6 +7885,7 @@
       });
 
       map.on('dragstart', () => {
+        scheduleBasemapBootstrapPrefetch();
         nauruMotionDragging = nauruMotionEffectsEnabled;
         if (!nauruMotionEffectsEnabled) return;
         nauruMotionTrackDirection = { x: 0, y: 0 };
@@ -7847,6 +7913,7 @@
       });
 
       map.on('moveend', () => {
+        scheduleBasemapBootstrapPrefetch();
         const c = map.getCenter();
         if (isNauruCenterLocked) {
           center = { lat: c.lat, lng: c.lng };
