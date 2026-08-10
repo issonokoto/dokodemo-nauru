@@ -272,14 +272,14 @@
       fill: url(#nauru-motion-track-gradient);
     }
     .nauru-motion-track-halo {
-      opacity: 0.58;
-      filter: blur(15px);
+      opacity: 0.52;
+      filter: blur(16px);
     }
     .nauru-motion-track-core {
-      opacity: 0.86;
+      opacity: 0.82;
       filter:
-        drop-shadow(0 0 8px rgba(255, 255, 255, 1))
-        drop-shadow(0 0 18px rgba(255, 255, 255, 0.76));
+        drop-shadow(0 0 10px rgba(255, 255, 255, 1))
+        drop-shadow(0 0 22px rgba(255, 255, 255, 0.82));
     }
     .nauru-motion-copy img {
       position: absolute;
@@ -2274,14 +2274,15 @@
   </div>
 
   <div id="map"></div>
-  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="off" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-track="hidden" data-track-opacity="0.00" data-track-length="0" data-track-segments="0" data-track-shape="tapered" data-track-head-width="0" data-effects="off" data-motion-policy="always">
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="off" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-track="hidden" data-track-opacity="0.00" data-track-length="0" data-track-segments="0" data-track-shape="energy-plume" data-track-head-width="0" data-track-mid-width-ratio="0.00" data-track-curves="0" data-track-tips="0" data-effects="off" data-motion-policy="always">
     <svg class="nauru-motion-light-track" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="nauru-motion-track-gradient" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stop-color="#fff" stop-opacity="0"></stop>
-          <stop offset="12%" stop-color="#fff" stop-opacity="0.14"></stop>
-          <stop offset="55%" stop-color="#fff" stop-opacity="0.64"></stop>
-          <stop offset="100%" stop-color="#fff" stop-opacity="0.96"></stop>
+          <stop offset="5%" stop-color="#fff" stop-opacity="0.18"></stop>
+          <stop offset="24%" stop-color="#fff" stop-opacity="0.48"></stop>
+          <stop offset="62%" stop-color="#fff" stop-opacity="0.80"></stop>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0.98"></stop>
         </linearGradient>
       </defs>
       <path class="nauru-motion-track-halo"></path>
@@ -3871,14 +3872,17 @@
         stage.dataset.trackLength = '0';
         stage.dataset.trackSegments = '0';
         stage.dataset.trackHeadWidth = '0';
+        stage.dataset.trackMidWidthRatio = '0.00';
+        stage.dataset.trackCurves = '0';
+        stage.dataset.trackTips = '0';
         return;
       }
 
       const silhouetteWidth = Number(stage.dataset.width) || 177;
       const silhouetteHeight = Number(stage.dataset.height) || 185;
       const trackLength = relocking
-        ? silhouetteWidth * 1.08
-        : silhouetteWidth * (0.92 + boost * 0.34 + overdrive * 0.58);
+        ? silhouetteWidth * 0.92
+        : silhouetteWidth * (0.78 + boost * 0.20 + overdrive * 0.32);
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       const direction = {
@@ -3903,43 +3907,57 @@
         x: screenCenter.x - direction.x * bodyAlongHalf * 0.08,
         y: screenCenter.y - direction.y * bodyAlongHalf * 0.08
       };
-      const screenTail = {
-        x: screenCenter.x - direction.x * trackLength,
-        y: screenCenter.y - direction.y * trackLength
-      };
-      const headLeft = {
-        x: screenHead.x + perpendicular.x * headHalfWidth,
-        y: screenHead.y + perpendicular.y * headHalfWidth
-      };
-      const headRight = {
-        x: screenHead.x - perpendicular.x * headHalfWidth,
-        y: screenHead.y - perpendicular.y * headHalfWidth
-      };
-      const tailUpperControl = {
-        x: screenTail.x + direction.x * trackLength * 0.30 + perpendicular.x * headHalfWidth * 0.08,
-        y: screenTail.y + direction.y * trackLength * 0.30 + perpendicular.y * headHalfWidth * 0.08
-      };
-      const headUpperControl = {
-        x: screenHead.x - direction.x * trackLength * 0.34 + perpendicular.x * headHalfWidth * 0.72,
-        y: screenHead.y - direction.y * trackLength * 0.34 + perpendicular.y * headHalfWidth * 0.72
-      };
-      const headLowerControl = {
-        x: screenHead.x - direction.x * trackLength * 0.34 - perpendicular.x * headHalfWidth * 0.72,
-        y: screenHead.y - direction.y * trackLength * 0.34 - perpendicular.y * headHalfWidth * 0.72
-      };
-      const tailLowerControl = {
-        x: screenTail.x + direction.x * trackLength * 0.30 - perpendicular.x * headHalfWidth * 0.08,
-        y: screenTail.y + direction.y * trackLength * 0.30 - perpendicular.y * headHalfWidth * 0.08
-      };
       const point = value => `${value.x.toFixed(2)} ${value.y.toFixed(2)}`;
-      const pathData = [
-        `M ${point(screenTail)}`,
-        `C ${point(tailUpperControl)} ${point(headUpperControl)} ${point(headLeft)}`,
-        `L ${point(headRight)}`,
-        `C ${point(headLowerControl)} ${point(tailLowerControl)} ${point(screenTail)}`,
-        'Z'
-      ].join(' ');
-      nauruMotionTrackPaths.forEach(path => path.setAttribute('d', pathData));
+      const buildEnergyPlumePath = (lengthScale, widthScale, phase, splitTip = false) => {
+        const plumeLength = trackLength * lengthScale;
+        const plumeHalfWidth = headHalfWidth * widthScale;
+        const waveA = Math.sin(now / 86 + phase) * (0.045 + boost * 0.020 + overdrive * 0.025);
+        const waveB = Math.sin(now / 63 + phase * 1.7) * (0.036 + boost * 0.018 + overdrive * 0.022);
+        const plumePoint = (along, cross) => ({
+          x: screenHead.x - direction.x * plumeLength * along + perpendicular.x * plumeHalfWidth * cross,
+          y: screenHead.y - direction.y * plumeLength * along + perpendicular.y * plumeHalfWidth * cross
+        });
+        const headLeft = plumePoint(0, 1);
+        const headRight = plumePoint(0, -1);
+        const tail = plumePoint(1, waveB * 0.22);
+        const upperSide = [
+          `M ${point(headLeft)}`,
+          `C ${point(plumePoint(0.06, 1.06))} ${point(plumePoint(0.14, 1.02 + waveA))} ${point(plumePoint(0.23, 0.94 + waveA))}`,
+          `C ${point(plumePoint(0.31, 0.84 + waveB))} ${point(plumePoint(0.40, 0.90 + waveA * 0.5))} ${point(plumePoint(0.49, 0.80 + waveB))}`,
+          `C ${point(plumePoint(0.58, 0.72 + waveA * 0.5))} ${point(plumePoint(0.68, 0.64 + waveB))} ${point(plumePoint(0.76, 0.43 + waveA))}`
+        ];
+        const tip = splitTip
+          ? [
+              `C ${point(plumePoint(0.84, 0.29 + waveB * 0.4))} ${point(plumePoint(0.95, 0.17))} ${point(plumePoint(1, 0.10 + waveB * 0.2))}`,
+              `C ${point(plumePoint(0.95, 0.09))} ${point(plumePoint(0.90, 0.01))} ${point(plumePoint(0.87, -0.06))}`,
+              `C ${point(plumePoint(0.95, -0.03))} ${point(plumePoint(1.04, -0.04))} ${point(plumePoint(1.08, -0.09 + waveA * 0.12))}`,
+              `C ${point(plumePoint(1.01, -0.13))} ${point(plumePoint(0.86, -0.23 + waveA * 0.2))} ${point(plumePoint(0.76, -0.34 + waveB))}`
+            ]
+          : [
+              `C ${point(plumePoint(0.84, 0.28 + waveB * 0.4))} ${point(plumePoint(0.94, 0.07))} ${point(tail)}`,
+              `C ${point(plumePoint(0.93, -0.06))} ${point(plumePoint(0.84, -0.20 + waveA * 0.2))} ${point(plumePoint(0.76, -0.34 + waveB))}`
+            ];
+        const lowerSide = [
+          `C ${point(plumePoint(0.68, -0.50 + waveA * 0.3))} ${point(plumePoint(0.62, -0.65 + waveB))} ${point(plumePoint(0.54, -0.72 + waveA))}`,
+          `C ${point(plumePoint(0.46, -0.80 + waveB))} ${point(plumePoint(0.36, -0.88 + waveA * 0.3))} ${point(plumePoint(0.26, -0.88 + waveB))}`,
+          `C ${point(plumePoint(0.15, -0.90 + waveA * 0.2))} ${point(plumePoint(0.07, -1.05))} ${point(headRight)}`,
+          `C ${point(plumePoint(-0.045, -0.66))} ${point(plumePoint(-0.045, 0.66))} ${point(headLeft)}`,
+          'Z'
+        ];
+        return [...upperSide, ...tip, ...lowerSide].join(' ');
+      };
+      const haloPathData = buildEnergyPlumePath(1.04, 1, 0, true);
+      const corePathData = buildEnergyPlumePath(0.91, 0.70, 1.85, true);
+      nauruMotionTrackPaths.forEach(path => {
+        path.setAttribute('d', path.classList.contains('nauru-motion-track-halo')
+          ? haloPathData
+          : corePathData);
+      });
+
+      const screenTail = {
+        x: screenHead.x - direction.x * trackLength * 1.12,
+        y: screenHead.y - direction.y * trackLength * 1.12
+      };
 
       if (nauruMotionTrackGradient) {
         nauruMotionTrackGradient.setAttribute('x1', screenTail.x.toFixed(2));
@@ -3952,9 +3970,13 @@
       nauruMotionLightTrack.style.opacity = String(trackOpacity);
       stage.dataset.track = 'visible';
       stage.dataset.trackOpacity = trackOpacity.toFixed(2);
-      stage.dataset.trackLength = Math.round(trackLength).toString();
-      stage.dataset.trackSegments = '1';
+      stage.dataset.trackLength = Math.round(trackLength * 1.12).toString();
+      stage.dataset.trackSegments = '2';
+      stage.dataset.trackShape = 'energy-plume';
       stage.dataset.trackHeadWidth = Math.round(headHalfWidth * 2).toString();
+      stage.dataset.trackMidWidthRatio = '0.78';
+      stage.dataset.trackCurves = '11';
+      stage.dataset.trackTips = '2';
     }
 
     function getNauruMotionImpulse(dx, dy) {
@@ -4164,6 +4186,9 @@
         stage.dataset.trackLength = '0';
         stage.dataset.trackSegments = '0';
         stage.dataset.trackHeadWidth = '0';
+        stage.dataset.trackMidWidthRatio = '0.00';
+        stage.dataset.trackCurves = '0';
+        stage.dataset.trackTips = '0';
         if (nauruMotionLightTrack) nauruMotionLightTrack.style.opacity = '0';
         nauruMotionTrackPaths.forEach(path => path.removeAttribute('d'));
       }
