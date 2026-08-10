@@ -3468,7 +3468,7 @@
       if (!map || !usesMobileLayout()) return null;
       if (basemapBootstrapLayer && map.hasLayer(basemapBootstrapLayer)) return basemapBootstrapLayer;
       const bootLayer = createBasemapTileLayer(BASEMAPS.osm, 0, {
-        maxNativeZoom: 5,
+        maxNativeZoom: 6,
         maxZoom: 19,
         keepBuffer: 4,
         updateWhenIdle: false,
@@ -3495,8 +3495,8 @@
 
     function prefetchBasemapBootstrapArea() {
       if (!map || !usesMobileLayout()) return;
-      const zoom = 5;
-      const radius = 2;
+      const zoom = 6;
+      const radius = 3;
       const worldSize = 2 ** zoom;
       const tilePoint = map.project(map.getCenter(), zoom).divideBy(256).floor();
       const tiles = [];
