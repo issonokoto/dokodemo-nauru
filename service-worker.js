@@ -1,4 +1,5 @@
-const CACHE_NAME = 'dokodemo-nauru-v81';
+const CACHE_NAME = 'dokodemo-nauru-v82';
+const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './index.html',
   './game/index.html',
@@ -66,7 +67,10 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    await Promise.all(keys
+      .filter(key => key !== CACHE_NAME)
+      .filter(key => !PRESERVED_CACHE_PREFIXES.some(prefix => key.startsWith(prefix)))
+      .map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });

@@ -2919,6 +2919,18 @@
           <p class="text-ocean-300 leading-relaxed">画像を保存したい場合だけ「📷 保存」を使ってください。</p>
         </div>
       </div>
+      <div class="mt-4 rounded-xl border border-white/10 bg-black/25 p-3">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-xs font-semibold text-sand-50">地図キャッシュ</p>
+          <span id="map-cache-status" class="text-[10px] text-ocean-300">確認中…</span>
+        </div>
+        <p class="mt-1 text-[11px] leading-relaxed text-ocean-300">
+          表示した標準地図を端末に残し、次回の表示を速くします。端末の空き容量が少ない場合は削除されることがあります。
+        </p>
+        <button id="clear-map-cache-btn" type="button" class="mt-2 rounded-lg border border-ocean-300/30 bg-ocean-900/80 px-3 py-1.5 text-[11px] font-semibold text-ocean-200 transition hover:border-gold-500/50 hover:text-gold-300 disabled:cursor-wait disabled:opacity-60">
+          保存した地図を削除
+        </button>
+      </div>
       <button id="close-notice-btn" type="button" class="mt-5 w-full py-2.5 rounded-xl font-semibold text-ocean-950 bg-gradient-to-r from-gold-400 to-gold-600 hover:brightness-110 active:scale-[0.98] transition">
         はじめる
       </button>
@@ -2973,6 +2985,7 @@
     const BASEMAPS = {
       osm: {
         url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        cacheTiles: true,
         options: {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
           maxZoom: 19
@@ -3034,6 +3047,10 @@
       large: { level: 1, label: '大きい' },
       xlarge: { level: 2, label: '特大' }
     };
+    const MAP_TILE_CACHE_NAME = 'dokodemo-nauru-map-tiles-v1';
+    let mapTileCachePromise = null;
+    let mapTileCacheGeneration = 0;
+    const mapTileBlobPromises = new Map();
 
     // ナウル本体の実寸（境界 bbox から）
     const NAURU_SIZE_M = { w: 5618, h: 5744 };
@@ -3425,14 +3442,139 @@
 
     function createBasemapTileLayer(cfg, textLevel, overrides = {}) {
       const tileScale = Math.pow(2, textLevel);
-      return L.tileLayer(cfg.url, {
+      const layer = L.tileLayer(cfg.url, {
         ...cfg.options,
         tileSize: 256 * tileScale,
         zoomOffset: -textLevel,
         crossOrigin: 'anonymous',
         ...overrides
       });
+      if (!cfg.cacheTiles || !('caches' in window) || typeof window.fetch !== 'function') return layer;
+      layer.createTile = function createCachedTile(coords, done) {
+        const tile = document.createElement('img');
+        tile.alt = '';
+        tile.setAttribute('role', 'presentation');
+        if (this.options.crossOrigin || this.options.crossOrigin === '') {
+          tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
+        }
+        const url = this.getTileUrl(coords);
+        let finished = false;
+        let fallbackStarted = false;
+        let objectUrl = '';
+        const finish = error => {
+          if (finished) return;
+          finished = true;
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          done(error || null, tile);
+        };
+        tile.onload = () => finish(null);
+        tile.onerror = () => {
+          if (!fallbackStarted) {
+            fallbackStarted = true;
+            if (objectUrl) {
+              URL.revokeObjectURL(objectUrl);
+              objectUrl = '';
+            }
+            tile.src = url;
+            return;
+          }
+          finish(new Error(`Map tile failed: ${url}`));
+        };
+        getMapTileBlob(url).then(blob => {
+          if (finished) return;
+          objectUrl = URL.createObjectURL(blob);
+          tile.src = objectUrl;
+        }).catch(() => {
+          if (finished) return;
+          fallbackStarted = true;
+          tile.src = url;
+        });
+        return tile;
+      };
+      return layer;
     }
+
+    function getMapTileCache() {
+      if (!('caches' in window)) return Promise.resolve(null);
+      if (!mapTileCachePromise) {
+        mapTileCachePromise = caches.open(MAP_TILE_CACHE_NAME).catch(() => null);
+      }
+      return mapTileCachePromise;
+    }
+
+    async function fetchMapTileBlob(url) {
+      const generation = mapTileCacheGeneration;
+      const cache = await getMapTileCache();
+      if (cache) {
+        try {
+          const cached = await cache.match(url, { ignoreVary: true });
+          if (cached) return await cached.blob();
+        } catch (_) {}
+      }
+
+      const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+      if (!response.ok) throw new Error(`Map tile request failed: ${response.status}`);
+      const blob = await response.clone().blob();
+      if (cache) {
+        try {
+          if (generation === mapTileCacheGeneration) await cache.put(url, response.clone());
+        } catch (_) {}
+      }
+      return blob;
+    }
+
+    function getMapTileBlob(url) {
+      if (!mapTileBlobPromises.has(url)) {
+        let promise;
+        promise = fetchMapTileBlob(url).finally(() => {
+          window.setTimeout(() => {
+            if (mapTileBlobPromises.get(url) === promise) mapTileBlobPromises.delete(url);
+          }, 0);
+        });
+        mapTileBlobPromises.set(url, promise);
+      }
+      return mapTileBlobPromises.get(url);
+    }
+
+    async function getMapTileCacheStatus() {
+      const cache = await getMapTileCache();
+      if (!cache) return { supported: false, count: 0 };
+      try {
+        const requests = await cache.keys();
+        return {
+          supported: true,
+          count: requests.filter(request => /tile\.openstreetmap\.org/.test(request.url)).length
+        };
+      } catch (_) {
+        return { supported: true, count: 0 };
+      }
+    }
+
+    async function clearMapTileCache() {
+      mapTileCacheGeneration += 1;
+      mapTileBlobPromises.clear();
+      const deleted = 'caches' in window ? await caches.delete(MAP_TILE_CACHE_NAME) : false;
+      mapTileCachePromise = null;
+      return deleted;
+    }
+
+    async function updateMapTileCacheStatus() {
+      const status = document.getElementById('map-cache-status');
+      if (!status) return;
+      const result = await getMapTileCacheStatus();
+      if (!result.supported) {
+        status.textContent = 'この環境では未対応';
+      } else if (result.count) {
+        status.textContent = `${result.count}枚保存中`;
+      } else {
+        status.textContent = 'まだ保存なし';
+      }
+    }
+
+    window.__nauruMapTileCache = {
+      getStatus: getMapTileCacheStatus,
+      clear: clearMapTileCache
+    };
 
     function syncBasemapControls(key) {
       currentBasemap = key;
@@ -8049,6 +8191,7 @@
       const noticeModal = document.getElementById('notice-modal');
       const helpButton = document.getElementById('btn-help');
       const closeNoticeButton = document.getElementById('close-notice-btn');
+      const clearMapCacheButton = document.getElementById('clear-map-cache-btn');
       const NOTICE_STORAGE_KEY = 'nauru_notice_v1_seen';
       let noticeReturnFocus = null;
       let noticeCloseTimer = 0;
@@ -8059,6 +8202,7 @@
         requestAnimationFrame(() => noticeModal.classList.remove('fade-out'));
         noticeModal.setAttribute('aria-hidden', 'false');
         helpButton.setAttribute('aria-expanded', 'true');
+        updateMapTileCacheStatus();
         closeNoticeButton.focus();
       };
       const closeModal = () => {
@@ -8073,6 +8217,18 @@
       };
       helpButton.addEventListener('click', () => openModal(helpButton));
       closeNoticeButton.addEventListener('click', closeModal);
+      if (clearMapCacheButton) {
+        clearMapCacheButton.addEventListener('click', async () => {
+          clearMapCacheButton.disabled = true;
+          try {
+            await clearMapTileCache();
+            await updateMapTileCacheStatus();
+            showToast('保存した地図を削除しました');
+          } finally {
+            clearMapCacheButton.disabled = false;
+          }
+        });
+      }
       noticeModal.addEventListener('click', (e) => {
         if (e.target === noticeModal) closeModal();
       });
