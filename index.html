@@ -251,7 +251,37 @@
       top: 50%;
       width: 0;
       height: 0;
+      z-index: 1;
       will-change: transform;
+    }
+    .nauru-motion-light-track {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      opacity: 0;
+      mix-blend-mode: screen;
+      will-change: opacity;
+    }
+    .nauru-motion-light-track path {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .nauru-motion-track-halo {
+      stroke-width: var(--nauru-motion-track-halo-width, 14px);
+      opacity: 0.68;
+      filter: blur(10px);
+    }
+    .nauru-motion-track-core {
+      stroke-width: var(--nauru-motion-track-core-width, 4px);
+      opacity: 0.98;
+      filter: drop-shadow(0 0 9px rgba(255, 255, 255, 1));
     }
     .nauru-motion-copy img {
       position: absolute;
@@ -2170,7 +2200,19 @@
   </div>
 
   <div id="map"></div>
-  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-motion-policy="always">
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-track="hidden" data-track-opacity="0.00" data-track-length="0" data-motion-policy="always">
+    <svg class="nauru-motion-light-track" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="nauru-motion-track-gradient" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0"></stop>
+          <stop offset="8%" stop-color="#fff" stop-opacity="0.42"></stop>
+          <stop offset="28%" stop-color="#fff" stop-opacity="0.88"></stop>
+          <stop offset="100%" stop-color="#fff" stop-opacity="1"></stop>
+        </linearGradient>
+      </defs>
+      <path class="nauru-motion-track-halo" stroke="url(#nauru-motion-track-gradient)"></path>
+      <path class="nauru-motion-track-core" stroke="url(#nauru-motion-track-gradient)"></path>
+    </svg>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="42"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="82"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="122"><img alt=""></span>
@@ -3082,6 +3124,9 @@
     let isNauruCenterLocked = true;
     let nauruLockButton = null;
     let nauruMotionStage = null;
+    let nauruMotionLightTrack = null;
+    let nauruMotionTrackGradient = null;
+    let nauruMotionTrackPaths = [];
     let nauruMotionTrails = [];
     let nauruMotionAura = null;
     let nauruMotionOverdrive = null;
@@ -3610,6 +3655,9 @@
       if (nauruMotionStage) return nauruMotionStage;
       nauruMotionStage = document.getElementById('nauru-motion-stage');
       if (!nauruMotionStage) return null;
+      nauruMotionLightTrack = nauruMotionStage.querySelector('.nauru-motion-light-track');
+      nauruMotionTrackGradient = nauruMotionStage.querySelector('#nauru-motion-track-gradient');
+      nauruMotionTrackPaths = Array.from(nauruMotionStage.querySelectorAll('.nauru-motion-light-track path'));
       nauruMotionTrails = Array.from(nauruMotionStage.querySelectorAll('.nauru-motion-trail'));
       nauruMotionAura = nauruMotionStage.querySelector('.nauru-motion-aura');
       nauruMotionOverdrive = nauruMotionStage.querySelector('.nauru-motion-overdrive');
@@ -3625,9 +3673,108 @@
     function sampleNauruMotionHistory(now, age) {
       const target = now - age;
       for (let i = nauruMotionHistory.length - 1; i >= 0; i--) {
-        if (nauruMotionHistory[i].time <= target) return nauruMotionHistory[i];
+        const point = nauruMotionHistory[i];
+        if (point.time <= target) {
+          const next = nauruMotionHistory[i + 1];
+          if (!next || next.time <= point.time) return point;
+          const progress = Math.max(0, Math.min(1, (target - point.time) / (next.time - point.time)));
+          return {
+            x: point.x + (next.x - point.x) * progress,
+            y: point.y + (next.y - point.y) * progress
+          };
+        }
       }
       return nauruMotionHistory[0] || { x: nauruMotionOffset.x, y: nauruMotionOffset.y };
+    }
+
+    function buildNauruMotionTrackPath(points) {
+      if (points.length < 2) return '';
+      const value = point => `${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
+      if (points.length === 2) return `M ${value(points[0])} L ${value(points[1])}`;
+      let path = `M ${value(points[0])}`;
+      for (let i = 1; i < points.length - 1; i++) {
+        const point = points[i];
+        const next = points[i + 1];
+        const midpoint = { x: (point.x + next.x) / 2, y: (point.y + next.y) / 2 };
+        path += ` Q ${value(point)} ${value(midpoint)}`;
+      }
+      const control = points[points.length - 2];
+      path += ` Q ${value(control)} ${value(points[points.length - 1])}`;
+      return path;
+    }
+
+    function renderNauruMotionLightTrack(now, boost, overdrive, trailStrength, effectOpacity, relocking) {
+      const stage = getNauruMotionStage();
+      if (!stage || !nauruMotionLightTrack || nauruMotionTrackPaths.length === 0) return;
+
+      const trackEnergy = relocking
+        ? 1
+        : trailStrength * Math.min(1, 0.36 + boost * 0.44 + overdrive * 0.20);
+      const historySpan = relocking ? 340 : 180 + boost * 60 + overdrive * 100;
+      const ageRatios = [1, 0.82, 0.64, 0.46, 0.28, 0.12, 0];
+      const points = ageRatios.map(ratio => sampleNauruMotionHistory(now, historySpan * ratio));
+      points[points.length - 1] = { x: nauruMotionOffset.x, y: nauruMotionOffset.y };
+
+      const filtered = points.filter((point, index) => {
+        if (index === 0) return true;
+        const previous = points[index - 1];
+        return Math.hypot(point.x - previous.x, point.y - previous.y) > 0.35;
+      });
+      if (filtered.length < 2 || trackEnergy < 0.025) {
+        nauruMotionLightTrack.style.opacity = '0';
+        nauruMotionTrackPaths.forEach(path => path.removeAttribute('d'));
+        stage.dataset.track = 'hidden';
+        stage.dataset.trackOpacity = '0.00';
+        stage.dataset.trackLength = '0';
+        return;
+      }
+
+      const tail = filtered[0];
+      const head = filtered[filtered.length - 1];
+      const dx = head.x - tail.x;
+      const dy = head.y - tail.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance < 0.8) {
+        nauruMotionLightTrack.style.opacity = '0';
+        nauruMotionTrackPaths.forEach(path => path.removeAttribute('d'));
+        stage.dataset.track = 'hidden';
+        stage.dataset.trackOpacity = '0.00';
+        stage.dataset.trackLength = '0';
+        return;
+      }
+
+      const silhouetteWidth = Number(stage.dataset.width) || 177;
+      const extension = relocking
+        ? Math.min(silhouetteWidth * 0.82, silhouetteWidth * 0.50 + distance * 0.15)
+        : silhouetteWidth * (0.88 + boost * 0.32 + overdrive * 0.55);
+      filtered[0] = {
+        x: tail.x - dx / distance * extension,
+        y: tail.y - dy / distance * extension
+      };
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const screenPoints = filtered.map(point => ({ x: centerX + point.x, y: centerY + point.y }));
+      const pathData = buildNauruMotionTrackPath(screenPoints);
+      nauruMotionTrackPaths.forEach(path => path.setAttribute('d', pathData));
+
+      const screenTail = screenPoints[0];
+      const screenHead = screenPoints[screenPoints.length - 1];
+      if (nauruMotionTrackGradient) {
+        nauruMotionTrackGradient.setAttribute('x1', screenTail.x.toFixed(2));
+        nauruMotionTrackGradient.setAttribute('y1', screenTail.y.toFixed(2));
+        nauruMotionTrackGradient.setAttribute('x2', screenHead.x.toFixed(2));
+        nauruMotionTrackGradient.setAttribute('y2', screenHead.y.toFixed(2));
+      }
+
+      const trackOpacity = Math.min(0.94, trackEnergy * (1.18 + overdrive * 0.18) * effectOpacity);
+      const haloWidth = Math.max(14, Math.min(38, silhouetteWidth * 0.11 + boost * 5 + overdrive * 11));
+      const coreWidth = Math.max(4, Math.min(10, silhouetteWidth * 0.024 + boost * 1.6 + overdrive * 2.4));
+      nauruMotionLightTrack.style.opacity = String(trackOpacity);
+      nauruMotionLightTrack.style.setProperty('--nauru-motion-track-halo-width', `${haloWidth.toFixed(2)}px`);
+      nauruMotionLightTrack.style.setProperty('--nauru-motion-track-core-width', `${coreWidth.toFixed(2)}px`);
+      stage.dataset.track = 'visible';
+      stage.dataset.trackOpacity = trackOpacity.toFixed(2);
+      stage.dataset.trackLength = Math.round(distance + extension).toString();
     }
 
     function getNauruMotionImpulse(dx, dy) {
@@ -3653,6 +3800,8 @@
       const trailStrength = Math.max(speedStrength, relocking ? 1 : 0);
       const trailOpacity = [0.22, 0.14, 0.08];
       const effectOpacity = Math.sqrt(Math.max(0, Math.min(1, silhouetteOpacity)));
+
+      renderNauruMotionLightTrack(now, boost, overdrive, trailStrength, effectOpacity, relocking);
 
       setNauruMotionCopyPosition(nauruMotionMain, nauruMotionOffset.x, nauruMotionOffset.y);
       setNauruMotionCopyPosition(nauruMotionAura, nauruMotionOffset.x, nauruMotionOffset.y);
@@ -3751,7 +3900,7 @@
       nauruMotionArrivalPulse *= Math.exp(-dt / 190);
 
       nauruMotionHistory.push({ time: now, x: nauruMotionOffset.x, y: nauruMotionOffset.y });
-      while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 220) {
+      while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 380) {
         nauruMotionHistory.shift();
       }
       renderNauruMotion(now);
@@ -3798,6 +3947,11 @@
         stage.dataset.boost = '0.00';
         stage.dataset.overdrive = '0.00';
         stage.dataset.charge = '0';
+        stage.dataset.track = 'hidden';
+        stage.dataset.trackOpacity = '0.00';
+        stage.dataset.trackLength = '0';
+        if (nauruMotionLightTrack) nauruMotionLightTrack.style.opacity = '0';
+        nauruMotionTrackPaths.forEach(path => path.removeAttribute('d'));
       }
     }
 
@@ -3882,7 +4036,7 @@
           nauruMotionLastFastInputTime = now;
         }
         nauruMotionHistory.push({ time: now, x: nauruMotionOffset.x, y: nauruMotionOffset.y });
-        while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 220) {
+        while (nauruMotionHistory.length > 2 && nauruMotionHistory[0].time < now - 380) {
           nauruMotionHistory.shift();
         }
         renderNauruMotion(now);
