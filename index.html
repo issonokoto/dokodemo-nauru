@@ -268,20 +268,18 @@
       will-change: opacity;
     }
     .nauru-motion-light-track path {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
+      stroke: none;
+      fill: url(#nauru-motion-track-gradient);
     }
     .nauru-motion-track-halo {
-      stroke-width: var(--nauru-motion-track-halo-width, 14px);
-      opacity: 0.68;
-      filter: blur(10px);
+      opacity: 0.58;
+      filter: blur(15px);
     }
     .nauru-motion-track-core {
-      stroke-width: var(--nauru-motion-track-core-width, 4px);
-      opacity: 0.98;
-      filter: drop-shadow(0 0 9px rgba(255, 255, 255, 1));
+      opacity: 0.86;
+      filter:
+        drop-shadow(0 0 8px rgba(255, 255, 255, 1))
+        drop-shadow(0 0 18px rgba(255, 255, 255, 0.76));
     }
     .nauru-motion-copy img {
       position: absolute;
@@ -463,6 +461,82 @@
       height: 15px;
       accent-color: #e8b020;
       cursor: pointer;
+    }
+    .motion-effect-toggle {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 0.55rem;
+      border: 1px solid rgba(126, 200, 227, 0.24);
+      border-radius: 0.7rem;
+      background: rgba(7, 31, 53, 0.66);
+      color: #efe6d4;
+      padding: 0.55rem 0.6rem;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .motion-effect-toggle[hidden] { display: none; }
+    .motion-effect-toggle:hover,
+    .motion-effect-toggle:focus-visible {
+      border-color: rgba(245, 197, 66, 0.72);
+      outline: none;
+    }
+    .motion-effect-toggle[aria-checked="true"] {
+      border-color: rgba(245, 197, 66, 0.62);
+      background: rgba(17, 53, 79, 0.86);
+      box-shadow: inset 0 0 18px rgba(245, 197, 66, 0.08);
+    }
+    .motion-effect-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.08rem;
+    }
+    .motion-effect-copy strong {
+      color: #f5c542;
+      font-size: 10px;
+      line-height: 1.25;
+    }
+    .motion-effect-copy small {
+      color: #7ec8e3;
+      font-size: 9px;
+      line-height: 1.3;
+    }
+    .motion-effect-state {
+      min-width: 2rem;
+      color: #8ea9ba;
+      font: 700 9px/1 monospace;
+      text-align: right;
+    }
+    .motion-effect-toggle[aria-checked="true"] .motion-effect-state { color: #f5c542; }
+    .motion-effect-switch {
+      position: relative;
+      width: 34px;
+      height: 19px;
+      border-radius: 999px;
+      background: #526775;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.34);
+      transition: background 0.15s;
+    }
+    .motion-effect-switch::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #f7f3ea;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.32);
+      transition: transform 0.16s;
+    }
+    .motion-effect-toggle[aria-checked="true"] .motion-effect-switch {
+      background: #d7a612;
+    }
+    .motion-effect-toggle[aria-checked="true"] .motion-effect-switch::after {
+      transform: translateX(15px);
     }
     .opacity-control {
       display: flex;
@@ -2200,18 +2274,18 @@
   </div>
 
   <div id="map"></div>
-  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="idle" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-track="hidden" data-track-opacity="0.00" data-track-length="0" data-track-segments="0" data-motion-policy="always">
+  <div id="nauru-motion-stage" aria-hidden="true" data-motion-state="off" data-boost="0.00" data-overdrive="0.00" data-charge="0" data-track="hidden" data-track-opacity="0.00" data-track-length="0" data-track-segments="0" data-track-shape="tapered" data-track-head-width="0" data-effects="off" data-motion-policy="always">
     <svg class="nauru-motion-light-track" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="nauru-motion-track-gradient" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stop-color="#fff" stop-opacity="0"></stop>
-          <stop offset="8%" stop-color="#fff" stop-opacity="0.42"></stop>
-          <stop offset="28%" stop-color="#fff" stop-opacity="0.88"></stop>
-          <stop offset="100%" stop-color="#fff" stop-opacity="1"></stop>
+          <stop offset="12%" stop-color="#fff" stop-opacity="0.14"></stop>
+          <stop offset="55%" stop-color="#fff" stop-opacity="0.64"></stop>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0.96"></stop>
         </linearGradient>
       </defs>
-      <path class="nauru-motion-track-halo" stroke="url(#nauru-motion-track-gradient)"></path>
-      <path class="nauru-motion-track-core" stroke="url(#nauru-motion-track-gradient)"></path>
+      <path class="nauru-motion-track-halo"></path>
+      <path class="nauru-motion-track-core"></path>
     </svg>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="42"><img alt=""></span>
     <span class="nauru-motion-copy nauru-motion-trail" data-trail-age="82"><img alt=""></span>
@@ -2387,6 +2461,14 @@
           <span id="rotation-display" class="text-[11px] font-mono text-gold-400 w-8 text-right">0°</span>
         </div>
         <button type="button" id="btn-reset-transform" class="w-full text-[10px] text-ocean-300 hover:text-gold-400 py-1">向きをリセット</button>
+        <button type="button" id="motion-effects-toggle" class="motion-effect-toggle" role="switch" aria-checked="false" data-testid="motion-effects-toggle">
+          <span class="motion-effect-copy">
+            <strong>ひみつの移動演出</strong>
+            <small>素早く動かすと残像・発光</small>
+          </span>
+          <span class="motion-effect-state">OFF</span>
+          <span class="motion-effect-switch" aria-hidden="true"></span>
+        </button>
       </div>
     </details>
   </aside>
@@ -2499,6 +2581,14 @@
         <button type="button" id="mobile-edit-flip-y" class="mobile-edit-action">上下反転</button>
         <button type="button" id="mobile-edit-reset" class="mobile-edit-action">リセット</button>
       </div>
+      <button type="button" id="mobile-motion-effects-toggle" class="motion-effect-toggle mt-2" role="switch" aria-checked="false" data-testid="mobile-motion-effects-toggle">
+        <span class="motion-effect-copy">
+          <strong>ひみつの移動演出</strong>
+          <small>素早く動かすと残像・発光</small>
+        </span>
+        <span class="motion-effect-state">OFF</span>
+        <span class="motion-effect-switch" aria-hidden="true"></span>
+      </button>
       <div class="check-row">
         <label for="mobile-chk-reticle">
           <input type="checkbox" id="mobile-chk-reticle" checked>
@@ -3146,6 +3236,7 @@
     let nauruMotionDragging = false;
     let nauruMotionTrackDirection = { x: 0, y: 0 };
     let nauruMotionTrackDirectionTime = 0;
+    let nauruMotionEffectsEnabled = false;
     let nauruMotionSource = '';
     let initialMapZoom = 12;
     let L_lon = NAURU_CENTER.lon;
@@ -3166,6 +3257,7 @@
     let kunUpdateToken = 0;
     let showReticle = true;
     let sharedUserBoundaryStyle = null;
+    const NAURU_MOTION_EFFECTS_STORAGE_KEY = 'nauru_motion_effects';
 
     function getActiveSwatch() {
       return SWATCH_BY_ID[activeSwatchId] || SWATCH_BY_ID['k-original'];
@@ -3204,6 +3296,48 @@
       try { localStorage.setItem('nauru_reticle', showReticle ? '1' : '0'); } catch (_) {}
     }
 
+    function syncNauruMotionEffectControls() {
+      const showSetting = getSilhouetteMode() === 'kun';
+      ['motion-effects-toggle', 'mobile-motion-effects-toggle'].forEach(id => {
+        const button = document.getElementById(id);
+        if (!button) return;
+        button.hidden = !showSetting;
+        button.setAttribute('aria-checked', nauruMotionEffectsEnabled ? 'true' : 'false');
+        const state = button.querySelector('.motion-effect-state');
+        if (state) state.textContent = nauruMotionEffectsEnabled ? 'ON' : 'OFF';
+      });
+      const stage = getNauruMotionStage();
+      if (stage) stage.dataset.effects = nauruMotionEffectsEnabled ? 'on' : 'off';
+    }
+
+    function setNauruMotionEffectsEnabled(on, persist = true) {
+      nauruMotionEffectsEnabled = !!on;
+      const now = performance.now();
+      if (nauruMotionFrame) cancelAnimationFrame(nauruMotionFrame);
+      nauruMotionFrame = null;
+      nauruMotionLastFrame = 0;
+      nauruMotionOffset = { x: 0, y: 0 };
+      nauruMotionHistory = [{ time: now, x: 0, y: 0 }];
+      nauruMotionLastSample = null;
+      nauruMotionLastSampleTime = 0;
+      nauruMotionLastInputTime = 0;
+      nauruMotionLastFastInputTime = 0;
+      nauruMotionSpeed = 0;
+      nauruMotionFastMs = 0;
+      nauruMotionArrivalPulse = 0;
+      nauruMotionRelock = null;
+      nauruMotionDragging = false;
+      nauruMotionTrackDirection = { x: 0, y: 0 };
+      nauruMotionTrackDirectionTime = 0;
+      syncNauruMotionEffectControls();
+      renderNauruMotion(now);
+      if (persist) {
+        try {
+          localStorage.setItem(NAURU_MOTION_EFFECTS_STORAGE_KEY, nauruMotionEffectsEnabled ? '1' : '0');
+        } catch (_) {}
+      }
+    }
+
     function syncTransformControls() {
       const slider = document.getElementById('rotation-slider');
       const display = document.getElementById('rotation-display');
@@ -3211,6 +3345,7 @@
       if (display) display.textContent = `${currentRotation}°`;
       toggleFlipButton('btn-flip-x', currentFlipX);
       toggleFlipButton('btn-flip-y', currentFlipY);
+      syncNauruMotionEffectControls();
       syncMobileEditControls();
     }
 
@@ -3426,6 +3561,7 @@
       if (flipX) flipX.classList.toggle('active', currentFlipX);
       if (flipY) flipY.classList.toggle('active', currentFlipY);
       syncOpacityControls();
+      syncNauruMotionEffectControls();
     }
 
     function setActiveSwatch(id) {
@@ -3719,9 +3855,11 @@
       const stage = getNauruMotionStage();
       if (!stage || !nauruMotionLightTrack || nauruMotionTrackPaths.length === 0) return;
 
-      const trackEnergy = relocking
+      const trackEnergy = nauruMotionEffectsEnabled && relocking
         ? 1
-        : trailStrength * Math.min(1, 0.36 + boost * 0.44 + overdrive * 0.20);
+        : (nauruMotionEffectsEnabled
+          ? trailStrength * Math.min(1, 0.36 + boost * 0.44 + overdrive * 0.20)
+          : 0);
       const directionAge = now - nauruMotionTrackDirectionTime;
       const directionLength = Math.hypot(nauruMotionTrackDirection.x, nauruMotionTrackDirection.y);
       const maxDirectionAge = relocking ? 180 : (nauruMotionDragging ? 150 : 220);
@@ -3732,24 +3870,75 @@
         stage.dataset.trackOpacity = '0.00';
         stage.dataset.trackLength = '0';
         stage.dataset.trackSegments = '0';
+        stage.dataset.trackHeadWidth = '0';
         return;
       }
 
       const silhouetteWidth = Number(stage.dataset.width) || 177;
+      const silhouetteHeight = Number(stage.dataset.height) || 185;
       const trackLength = relocking
         ? silhouetteWidth * 1.08
         : silhouetteWidth * (0.92 + boost * 0.34 + overdrive * 0.58);
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      const screenHead = {
+      const direction = {
+        x: nauruMotionTrackDirection.x / directionLength,
+        y: nauruMotionTrackDirection.y / directionLength
+      };
+      const perpendicular = { x: -direction.y, y: direction.x };
+      const bodyCrossHalf = Math.hypot(
+        silhouetteWidth * perpendicular.x,
+        silhouetteHeight * perpendicular.y
+      ) / 2;
+      const bodyAlongHalf = Math.hypot(
+        silhouetteWidth * direction.x,
+        silhouetteHeight * direction.y
+      ) / 2;
+      const headHalfWidth = bodyCrossHalf * Math.min(1, 0.94 + boost * 0.04 + overdrive * 0.02);
+      const screenCenter = {
         x: centerX + nauruMotionOffset.x,
         y: centerY + nauruMotionOffset.y
       };
-      const screenTail = {
-        x: screenHead.x - nauruMotionTrackDirection.x * trackLength,
-        y: screenHead.y - nauruMotionTrackDirection.y * trackLength
+      const screenHead = {
+        x: screenCenter.x - direction.x * bodyAlongHalf * 0.08,
+        y: screenCenter.y - direction.y * bodyAlongHalf * 0.08
       };
-      const pathData = `M ${screenTail.x.toFixed(2)} ${screenTail.y.toFixed(2)} L ${screenHead.x.toFixed(2)} ${screenHead.y.toFixed(2)}`;
+      const screenTail = {
+        x: screenCenter.x - direction.x * trackLength,
+        y: screenCenter.y - direction.y * trackLength
+      };
+      const headLeft = {
+        x: screenHead.x + perpendicular.x * headHalfWidth,
+        y: screenHead.y + perpendicular.y * headHalfWidth
+      };
+      const headRight = {
+        x: screenHead.x - perpendicular.x * headHalfWidth,
+        y: screenHead.y - perpendicular.y * headHalfWidth
+      };
+      const tailUpperControl = {
+        x: screenTail.x + direction.x * trackLength * 0.30 + perpendicular.x * headHalfWidth * 0.08,
+        y: screenTail.y + direction.y * trackLength * 0.30 + perpendicular.y * headHalfWidth * 0.08
+      };
+      const headUpperControl = {
+        x: screenHead.x - direction.x * trackLength * 0.34 + perpendicular.x * headHalfWidth * 0.72,
+        y: screenHead.y - direction.y * trackLength * 0.34 + perpendicular.y * headHalfWidth * 0.72
+      };
+      const headLowerControl = {
+        x: screenHead.x - direction.x * trackLength * 0.34 - perpendicular.x * headHalfWidth * 0.72,
+        y: screenHead.y - direction.y * trackLength * 0.34 - perpendicular.y * headHalfWidth * 0.72
+      };
+      const tailLowerControl = {
+        x: screenTail.x + direction.x * trackLength * 0.30 - perpendicular.x * headHalfWidth * 0.08,
+        y: screenTail.y + direction.y * trackLength * 0.30 - perpendicular.y * headHalfWidth * 0.08
+      };
+      const point = value => `${value.x.toFixed(2)} ${value.y.toFixed(2)}`;
+      const pathData = [
+        `M ${point(screenTail)}`,
+        `C ${point(tailUpperControl)} ${point(headUpperControl)} ${point(headLeft)}`,
+        `L ${point(headRight)}`,
+        `C ${point(headLowerControl)} ${point(tailLowerControl)} ${point(screenTail)}`,
+        'Z'
+      ].join(' ');
       nauruMotionTrackPaths.forEach(path => path.setAttribute('d', pathData));
 
       if (nauruMotionTrackGradient) {
@@ -3759,16 +3948,13 @@
         nauruMotionTrackGradient.setAttribute('y2', screenHead.y.toFixed(2));
       }
 
-      const trackOpacity = Math.min(0.94, trackEnergy * (1.18 + overdrive * 0.18) * effectOpacity);
-      const haloWidth = Math.max(14, Math.min(38, silhouetteWidth * 0.11 + boost * 5 + overdrive * 11));
-      const coreWidth = Math.max(4, Math.min(10, silhouetteWidth * 0.024 + boost * 1.6 + overdrive * 2.4));
+      const trackOpacity = Math.min(0.84, trackEnergy * (0.88 + overdrive * 0.10) * effectOpacity);
       nauruMotionLightTrack.style.opacity = String(trackOpacity);
-      nauruMotionLightTrack.style.setProperty('--nauru-motion-track-halo-width', `${haloWidth.toFixed(2)}px`);
-      nauruMotionLightTrack.style.setProperty('--nauru-motion-track-core-width', `${coreWidth.toFixed(2)}px`);
       stage.dataset.track = 'visible';
       stage.dataset.trackOpacity = trackOpacity.toFixed(2);
       stage.dataset.trackLength = Math.round(trackLength).toString();
       stage.dataset.trackSegments = '1';
+      stage.dataset.trackHeadWidth = Math.round(headHalfWidth * 2).toString();
     }
 
     function getNauruMotionImpulse(dx, dy) {
@@ -3787,22 +3973,30 @@
       const stage = getNauruMotionStage();
       if (!stage) return;
 
-      const relocking = !!nauruMotionRelock;
-      const speedStrength = Math.max(0, Math.min(1, (nauruMotionSpeed - 90) / 620));
-      const boost = Math.max(0, Math.min(1, (nauruMotionFastMs - 420) / 1050));
-      const overdrive = Math.max(0, Math.min(1, (nauruMotionFastMs - 1550) / 1050));
+      const effectsActive = nauruMotionEffectsEnabled;
+      const relocking = effectsActive && !!nauruMotionRelock;
+      const speedStrength = effectsActive
+        ? Math.max(0, Math.min(1, (nauruMotionSpeed - 90) / 620))
+        : 0;
+      const boost = effectsActive
+        ? Math.max(0, Math.min(1, (nauruMotionFastMs - 420) / 1050))
+        : 0;
+      const overdrive = effectsActive
+        ? Math.max(0, Math.min(1, (nauruMotionFastMs - 1550) / 1050))
+        : 0;
       const trailStrength = Math.max(speedStrength, relocking ? 1 : 0);
       const trailOpacity = [0.22, 0.14, 0.08];
       const effectOpacity = Math.sqrt(Math.max(0, Math.min(1, silhouetteOpacity)));
+      const visualOffset = effectsActive ? nauruMotionOffset : { x: 0, y: 0 };
 
       renderNauruMotionLightTrack(now, boost, overdrive, trailStrength, effectOpacity, relocking);
 
-      setNauruMotionCopyPosition(nauruMotionMain, nauruMotionOffset.x, nauruMotionOffset.y);
-      setNauruMotionCopyPosition(nauruMotionAura, nauruMotionOffset.x, nauruMotionOffset.y);
-      setNauruMotionCopyPosition(nauruMotionOverdrive, nauruMotionOffset.x, nauruMotionOffset.y);
+      setNauruMotionCopyPosition(nauruMotionMain, visualOffset.x, visualOffset.y);
+      setNauruMotionCopyPosition(nauruMotionAura, visualOffset.x, visualOffset.y);
+      setNauruMotionCopyPosition(nauruMotionOverdrive, visualOffset.x, visualOffset.y);
       nauruMotionTrails.forEach((copy, index) => {
         const age = Number(copy.dataset.trailAge) || (42 + index * 40);
-        const point = sampleNauruMotionHistory(now, age);
+        const point = effectsActive ? sampleNauruMotionHistory(now, age) : { x: 0, y: 0 };
         setNauruMotionCopyPosition(copy, point.x, point.y);
         const img = copy.querySelector('img');
         if (img) img.style.opacity = String(trailOpacity[index] * trailStrength * effectOpacity);
@@ -3832,20 +4026,23 @@
           : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18))';
       }
 
-      stage.dataset.motionState = relocking
-        ? 'relock'
-        : overdrive > 0.05
-          ? 'overdrive'
-          : boost > 0.05
-            ? 'boost'
-            : trailStrength > 0.08
-              ? 'trail'
-              : 'idle';
+      stage.dataset.effects = effectsActive ? 'on' : 'off';
+      stage.dataset.motionState = effectsActive
+        ? (relocking
+          ? 'relock'
+          : overdrive > 0.05
+            ? 'overdrive'
+            : boost > 0.05
+              ? 'boost'
+              : trailStrength > 0.08
+                ? 'trail'
+                : 'idle')
+        : 'off';
       stage.dataset.boost = boost.toFixed(2);
       stage.dataset.overdrive = overdrive.toFixed(2);
-      stage.dataset.charge = String(Math.round(nauruMotionFastMs));
-      stage.dataset.offsetX = nauruMotionOffset.x.toFixed(2);
-      stage.dataset.offsetY = nauruMotionOffset.y.toFixed(2);
+      stage.dataset.charge = String(Math.round(effectsActive ? nauruMotionFastMs : 0));
+      stage.dataset.offsetX = visualOffset.x.toFixed(2);
+      stage.dataset.offsetY = visualOffset.y.toFixed(2);
     }
 
     function runNauruMotionFrame(now) {
@@ -3853,6 +4050,12 @@
       const stage = getNauruMotionStage();
       if (!stage || !stage.classList.contains('is-visible')) {
         nauruMotionLastFrame = 0;
+        return;
+      }
+      if (!nauruMotionEffectsEnabled) {
+        nauruMotionLastFrame = 0;
+        nauruMotionOffset = { x: 0, y: 0 };
+        renderNauruMotion(now);
         return;
       }
 
@@ -3928,7 +4131,9 @@
     }
 
     function ensureNauruMotionFrame() {
-      if (!nauruMotionFrame) nauruMotionFrame = requestAnimationFrame(runNauruMotionFrame);
+      if (nauruMotionEffectsEnabled && !nauruMotionFrame) {
+        nauruMotionFrame = requestAnimationFrame(runNauruMotionFrame);
+      }
     }
 
     function setNauruMotionVisible(visible) {
@@ -3958,6 +4163,7 @@
         stage.dataset.trackOpacity = '0.00';
         stage.dataset.trackLength = '0';
         stage.dataset.trackSegments = '0';
+        stage.dataset.trackHeadWidth = '0';
         if (nauruMotionLightTrack) nauruMotionLightTrack.style.opacity = '0';
         nauruMotionTrackPaths.forEach(path => path.removeAttribute('d'));
       }
@@ -4010,7 +4216,7 @@
     }
 
     function recordNauruMotionSample() {
-      if (!map || !isNauruCenterLocked || isZooming || getSilhouetteMode() !== 'kun') return;
+      if (!nauruMotionEffectsEnabled || !map || !isNauruCenterLocked || isZooming || getSilhouetteMode() !== 'kun') return;
       const now = performance.now();
       if (!nauruMotionDragging && now - nauruMotionLastInputTime > 180) {
         resetNauruMotionSample();
@@ -4082,6 +4288,12 @@
       const stage = getNauruMotionStage();
       if (!stage || stage.dataset.renderable === 'false' || getSilhouetteMode() !== 'kun') return;
       setNauruMotionVisible(true);
+      if (!nauruMotionEffectsEnabled) {
+        nauruMotionOffset = { x: 0, y: 0 };
+        nauruMotionHistory = [{ time: performance.now(), x: 0, y: 0 }];
+        renderNauruMotion(performance.now());
+        return;
+      }
       const start = startOffset || { x: 0, y: 0 };
       const distance = Math.hypot(start.x, start.y);
       const now = performance.now();
@@ -7112,6 +7324,11 @@
           }
         } catch (_) {}
       }
+      try {
+        nauruMotionEffectsEnabled = localStorage.getItem(NAURU_MOTION_EFFECTS_STORAGE_KEY) === '1';
+      } catch (_) {
+        nauruMotionEffectsEnabled = false;
+      }
       buildSwatchPanel();
       setReticleVisible(showReticle);
       syncOpacityControls();
@@ -7125,6 +7342,14 @@
       if (mobileChkReticle) {
         mobileChkReticle.addEventListener('change', () => setReticleVisible(mobileChkReticle.checked));
       }
+      ['motion-effects-toggle', 'mobile-motion-effects-toggle'].forEach(id => {
+        const button = document.getElementById(id);
+        if (!button) return;
+        button.addEventListener('click', () => {
+          setNauruMotionEffectsEnabled(!nauruMotionEffectsEnabled);
+          showToast(`ひみつの移動演出を${nauruMotionEffectsEnabled ? 'ON' : 'OFF'}にしました`);
+        });
+      });
 
       ['opacity-slider', 'mobile-opacity-slider'].forEach(id => {
         const slider = document.getElementById(id);
@@ -7413,7 +7638,8 @@
       });
 
       map.on('dragstart', () => {
-        nauruMotionDragging = true;
+        nauruMotionDragging = nauruMotionEffectsEnabled;
+        if (!nauruMotionEffectsEnabled) return;
         nauruMotionTrackDirection = { x: 0, y: 0 };
         nauruMotionTrackDirectionTime = 0;
         resetNauruMotionSample();
@@ -7421,7 +7647,7 @@
       });
       map.on('dragend', () => {
         nauruMotionDragging = false;
-        ensureNauruMotionFrame();
+        if (nauruMotionEffectsEnabled) ensureNauruMotionFrame();
       });
 
       let moveRaf = null;
