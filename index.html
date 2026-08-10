@@ -73,10 +73,8 @@
     #map-boot-shell.is-hidden { opacity: 0; }
     #map { position: absolute; inset: 0; z-index: 1; background: transparent; }
     .leaflet-container { background: transparent; }
-    .leaflet-layer.nauru-map-detail-layer,
-    .leaflet-layer.nauru-map-bootstrap-layer {
-      transition: opacity 220ms ease;
-    }
+    .leaflet-layer.nauru-map-detail-layer { transition: opacity 80ms ease; }
+    .leaflet-layer.nauru-map-bootstrap-layer { transition: opacity 220ms ease; }
     .leaflet-layer.nauru-map-detail-layer-ready { opacity: 1 !important; }
     .leaflet-layer.nauru-map-bootstrap-layer-leaving { opacity: 0 !important; }
     @media (prefers-reduced-motion: reduce) {
@@ -3496,26 +3494,30 @@
       const cfg = BASEMAPS[key];
       const textLevel = getBasemapTextLevel(key);
       if (baseLayer) map.removeLayer(baseLayer);
-      const primaryLayer = createBasemapTileLayer(cfg, textLevel, fadeFromBootstrap
-        ? { className: 'nauru-map-detail-layer' }
-        : {});
+      const detailLayerOverrides = usesMobileLayout()
+        ? { keepBuffer: 0, updateWhenIdle: true, updateWhenZooming: false }
+        : {};
+      if (fadeFromBootstrap) detailLayerOverrides.className = 'nauru-map-detail-layer';
+      const primaryLayer = createBasemapTileLayer(cfg, textLevel, detailLayerOverrides);
       const detailLayers = [primaryLayer];
       primaryLayer.once('load', hideBootMapShell);
       if (fadeFromBootstrap) {
-        primaryLayer.options.className = 'nauru-map-detail-layer';
         primaryLayer.setOpacity(0);
+        let detailRevealed = false;
         const revealDetail = () => {
-          if (requestId !== basemapRequestId) return;
+          if (detailRevealed || requestId !== basemapRequestId) return;
+          detailRevealed = true;
+          hideBootMapShell();
           primaryLayer.setOpacity(1);
           const container = primaryLayer.getContainer && primaryLayer.getContainer();
           if (container) container.classList.add('nauru-map-detail-layer-ready');
         };
+        // 全タイルの完了を待たず、最初の詳細タイルから表示を始める。
+        primaryLayer.once('tileload', revealDetail);
         primaryLayer.once('load', revealDetail);
       }
       if (cfg.fallback && BASEMAPS[cfg.fallback]) {
-        const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel, fadeFromBootstrap
-          ? { className: 'nauru-map-detail-layer' }
-          : {});
+        const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel, detailLayerOverrides);
         detailLayers.push(fallbackLayer);
         fallbackLayer.once('load', hideBootMapShell);
         if (fadeFromBootstrap) {
@@ -3555,10 +3557,7 @@
 
       if (bootstrap && usesMobileLayout()) {
         ensureBasemapBootstrapLayer();
-        basemapTransitionTimer = window.setTimeout(() => {
-          basemapTransitionTimer = null;
-          applyBasemap(key, requestId, true);
-        }, 140);
+        applyBasemap(key, requestId, true);
         return;
       }
       applyBasemap(key, requestId, false);
