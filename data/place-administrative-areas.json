@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-26T12:50:26.570Z",
+  "generatedAt": "2026-08-15T16:21:34.288Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 2711,
-    "withPrefectures": 2580,
-    "withMunicipalities": 2561,
+    "total": 2713,
+    "withPrefectures": 2582,
+    "withMunicipalities": 2563,
     "multiPrefecture": 18,
     "multiMunicipality": 90,
     "withGroups": 158
@@ -24420,6 +24420,24 @@
       ],
       "municipalities": [
         "奈良県橿原市"
+      ],
+      "groups": []
+    },
+    "attraction-large-park-W837804554": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府泉南市"
+      ],
+      "groups": []
+    },
+    "attraction-W1491742303": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市北区"
       ],
       "groups": []
     }
