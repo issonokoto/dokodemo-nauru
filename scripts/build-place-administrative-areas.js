@@ -102,6 +102,9 @@ const MANUAL_OVERRIDES = {
   'attraction-unesco-776': {
     prefectures: ['広島県'], municipalities: ['広島県廿日市市']
   },
+  'attraction-kofun-daisen': {
+    prefectures: ['大阪府'], municipalities: ['大阪府堺市']
+  },
   'water-wikipedia-W219619536': {
     prefectures: ['宮城県'], municipalities: ['宮城県蔵王町', '宮城県川崎町']
   },

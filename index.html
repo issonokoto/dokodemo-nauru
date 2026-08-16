@@ -7568,6 +7568,37 @@
       return polygons.filter(polygon => polygon.some(ring => Array.isArray(ring) && ring.length >= 3));
     }
 
+    function polygonGroupsByLayerFromGeojson(value) {
+      const layers = { default: [], land: [], water: [] };
+      const validPolygons = polygons => polygons.filter(polygon => polygon.some(ring => Array.isArray(ring) && ring.length >= 3));
+      const visit = (item, inheritedLayer = 'default') => {
+        if (!item) return;
+        if (item.type === 'FeatureCollection') {
+          (item.features || []).forEach(feature => visit(feature, inheritedLayer));
+        } else if (item.type === 'Feature') {
+          const requestedLayer = item.properties && item.properties.layer;
+          const layer = requestedLayer === 'land' || requestedLayer === 'water' ? requestedLayer : inheritedLayer;
+          visit(item.geometry, layer);
+        } else if (item.type === 'GeometryCollection') {
+          (item.geometries || []).forEach(geometry => visit(geometry, inheritedLayer));
+        } else if (item.type === 'Polygon') {
+          layers[inheritedLayer].push(item.coordinates || []);
+        } else if (item.type === 'MultiPolygon') {
+          (item.coordinates || []).forEach(polygon => layers[inheritedLayer].push(polygon));
+        }
+      };
+      visit(value);
+      layers.default = validPolygons(layers.default);
+      layers.land = validPolygons(layers.land);
+      layers.water = validPolygons(layers.water);
+      const polygons = layers.land.length ? layers.land : layers.default;
+      return {
+        polygons,
+        waterPolygons: layers.water,
+        allPolygons: [...polygons, ...layers.water]
+      };
+    }
+
     function allCoordinatesFromPolygons(polygons) {
       return polygons.flatMap(polygon => polygon.flatMap(ring => ring))
         .filter(point => Array.isArray(point) && Number.isFinite(Number(point[0])) && Number.isFinite(Number(point[1])));
@@ -7742,9 +7773,15 @@
       } else {
         source = await loadCurrentMunicipalityGeometry(target);
       }
-      const polygons = polygonGroupsFromGeojson(source);
-      if (!polygons.length) throw new Error('境界データが見つかりませんでした');
-      const result = { target, polygons, bounds: getGeometryBounds(polygons) };
+      const layered = polygonGroupsByLayerFromGeojson(source);
+      if (!layered.allPolygons.length) throw new Error('境界データが見つかりませんでした');
+      const result = {
+        target,
+        polygons: layered.polygons,
+        waterPolygons: layered.waterPolygons,
+        allPolygons: layered.allPolygons,
+        bounds: getGeometryBounds(layered.allPolygons)
+      };
       comparisonGeometryCache.set(cacheKey, result);
       return result;
     }
@@ -7890,13 +7927,17 @@
     }
 
     async function renderComparison(result) {
-      const targetMetrics = geometryMetrics(result.polygons);
+      const targetPolygons = result.allPolygons || result.polygons;
+      const targetMetrics = geometryMetrics(targetPolygons);
       const nauruPolygons = [NAURU_RINGS];
       const nauruMetrics = geometryMetrics(nauruPolygons);
       if (!targetMetrics || !nauruMetrics) throw new Error('比較図を作れませんでした');
       const commonExtent = Math.max(targetMetrics.width, targetMetrics.height, nauruMetrics.width, nauruMetrics.height, 1);
       const pixelsPerMeter = 226 / commonExtent;
       const targetPath = makeComparisonPath(result.polygons, targetMetrics, pixelsPerMeter);
+      const sourceWaterPath = (result.waterPolygons || []).length
+        ? makeComparisonPath(result.waterPolygons, targetMetrics, pixelsPerMeter)
+        : '';
       const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
       let comparisonOverlays = { waterPolygons: [], islandPolygons: [] };
       try {
@@ -7904,13 +7945,13 @@
       } catch (error) {
         console.warn('比較図の水面・島の補助表示を読み込めませんでした', error);
       }
-      const waterPath = comparisonOverlays.waterPolygons.length
+      const supplementalWaterPath = comparisonOverlays.waterPolygons.length
         ? makeComparisonPath(comparisonOverlays.waterPolygons, targetMetrics, pixelsPerMeter)
         : '';
       const islandPath = comparisonOverlays.islandPolygons.length
         ? makeComparisonPath(comparisonOverlays.islandPolygons, targetMetrics, pixelsPerMeter)
         : '';
-      const hasComparisonOverlay = Boolean(waterPath || islandPath);
+      const hasComparisonOverlay = Boolean(sourceWaterPath || supplementalWaterPath || islandPath);
       const historical = isHistoricalComparisonTarget(result.target);
       const natural = isNaturalComparisonTarget(result.target);
       const attraction = result.target.kind === 'attraction';
@@ -7943,9 +7984,14 @@
       const comparisonClip = hasComparisonOverlay
         ? `<defs><clipPath id="${comparisonClipId}" clipPathUnits="userSpaceOnUse"><path d="${targetPath}" fill-rule="evenodd" clip-rule="evenodd" /></clipPath></defs>`
         : '';
-      const waterOverlay = waterPath
-        ? `<path d="${waterPath}" fill="#52b8dc" stroke="#155a78" stroke-width="1.35" fill-rule="evenodd" clip-path="url(#${comparisonClipId})" />`
-        : '';
+      const waterOverlay = [
+        sourceWaterPath
+          ? `<path d="${sourceWaterPath}" fill="#52b8dc" stroke="#155a78" stroke-width="2.2" fill-rule="evenodd" />`
+          : '',
+        supplementalWaterPath
+          ? `<path d="${supplementalWaterPath}" fill="#52b8dc" stroke="#155a78" stroke-width="1.35" fill-rule="evenodd" clip-path="url(#${comparisonClipId})" />`
+          : ''
+      ].join('');
       const islandOverlay = islandPath
         ? `<path d="${islandPath}" fill="#8ec31f" stroke="#365c16" stroke-width="1.35" fill-rule="evenodd" clip-path="url(#${comparisonClipId})" />`
         : '';

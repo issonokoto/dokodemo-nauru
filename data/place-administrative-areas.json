@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T01:28:34.775Z",
+  "generatedAt": "2026-08-16T02:17:06.644Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 3062,
-    "withPrefectures": 2908,
-    "withMunicipalities": 2889,
+    "total": 3063,
+    "withPrefectures": 2909,
+    "withMunicipalities": 2890,
     "multiPrefecture": 22,
     "multiMunicipality": 99,
     "withGroups": 160
@@ -27508,6 +27508,15 @@
     "attraction-large-airport-W151578860": {
       "prefectures": [],
       "municipalities": [],
+      "groups": []
+    },
+    "attraction-kofun-daisen": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府堺市"
+      ],
       "groups": []
     }
   }

@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:49:18.517Z",
+  "name": "大仙古墳外濠",
+  "kind": "water",
+  "context": "大阪府 堺市 大仙古墳",
+  "boundaryDefinition": "OSMに記録された閉じた水域境界。周囲の陸地は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 41374179,
+    "objectUrl": "https://www.openstreetmap.org/way/41374179",
+    "responseSha256": "e68bfe0aba080478db875f692b8cfdd2f1e0503f1b8cfe14ab67252bdec4c1f0",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "../cache",
+    "rawResponseFile": "../cache/W41374179.osm-full.json",
+    "rawResponseSourceFile": "../cache/W41374179.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/41374179/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/41374179/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "../cache/W41374179.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.4828475,
+      34.5597869,
+      135.4906444,
+      34.5670058
+    ],
+    "sha256": "ca0ddf635216d45acfb7810ca1958755bcf240173de41b72b1795d0a18ceaf03",
+    "areaKm2": 0.03917839,
+    "lineLengthKm": null,
+    "vertexCount": 74,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.0800676,
+    "projectedAspectRatio": 0.88943456,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W41374179.preview.svg",
+      "width": 1822,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1822,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.88964844,
+      "contentAspectRatio": 0.88943456,
+      "aspectRatioDifferencePercent": 0.02404687,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1822,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.88943456,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "W41374179.geojson",
+    "geojsonSha256": "6311554713322cbb0d8f9f78b015702b137a58a54c3a144374670fab1dbe0966",
+    "metadata": "W41374179.metadata.json",
+    "previewSvg": "W41374179.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "../cache/W41374179.osm-full.json",
+    "rawResponseSource": "../cache/W41374179.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  }
+}
