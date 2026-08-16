@@ -3328,6 +3328,11 @@
     let searchAreaIndexPromise = null;
     let facilityRelationsPromise = null;
     const comparisonGeometryCache = new Map();
+    const comparisonOverlayCache = new Map();
+    const comparisonOverlayGeometryCache = new Map();
+    const COMPARISON_OVERLAY_WATER_MIN_AREA_KM2 = 1;
+    const COMPARISON_OVERLAY_COUNTRY_WATER_MIN_AREA_KM2 = 20;
+    const COMPARISON_OVERLAY_ISLAND_MIN_AREA_KM2 = 0.1;
     let activeComparison = null;
     let appliedComparisonConditionQuery = '';
     let searchBuilderTargets = [];
@@ -7718,6 +7723,121 @@
       return result;
     }
 
+    function comparisonBoundsOverlap(first, second) {
+      return Boolean(first && second
+        && first.minLng <= second.maxLng
+        && first.maxLng >= second.minLng
+        && first.minLat <= second.maxLat
+        && first.maxLat >= second.minLat);
+    }
+
+    function comparisonFeatureAreaKm2(feature, areaIndex, polygons = null) {
+      const indexed = indexedFeatureArea(feature && feature.properties, feature, areaIndex);
+      if (Number.isFinite(indexed) && indexed > 0) return indexed;
+      return polygons && polygons.length ? polygonsAreaKm2(polygons) : NaN;
+    }
+
+    function comparisonFeatureIsJapanese(feature, administrativeIndex) {
+      const properties = feature && feature.properties || {};
+      const administrative = administrativeMetadata(feature, administrativeIndex);
+      return administrative.prefectures.length > 0
+        || PREFECTURES.some(prefecture => String(properties.context || '').includes(prefecture.name));
+    }
+
+    function comparisonFeatureBelongsToAdministrativeTarget(feature, target, administrativeIndex) {
+      const administrative = administrativeMetadata(feature, administrativeIndex);
+      if (target.kind === 'prefecture') return administrative.prefectures.includes(target.name);
+      if (target.kind === 'municipality') {
+        const municipality = target.municipalities && target.municipalities[0] || target.name;
+        return administrative.municipalities.includes(municipality);
+      }
+      return false;
+    }
+
+    async function loadComparisonOverlayFeaturePolygons(feature) {
+      const properties = feature && feature.properties || {};
+      const id = properties.id || feature && feature.id;
+      if (!id) return [];
+      if (comparisonOverlayGeometryCache.has(id)) return comparisonOverlayGeometryCache.get(id);
+      const url = properties.geometryFile ? `./data/${properties.geometryFile}` : '';
+      if (!url) return [];
+      const promise = fetch(url, { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error(`${properties.name || id}の輪郭を取得できませんでした`);
+          return response.json();
+        })
+        .then(source => polygonGroupsFromGeojson(source))
+        .catch(error => {
+          comparisonOverlayGeometryCache.delete(id);
+          throw error;
+        });
+      comparisonOverlayGeometryCache.set(id, promise);
+      return promise;
+    }
+
+    async function loadComparisonOverlays(target, targetBounds) {
+      if (!target || !['prefecture', 'municipality', 'country'].includes(target.kind)) {
+        return { waterPolygons: [], islandPolygons: [] };
+      }
+      const cacheKey = target.kind === 'prefecture'
+        ? `prefecture:${target.code}`
+        : target.kind === 'municipality'
+          ? `municipality:${target.adminCode}`
+          : `country:${target.code || target.id}`;
+      if (comparisonOverlayCache.has(cacheKey)) return comparisonOverlayCache.get(cacheKey);
+
+      const promise = (async () => {
+        const [collection, administrativeIndex, areaIndex] = await Promise.all([
+          loadNaturalFeatures(),
+          loadPlaceAdministrativeAreas(),
+          loadSearchAreaIndex()
+        ]);
+        const features = collection && Array.isArray(collection.features) ? collection.features : [];
+        const candidates = features.filter(feature => {
+          const properties = feature && feature.properties || {};
+          const kind = properties.kind;
+          if (!['water', 'island'].includes(kind) || !properties.geometryFile) return false;
+          if (target.kind === 'country') {
+            if (kind !== 'water') return false;
+            const id = String(properties.id || feature.id || '');
+            if (id.startsWith('water-global-')) return true;
+            return target.code === 'JPN' && comparisonFeatureIsJapanese(feature, administrativeIndex);
+          }
+          return comparisonFeatureBelongsToAdministrativeTarget(feature, target, administrativeIndex);
+        });
+        const loaded = await Promise.all(candidates.map(async feature => {
+          try {
+            const polygons = await loadComparisonOverlayFeaturePolygons(feature);
+            const bounds = getGeometryBounds(polygons);
+            if (!polygons.length || !comparisonBoundsOverlap(bounds, targetBounds)) return null;
+            const properties = feature.properties || {};
+            const areaKm2 = comparisonFeatureAreaKm2(feature, areaIndex, polygons);
+            const minimumArea = target.kind === 'country'
+              ? COMPARISON_OVERLAY_COUNTRY_WATER_MIN_AREA_KM2
+              : properties.kind === 'island'
+                ? COMPARISON_OVERLAY_ISLAND_MIN_AREA_KM2
+                : COMPARISON_OVERLAY_WATER_MIN_AREA_KM2;
+            if (!Number.isFinite(areaKm2) || areaKm2 < minimumArea) return null;
+            return { kind: properties.kind, polygons, areaKm2 };
+          } catch (error) {
+            console.warn('比較図の水面・島の輪郭を読み込めませんでした', error);
+            return null;
+          }
+        }));
+        return {
+          waterPolygons: loaded.filter(item => item && item.kind === 'water').flatMap(item => item.polygons),
+          islandPolygons: loaded.filter(item => item && item.kind === 'island').flatMap(item => item.polygons)
+        };
+      })();
+      comparisonOverlayCache.set(cacheKey, promise);
+      try {
+        return await promise;
+      } catch (error) {
+        comparisonOverlayCache.delete(cacheKey);
+        throw error;
+      }
+    }
+
     function comparisonBoundsToLeaflet(bounds) {
       return bounds ? L.latLngBounds([bounds.minLat, bounds.minLng], [bounds.maxLat, bounds.maxLng]) : null;
     }
@@ -7731,6 +7851,19 @@
       const pixelsPerMeter = 226 / commonExtent;
       const targetPath = makeComparisonPath(result.polygons, targetMetrics, pixelsPerMeter);
       const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
+      let comparisonOverlays = { waterPolygons: [], islandPolygons: [] };
+      try {
+        comparisonOverlays = await loadComparisonOverlays(result.target, result.bounds);
+      } catch (error) {
+        console.warn('比較図の水面・島の補助表示を読み込めませんでした', error);
+      }
+      const waterPath = comparisonOverlays.waterPolygons.length
+        ? makeComparisonPath(comparisonOverlays.waterPolygons, targetMetrics, pixelsPerMeter)
+        : '';
+      const islandPath = comparisonOverlays.islandPolygons.length
+        ? makeComparisonPath(comparisonOverlays.islandPolygons, targetMetrics, pixelsPerMeter)
+        : '';
+      const hasComparisonOverlay = Boolean(waterPath || islandPath);
       const historical = isHistoricalComparisonTarget(result.target);
       const natural = isNaturalComparisonTarget(result.target);
       const attraction = result.target.kind === 'attraction';
@@ -7759,7 +7892,17 @@
       }
       const targetFill = result.target.kind === 'water' ? '#52b8dc' : attraction ? '#f5a623' : '#8ec31f';
       const targetStroke = result.target.kind === 'water' ? '#155a78' : attraction ? '#8a4b08' : '#365c16';
-      targetSvg.innerHTML = `<path d="${targetPath}" fill="${targetFill}" stroke="${targetStroke}" stroke-width="2.2" fill-rule="evenodd" />`;
+      const comparisonClipId = 'comparison-target-clip';
+      const comparisonClip = hasComparisonOverlay
+        ? `<defs><clipPath id="${comparisonClipId}" clipPathUnits="userSpaceOnUse"><path d="${targetPath}" fill-rule="evenodd" clip-rule="evenodd" /></clipPath></defs>`
+        : '';
+      const waterOverlay = waterPath
+        ? `<path d="${waterPath}" fill="#52b8dc" stroke="#155a78" stroke-width="1.35" fill-rule="evenodd" clip-path="url(#${comparisonClipId})" />`
+        : '';
+      const islandOverlay = islandPath
+        ? `<path d="${islandPath}" fill="#8ec31f" stroke="#365c16" stroke-width="1.35" fill-rule="evenodd" clip-path="url(#${comparisonClipId})" />`
+        : '';
+      targetSvg.innerHTML = `${comparisonClip}<path d="${targetPath}" fill="${targetFill}" stroke="none" fill-rule="evenodd" />${waterOverlay}${islandOverlay}<path d="${targetPath}" fill="none" stroke="${targetStroke}" stroke-width="2.2" fill-rule="evenodd" />`;
       document.getElementById('comparison-title').textContent = `ナウル共和国と${targetLabel}${targetPeriodLabel}の大きさ比較`;
       document.getElementById('comparison-nauru-area').textContent = `面積 ${NAURU_AREA_KM2} km²`;
       document.getElementById('comparison-target-name').textContent = targetLabel;
@@ -7802,6 +7945,10 @@
         countryBoundaryLink.rel = 'noopener';
         countryBoundaryLink.textContent = result.target.boundarySourceLabel || 'Natural Earth';
         comparisonNote.append(countryBoundaryLink, ' の高精細データを表示。');
+        comparisonNote.append(' 海域は面積・比較形状に含めていません。');
+        if (hasComparisonOverlay) {
+          comparisonNote.append('水色は収録済みの主要な湖沼・池（表示のみ）です。');
+        }
       } else if (natural || attraction) {
         comparisonNote.replaceChildren();
         const hasOfficialArea = attraction
@@ -7835,6 +7982,9 @@
         if (result.target.territoryNote) comparisonNote.append(` ${result.target.territoryNote}`);
       } else {
         comparisonNote.textContent = '面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。';
+        if (hasComparisonOverlay) {
+          comparisonNote.append(' 水色は区域内の主要な湖沼・池、緑の島は表示上の補助です。');
+        }
       }
       activeComparison = { ...result, targetArea, ratio, ratioLabel, targetLabel, targetPeriodLabel };
       document.getElementById('comparison-modal').classList.add('open');
