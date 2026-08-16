@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:20:52.488Z",
+  "name": "誉田御廟山古墳",
+  "kind": "facility",
+  "context": "大阪府羽曳野市",
+  "boundaryDefinition": "誉田御廟山古墳（応神天皇陵）の墳丘・濠を含むOSM記録の古墳境界。周辺の市街地や大仙公園は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 44774270,
+    "objectUrl": "https://www.openstreetmap.org/way/44774270",
+    "responseSha256": "1402d6ecbf51964c548f5eed036f46c003f506bef145afd59826fb4f29eeea2c",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W44774270.osm-full.json",
+    "rawResponseSourceFile": "cache/W44774270.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/44774270/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/44774270/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W44774270.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.6055347,
+      34.5599949,
+      135.6118462,
+      34.5658421
+    ],
+    "sha256": "62a2ce197777c0aef9745cadfef5e985e5064d7fdd981b3b234b02bc5abc9cf5",
+    "areaKm2": 0.24564797,
+    "lineLengthKm": null,
+    "vertexCount": 40,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.07940553,
+    "projectedAspectRatio": 0.88889445,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W44774270.preview.svg",
+      "width": 1820,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1820,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.88867188,
+      "contentAspectRatio": 0.88889445,
+      "aspectRatioDifferencePercent": -0.0250392,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1820,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.88889445,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "kofun-W44774270.geojson",
+    "geojsonSha256": "7c9d02ef4743a9f2bc9b660cb28750e71aa01c2183f446a5bcb79d0a1ff9d2e5",
+    "metadata": "kofun-W44774270.metadata.json",
+    "previewSvg": "kofun-W44774270.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W44774270.osm-full.json",
+    "rawResponseSource": "cache/W44774270.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-kofun-W44774270",
+  "catalog": {
+    "id": "attraction-kofun-W44774270",
+    "geometryFile": "attractions/kofun-W44774270.geojson",
+    "subtype": "kofun",
+    "subtypeLabel": "古墳・前方後円墳",
+    "statusLabel": "前方後円墳・応神天皇陵（誉田陵）"
+  }
+}

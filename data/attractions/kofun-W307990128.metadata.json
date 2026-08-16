@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:26:05.96Z",
+  "name": "西殿塚古墳",
+  "kind": "facility",
+  "context": "奈良県天理市",
+  "boundaryDefinition": "西殿塚古墳の墳丘・周濠を含むOSM記録の古墳境界。周辺の道路や集落は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 307990128,
+    "objectUrl": "https://www.openstreetmap.org/way/307990128",
+    "responseSha256": "cb79ef391e1efb862915d5638891d4908ec65fb1c4b57946849526104fde7351",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W307990128.osm-full.json",
+    "rawResponseSourceFile": "cache/W307990128.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/307990128/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/307990128/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W307990128.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.8502541,
+      34.5673625,
+      135.8517881,
+      34.5694292
+    ],
+    "sha256": "c1f2c9af1ee89b134b9f58ab90ffb6fc276f1c9f4eb3cfa90a5b138a1362cbd5",
+    "areaKm2": 0.0249434,
+    "lineLengthKm": null,
+    "vertexCount": 38,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 0.74224609,
+    "projectedAspectRatio": 0.61120215,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W307990128.preview.svg",
+      "width": 1252,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1252,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.61132813,
+      "contentAspectRatio": 0.61120215,
+      "aspectRatioDifferencePercent": 0.02061148,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1252,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.61120215,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "kofun-W307990128.geojson",
+    "geojsonSha256": "1adb2b255dfded861ade9d2be5bbc873a52b309100f99be598378d9486d10544",
+    "metadata": "kofun-W307990128.metadata.json",
+    "previewSvg": "kofun-W307990128.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W307990128.osm-full.json",
+    "rawResponseSource": "cache/W307990128.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-kofun-W307990128",
+  "catalog": {
+    "id": "attraction-kofun-W307990128",
+    "geometryFile": "attractions/kofun-W307990128.geojson",
+    "subtype": "kofun",
+    "subtypeLabel": "古墳・前方後円墳",
+    "statusLabel": "前方後円墳・西殿塚古墳"
+  }
+}
