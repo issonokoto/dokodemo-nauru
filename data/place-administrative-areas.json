@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-15T15:30:08.370Z",
+  "generatedAt": "2026-08-16T00:46:58.095Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 2704,
-    "withPrefectures": 2573,
-    "withMunicipalities": 2554,
-    "multiPrefecture": 18,
-    "multiMunicipality": 90,
-    "withGroups": 158
+    "total": 3055,
+    "withPrefectures": 2901,
+    "withMunicipalities": 2882,
+    "multiPrefecture": 22,
+    "multiMunicipality": 99,
+    "withGroups": 160
   },
   "places": {
     "water-W541590471": {
@@ -5101,12 +5101,95 @@
         "北マリアナ諸島・アメリカ合衆国"
       ]
     },
+    "island-R6421263": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市中央区"
+      ],
+      "groups": []
+    },
+    "island-R6421262": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市東灘区"
+      ],
+      "groups": []
+    },
+    "island-R6421264": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市中央区"
+      ],
+      "groups": []
+    },
+    "island-W484294967": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県長崎市"
+      ],
+      "groups": []
+    },
+    "island-R3782450": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都江東区",
+        "東京都品川区",
+        "東京都港区"
+      ],
+      "groups": []
+    },
+    "island-R12608090": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県川崎市川崎区"
+      ],
+      "groups": []
+    },
+    "island-W674864602": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県川崎市川崎区"
+      ],
+      "groups": []
+    },
+    "island-R12752844": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都江東区"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-W579118214": {
       "prefectures": [
         "岩手県"
       ],
       "municipalities": [
         "岩手県一関市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W266984664": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県西尾市"
       ],
       "groups": []
     },
@@ -5125,6 +5208,15 @@
       ],
       "municipalities": [
         "宮城県利府町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W561141793": {
+      "prefectures": [
+        "富山県"
+      ],
+      "municipalities": [
+        "富山県富山市"
       ],
       "groups": []
     },
@@ -5218,12 +5310,58 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-R19446865": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府高石市",
+        "大阪府堺市西区"
+      ],
+      "groups": []
+    },
     "attraction-W1354154264": {
       "prefectures": [
         "大阪府"
       ],
       "municipalities": [
         "大阪府大阪市城東区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R8534238": {
+      "prefectures": [
+        "和歌山県"
+      ],
+      "municipalities": [
+        "和歌山県有田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R19444606": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府高石市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W289374481": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県七尾市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W746347943": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県鹿児島市"
       ],
       "groups": []
     },
@@ -5244,6 +5382,24 @@
         "宮城県仙台市宮城野区",
         "宮城県多賀城市",
         "宮城県七ヶ浜町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W551659569": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県知多市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W806438309": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県川西市"
       ],
       "groups": []
     },
@@ -5292,12 +5448,46 @@
       ],
       "groups": []
     },
+    "attraction-W1385731142": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県名古屋市北区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W551648683": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R18886538": {
+      "prefectures": [
+        "宮城県"
+      ],
+      "municipalities": [
+        "宮城県角田市"
+      ],
+      "groups": []
+    },
     "attraction-large-large-farm-W429905984": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道士幌町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R8300084": {
+      "prefectures": [
+        "岡山県",
+        "広島県"
+      ],
+      "municipalities": [
+        "岡山県笠岡市",
+        "広島県福山市"
       ],
       "groups": []
     },
@@ -5310,12 +5500,80 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W621137843": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県神栖市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W1354480790": {
       "prefectures": [
         "静岡県"
       ],
       "municipalities": [
         "静岡県御殿場市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W279373034": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県四日市市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W869737215": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県倉敷市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W614730310": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W619489687": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県和木町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W619500792": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府堺市西区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W558931056": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R10373780": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県古河市"
       ],
       "groups": []
     },
@@ -5334,6 +5592,15 @@
       ],
       "municipalities": [
         "千葉県木更津市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W1389357461": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府京丹後市"
       ],
       "groups": []
     },
@@ -5409,6 +5676,15 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W615193891": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県周南市"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W1074397763": {
       "prefectures": [
         "茨城県"
@@ -5418,12 +5694,93 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W53157096": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県上郡町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W428376192": {
+      "prefectures": [
+        "群馬県"
+      ],
+      "municipalities": [
+        "群馬県太田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R7248810": {
+      "prefectures": [
+        "群馬県"
+      ],
+      "municipalities": [
+        "群馬県大泉町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W477818655": {
+      "prefectures": [
+        "群馬県"
+      ],
+      "municipalities": [
+        "群馬県太田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W938350281": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道帯広市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W619411514": {
+      "prefectures": [
+        "福井県"
+      ],
+      "municipalities": [
+        "福井県坂井市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R17479185": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県美祢市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W418987103": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県茂木町"
+      ],
+      "groups": []
+    },
     "attraction-large-airport-W902036034": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道石狩市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W362029291": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県呉市"
       ],
       "groups": []
     },
@@ -5442,6 +5799,24 @@
       ],
       "municipalities": [
         "神奈川県川崎市中原区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W551847921": {
+      "prefectures": [
+        "富山県"
+      ],
+      "municipalities": [
+        "富山県黒部市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W528287675": {
+      "prefectures": [
+        "宮城県"
+      ],
+      "municipalities": [
+        "宮城県大崎市"
       ],
       "groups": []
     },
@@ -5469,6 +5844,15 @@
       ],
       "municipalities": [
         "広島県広島市南区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W938346808": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道豊頃町"
       ],
       "groups": []
     },
@@ -5661,6 +6045,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W635471135": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県栃木市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R1481217": {
       "prefectures": [
         "福島県"
@@ -5713,6 +6106,20 @@
       "municipalities": [
         "愛媛県砥部町"
       ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R7387500": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県豊田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1532769501": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-R11676702": {
@@ -5887,6 +6294,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-R8866755": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県四日市市"
+      ],
+      "groups": []
+    },
     "attraction-W1338929834": {
       "prefectures": [
         "岩手県"
@@ -5911,6 +6327,15 @@
       ],
       "municipalities": [
         "沖縄県沖縄市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-R5973045": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県名護市"
       ],
       "groups": []
     },
@@ -5990,6 +6415,33 @@
       ],
       "municipalities": [
         "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W621168623": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県岡山市南区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W621189002": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県胎内市"
+      ],
+      "groups": []
+    },
+    "attraction-W1491742303": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市北区"
       ],
       "groups": []
     },
@@ -6074,6 +6526,33 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W634083202": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府堺市西区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W222363461": {
+      "prefectures": [
+        "香川県"
+      ],
+      "municipalities": [
+        "香川県坂出市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R19969935": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県四日市市"
+      ],
+      "groups": []
+    },
     "attraction-zoo-W1339046872": {
       "prefectures": [
         "神奈川県"
@@ -6152,6 +6631,15 @@
       ],
       "municipalities": [
         "秋田県秋田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W192581128": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県小松市"
       ],
       "groups": []
     },
@@ -6418,6 +6906,24 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W1135381908": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W703836119": {
+      "prefectures": [
+        "熊本県"
+      ],
+      "municipalities": [
+        "熊本県長洲町"
+      ],
+      "groups": []
+    },
     "attraction-W1281984233": {
       "prefectures": [
         "沖縄県"
@@ -6504,12 +7010,48 @@
       "municipalities": [],
       "groups": []
     },
+    "attraction-large-industrial-complex-W935828607": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道下川町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W561833266": {
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県湖西市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W469917133": {
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県牧之原市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W341164658": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道小樽市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W936582569": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道美深町"
       ],
       "groups": []
     },
@@ -6546,6 +7088,69 @@
       ],
       "municipalities": [
         "埼玉県草加市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R11816417": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道八雲町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W260860888": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県姫路市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W451651785": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県たつの市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W211273736": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県中津市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W614776480": {
+      "prefectures": [
+        "滋賀県"
+      ],
+      "municipalities": [
+        "滋賀県竜王町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W794479547": {
+      "prefectures": [
+        "滋賀県"
+      ],
+      "municipalities": [
+        "滋賀県竜王町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W936384597": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道士別市"
       ],
       "groups": []
     },
@@ -6702,6 +7307,42 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W618355300": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県糸魚川市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W639413568": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県いなべ市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W475417817": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道網走市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57007960": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道帯広市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R3812096": {
       "prefectures": [
         "山口県"
@@ -6771,6 +7412,114 @@
       ],
       "municipalities": [
         "三重県伊勢市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W101971366": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県碧南市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W551626979": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県東海市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W472825767": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県宮若市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W171507682": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県豊田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W619430687": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県豊田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W590813381": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県田原市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W496050886": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県豊田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W935847011": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道士別市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W622441862": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県豊田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W590810606": {
+      "prefectures": [
+        "岩手県"
+      ],
+      "municipalities": [
+        "岩手県金ケ崎町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W676665817": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道苫小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R8800014": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県いなべ市"
       ],
       "groups": []
     },
@@ -7080,6 +7829,24 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W493742254": {
+      "prefectures": [
+        "群馬県"
+      ],
+      "municipalities": [
+        "群馬県大泉町"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-R10662589": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県竹富町"
+      ],
+      "groups": []
+    },
     "attraction-botanical-garden-W1108948716": {
       "prefectures": [
         "北海道"
@@ -7127,6 +7894,15 @@
       ],
       "municipalities": [
         "沖縄県石垣市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1362304447": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
       ],
       "groups": []
     },
@@ -7229,6 +8005,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W422749616": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県壬生町"
+      ],
+      "groups": []
+    },
     "attraction-W337993595": {
       "prefectures": [
         "熊本県"
@@ -7301,6 +8086,24 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W641965680": {
+      "prefectures": [
+        "滋賀県"
+      ],
+      "municipalities": [
+        "滋賀県彦根市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W935834642": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道士別市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W629055356": {
       "prefectures": [
         "滋賀県"
@@ -7316,6 +8119,15 @@
       ],
       "municipalities": [
         "神奈川県横須賀市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R19165524": {
+      "prefectures": [
+        "島根県"
+      ],
+      "municipalities": [
+        "島根県安来市"
       ],
       "groups": []
     },
@@ -7360,12 +8172,39 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W930450811": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道幕別町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W544259648": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道斜里町"
+      ],
+      "groups": []
+    },
     "attraction-W1476514970": {
       "prefectures": [
         "神奈川県"
       ],
       "municipalities": [
         "神奈川県川崎市多摩区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W888791965": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道大空町"
       ],
       "groups": []
     },
@@ -7393,6 +8232,24 @@
       ],
       "municipalities": [
         "和歌山県和歌山市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-R5120421": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県うるま市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W396644122": {
+      "prefectures": [
+        "埼玉県"
+      ],
+      "municipalities": [
+        "埼玉県寄居町"
       ],
       "groups": []
     },
@@ -7429,6 +8286,33 @@
       ],
       "municipalities": [
         "千葉県富津市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R12455444": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県広島市南区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W525299662": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県防府市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1091250668": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県三次市"
       ],
       "groups": []
     },
@@ -7586,6 +8470,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W502055066": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県六ヶ所村"
+      ],
+      "groups": []
+    },
     "attraction-W770995959": {
       "prefectures": [
         "静岡県"
@@ -7687,6 +8580,24 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-R10175737": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県六ヶ所村"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W736714087": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県六ヶ所村"
+      ],
+      "groups": []
+    },
     "attraction-R5695002": {
       "prefectures": [
         "大阪府"
@@ -7738,6 +8649,15 @@
       ],
       "municipalities": [
         "愛知県蒲郡市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W849063770": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府京都市伏見区"
       ],
       "groups": []
     },
@@ -7801,6 +8721,15 @@
       ],
       "municipalities": [
         "愛知県名古屋市港区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1231890325": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県宇都宮市"
       ],
       "groups": []
     },
@@ -8029,6 +8958,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W551626977": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県東海市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W896573359": {
       "prefectures": [
         "愛媛県"
@@ -8053,6 +8991,33 @@
       ],
       "municipalities": [
         "福島県郡山市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W643001950": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W641369843": {
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県富士市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1126465212": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県白山市"
       ],
       "groups": []
     },
@@ -8101,6 +9066,11 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1537093025": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-park-W798289286": {
       "prefectures": [
         "熊本県"
@@ -8134,6 +9104,15 @@
       ],
       "municipalities": [
         "沖縄県粟国村"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1128351028": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県金沢市"
       ],
       "groups": []
     },
@@ -8188,6 +9167,15 @@
       ],
       "municipalities": [
         "沖縄県伊江村"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W893188183": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県伊是名村"
       ],
       "groups": []
     },
@@ -8479,6 +9467,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W180714903": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県宇部市"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-W88464286": {
       "prefectures": [
         "福岡県"
@@ -8715,6 +9712,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-R4866479": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県国頭村"
+      ],
+      "groups": []
+    },
     "attraction-large-large-farm-R12475728": {
       "prefectures": [
         "秋田県"
@@ -8850,12 +9856,30 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W936543921": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道旭川市"
+      ],
+      "groups": []
+    },
     "attraction-R2958080": {
       "prefectures": [
         "神奈川県"
       ],
       "municipalities": [
         "神奈川県横浜市中区"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W314547242": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県横浜市金沢区"
       ],
       "groups": []
     },
@@ -8901,6 +9925,42 @@
       ],
       "municipalities": [
         "神奈川県横浜市中区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W432384122": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道苫小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W432566943": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道苫小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W455327764": {
+      "prefectures": [
+        "鳥取県"
+      ],
+      "municipalities": [
+        "鳥取県日吉津村"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W47994414": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県春日井市"
       ],
       "groups": []
     },
@@ -8958,6 +10018,16 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-R11269781": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県早島町",
+        "岡山県岡山市北区"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W453322804": {
       "prefectures": [
         "岡山県"
@@ -9009,6 +10079,29 @@
       ],
       "municipalities": [
         "茨城県笠間市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-R12537205": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県和泊町"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W343568385": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1214740843": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県うるま市"
       ],
       "groups": []
     },
@@ -9422,6 +10515,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-R5872329": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県江田島市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W292005174": {
       "prefectures": [
         "宮崎県"
@@ -9449,12 +10551,39 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W647087836": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市東灘区"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W979563387": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道松前町"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W1156797039": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W918579565": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県呉市"
       ],
       "groups": []
     },
@@ -9476,6 +10605,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W1135381679": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W1135382010": {
       "prefectures": [
         "京都府"
@@ -9491,6 +10629,15 @@
       ],
       "municipalities": [
         "京都府舞鶴市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W936765224": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道余市町"
       ],
       "groups": []
     },
@@ -9512,6 +10659,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-R5810229": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県江田島市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W194055537": {
       "prefectures": [
         "千葉県"
@@ -9522,6 +10678,15 @@
       "groups": []
     },
     "attraction-large-military-base-W362024338": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県呉市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W362030430": {
       "prefectures": [
         "広島県"
       ],
@@ -9575,6 +10740,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W1135381781": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
     "attraction-large-airport-W205860172": {
       "prefectures": [
         "長崎県"
@@ -9612,6 +10786,15 @@
       "groups": []
     },
     "attraction-large-military-base-W1135381958": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W52170209": {
       "prefectures": [
         "京都府"
       ],
@@ -9721,6 +10904,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W278762830": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県笠岡市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W278762831": {
       "prefectures": [
         "岡山県"
@@ -9775,6 +10967,15 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W533375086": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都江戸川区"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R9645089": {
       "prefectures": [
         "東京都"
@@ -9790,6 +10991,33 @@
       ],
       "municipalities": [
         "東京都江戸川区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W353626719": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県下松市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W106675401": {
+      "prefectures": [
+        "福島県"
+      ],
+      "municipalities": [
+        "福島県いわき市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W316883077": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県周南市"
       ],
       "groups": []
     },
@@ -9826,6 +11054,15 @@
       ],
       "municipalities": [
         "愛知県小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W591685686": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市大正区"
       ],
       "groups": []
     },
@@ -10090,6 +11327,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W57011474": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県喜界町"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W493158487": {
       "prefectures": [
         "岐阜県"
@@ -10175,6 +11421,15 @@
       ],
       "municipalities": [
         "岐阜県御嵩町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1133340606": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県塩谷町"
       ],
       "groups": []
     },
@@ -10356,6 +11611,11 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-R6819473": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-park-R12622450": {
       "prefectures": [
         "大阪府"
@@ -10457,6 +11717,15 @@
       "groups": []
     },
     "attraction-large-park-W466573751": {
+      "prefectures": [
+        "宮崎県"
+      ],
+      "municipalities": [
+        "宮崎県宮崎市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-W531635249": {
       "prefectures": [
         "宮崎県"
       ],
@@ -10628,6 +11897,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W969271384": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県佐伯市"
+      ],
+      "groups": []
+    },
     "attraction-large-world-heritage-W1134439456": {
       "prefectures": [
         "奈良県"
@@ -10664,7 +11942,25 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W564459009": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県倉敷市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W273276502": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県倉敷市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W370299606": {
       "prefectures": [
         "岡山県"
       ],
@@ -10754,6 +12050,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W1117437164": {
+      "prefectures": [
+        "滋賀県"
+      ],
+      "municipalities": [
+        "滋賀県甲賀市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W673554433": {
       "prefectures": [
         "滋賀県"
@@ -10796,6 +12101,20 @@
       ],
       "municipalities": [
         "神奈川県横浜市金沢区"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-R5996317": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
+    "attraction-large-military-base-R5972878": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県金武町"
       ],
       "groups": []
     },
@@ -10894,6 +12213,11 @@
       "municipalities": [
         "山梨県南アルプス市"
       ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1539648754": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-airport-W57007974": {
@@ -11078,6 +12402,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-R6987441": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県座間味村"
+      ],
+      "groups": []
+    },
     "attraction-national-park-W342483714": {
       "prefectures": [
         "沖縄県"
@@ -11175,6 +12508,15 @@
       ],
       "municipalities": [
         "愛知県犬山市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W657142699": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県阿賀野市"
       ],
       "groups": []
     },
@@ -11385,6 +12727,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W618353115": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県亀山市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W186236840": {
       "prefectures": [
         "埼玉県"
@@ -11418,6 +12769,16 @@
       "municipalities": [
         "奈良県奈良市"
       ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1322872525": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
+    "attraction-large-large-port-W1324735496": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-large-port-W666820892": {
@@ -11472,6 +12833,15 @@
       ],
       "municipalities": [
         "新潟県新発田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57014922": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県五島市"
       ],
       "groups": []
     },
@@ -11565,6 +12935,11 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1540153353": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-large-port-W1540153358": {
       "prefectures": [
         "北海道"
@@ -11581,6 +12956,11 @@
       "municipalities": [
         "北海道厚真町"
       ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1537387488": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-park-W160374558": {
@@ -11607,6 +12987,15 @@
       ],
       "municipalities": [
         "神奈川県綾瀬市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W617818934": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県厚木市"
       ],
       "groups": []
     },
@@ -11743,6 +13132,15 @@
       ],
       "municipalities": [
         "広島県広島市中区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W103812542": {
+      "prefectures": [
+        "福島県"
+      ],
+      "municipalities": [
+        "福島県広野町"
       ],
       "groups": []
     },
@@ -11917,6 +13315,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W937748573": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道えりも町"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W753770158": {
       "prefectures": [
         "埼玉県"
@@ -11932,6 +13339,15 @@
       ],
       "municipalities": [
         "北海道別海町"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W719079440": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県萩市"
       ],
       "groups": []
     },
@@ -12191,12 +13607,30 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W686597003": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県対馬市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W544402620": {
       "prefectures": [
         "沖縄県"
       ],
       "municipalities": [
         "沖縄県久米島町"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W1371155555": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府京丹後市"
       ],
       "groups": []
     },
@@ -12368,6 +13802,15 @@
       ],
       "municipalities": [
         "香川県さぬき市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W288838492": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県福岡市東区"
       ],
       "groups": []
     },
@@ -12597,6 +14040,15 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W993272070": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県志布志市"
+      ],
+      "groups": []
+    },
     "attraction-botanical-garden-W81366899": {
       "prefectures": [
         "東京都"
@@ -12612,6 +14064,15 @@
       ],
       "municipalities": [
         "東京都新宿区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-W706583711": {
+      "prefectures": [
+        "岩手県"
+      ],
+      "municipalities": [
+        "岩手県滝沢市"
       ],
       "groups": []
     },
@@ -12649,6 +14110,20 @@
       "municipalities": [
         "沖縄県今帰仁村"
       ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1125768788": {
+      "prefectures": [
+        "香川県"
+      ],
+      "municipalities": [
+        "香川県丸亀市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W59245872": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-park-W133352801": {
@@ -12694,6 +14169,15 @@
       "municipalities": [
         "佐賀県吉野ヶ里町",
         "佐賀県上峰町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R9239970": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県佐世保市"
       ],
       "groups": []
     },
@@ -12787,6 +14271,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W1178660022": {
+      "prefectures": [
+        "埼玉県"
+      ],
+      "municipalities": [
+        "埼玉県寄居町"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W150593386": {
       "prefectures": [
         "埼玉県"
@@ -12841,6 +14334,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W509128935": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県西宮市"
+      ],
+      "groups": []
+    },
     "attraction-W480317330": {
       "prefectures": [
         "大阪府"
@@ -12883,6 +14385,15 @@
       ],
       "municipalities": [
         "埼玉県吉川市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1434903201": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県美作市"
       ],
       "groups": []
     },
@@ -12941,6 +14452,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W316395408": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県三島村"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R6946709": {
       "prefectures": [
         "神奈川県"
@@ -12956,6 +14476,42 @@
       ],
       "municipalities": [
         "神奈川県横浜市鶴見区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W874934350": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W594393680": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県玉野市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W619500786": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府高石市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W325346282": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県岩国市"
       ],
       "groups": []
     },
@@ -13058,6 +14614,11 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1535738164": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-airport-W57009213": {
       "prefectures": [
         "東京都"
@@ -13121,12 +14682,142 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W467880785": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県新潟市北区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W614885765": {
+      "prefectures": [
+        "茨城県",
+        "岡山県",
+        "富山県"
+      ],
+      "municipalities": [
+        "茨城県神栖市",
+        "岡山県倉敷市",
+        "富山県富山市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W566118617": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県大竹市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1459064277": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県四日市市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W622438325": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県苅田町"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-W771347767": {
       "prefectures": [
         "福岡県"
       ],
       "municipalities": [
         "福岡県北九州市小倉南区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W435652900": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道音更町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W467067792": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県岡崎市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R11873482": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県倉敷市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W28698663": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県広島市西区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W28698624": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県広島市中区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W672664216": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市兵庫区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W737747058": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県長崎市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W558832815": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県八戸市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W427747824": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県高砂市"
       ],
       "groups": []
     },
@@ -13257,6 +14948,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W417424393": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県山口市"
+      ],
+      "groups": []
+    },
     "attraction-large-airport-W57010586": {
       "prefectures": [
         "山口県"
@@ -13299,6 +14999,24 @@
       ],
       "municipalities": [
         "東京都青梅市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R17831881": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県姫路市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W533552290": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県つくば市"
       ],
       "groups": []
     },
@@ -13380,6 +15098,15 @@
       ],
       "municipalities": [
         "静岡県静岡市駿河区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W255763556": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県志賀町"
       ],
       "groups": []
     },
@@ -13509,6 +15236,33 @@
       ],
       "groups": []
     },
+    "attraction-large-large-farm-W1212258060": {
+      "prefectures": [
+        "岩手県"
+      ],
+      "municipalities": [
+        "岩手県一関市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W614885758": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県神栖市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W736523294": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県神栖市"
+      ],
+      "groups": []
+    },
     "attraction-large-airport-W421586353": {
       "prefectures": [
         "北海道"
@@ -13533,6 +15287,15 @@
       ],
       "municipalities": [
         "神奈川県厚木市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W289146236": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県七尾市"
       ],
       "groups": []
     },
@@ -13734,6 +15497,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-R5810231": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県江田島市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R10737865": {
       "prefectures": [
         "秋田県"
@@ -13761,6 +15533,24 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-R15983151": {
+      "prefectures": [
+        "秋田県"
+      ],
+      "municipalities": [
+        "秋田県秋田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1180020851": {
+      "prefectures": [
+        "秋田県"
+      ],
+      "municipalities": [
+        "秋田県秋田市"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-R17479127": {
       "prefectures": [
         "山口県"
@@ -13779,12 +15569,85 @@
       ],
       "groups": []
     },
+    "attraction-large-large-farm-R12128194": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道大空町",
+        "北海道網走市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W46155675": {
       "prefectures": [
         "大阪府"
       ],
       "municipalities": [
         "大阪府大阪市住之江区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W614597809": {
+      "prefectures": [
+        "愛媛県"
+      ],
+      "municipalities": [
+        "愛媛県新居浜市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W550286897": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W779228208": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県三沢市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W620964350": {
+      "prefectures": [
+        "愛媛県"
+      ],
+      "municipalities": [
+        "愛媛県新居浜市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W183009452": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県名古屋市港区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R10686502": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県赤穂市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W866526227": {
+      "prefectures": [
+        "高知県"
+      ],
+      "municipalities": [
+        "高知県須崎市"
       ],
       "groups": []
     },
@@ -13851,12 +15714,48 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-R6121880": {
+      "prefectures": [
+        "島根県"
+      ],
+      "municipalities": [
+        "島根県出雲市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W362875711": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県周南市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W316875359": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県周南市"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W676665818": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道苫小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W343204846": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県渡名喜村"
       ],
       "groups": []
     },
@@ -13923,6 +15822,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W782560565": {
+      "prefectures": [
+        "福島県"
+      ],
+      "municipalities": [
+        "福島県いわき市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W31959357": {
       "prefectures": [
         "静岡県"
@@ -13930,6 +15838,11 @@
       "municipalities": [
         "静岡県静岡市"
       ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1535736088": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-airport-R16711610": {
@@ -13950,6 +15863,17 @@
         "岡山県勝央町"
       ],
       "groups": []
+    },
+    "attraction-large-world-heritage-R2894554": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都小笠原村"
+      ],
+      "groups": [
+        "小笠原諸島"
+      ]
     },
     "attraction-unesco-1362": {
       "prefectures": [
@@ -13998,6 +15922,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W744908411": {
+      "prefectures": [
+        "秋田県"
+      ],
+      "municipalities": [
+        "秋田県小坂町"
+      ],
+      "groups": []
+    },
     "attraction-W297485995": {
       "prefectures": [
         "秋田県"
@@ -14022,6 +15955,15 @@
       ],
       "municipalities": [
         "長野県小諸市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W416694272": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県小山市"
       ],
       "groups": []
     },
@@ -14079,12 +16021,30 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1502927985": {
+      "prefectures": [
+        "佐賀県"
+      ],
+      "municipalities": [
+        "佐賀県唐津市"
+      ],
+      "groups": []
+    },
     "attraction-castle-W153209407": {
       "prefectures": [
         "福岡県"
       ],
       "municipalities": [
         "福岡県北九州市小倉北区"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W454205459": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県小値賀町"
       ],
       "groups": []
     },
@@ -14188,6 +16148,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W242466554": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県四日市市"
+      ],
+      "groups": []
+    },
     "attraction-zoo-W1222893581": {
       "prefectures": [
         "北海道"
@@ -14203,6 +16172,15 @@
       ],
       "municipalities": [
         "東京都奥多摩町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W492285451": {
+      "prefectures": [
+        "長野県"
+      ],
+      "municipalities": [
+        "長野県大町市"
       ],
       "groups": []
     },
@@ -14323,6 +16301,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W618344823": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県上越市"
+      ],
+      "groups": []
+    },
     "attraction-W1031898950": {
       "prefectures": [
         "新潟県"
@@ -14338,6 +16325,15 @@
       ],
       "municipalities": [
         "京都府京都市北区"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W454193654": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県新上五島町"
       ],
       "groups": []
     },
@@ -14585,12 +16581,30 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W103827577": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県東海村"
+      ],
+      "groups": []
+    },
     "attraction-botanical-garden-W768537153": {
       "prefectures": [
         "滋賀県"
       ],
       "municipalities": [
         "滋賀県野洲市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W392308366": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県上越市"
       ],
       "groups": []
     },
@@ -14775,6 +16789,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W216781917": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-R9626992": {
       "prefectures": [
         "福島県"
@@ -14790,6 +16813,24 @@
       ],
       "municipalities": [
         "東京都新島村"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R17464706": {
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県島田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1290025758": {
+      "prefectures": [
+        "徳島県"
+      ],
+      "municipalities": [
+        "徳島県阿南市"
       ],
       "groups": []
     },
@@ -14883,6 +16924,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W772669000": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市中央区"
+      ],
+      "groups": []
+    },
     "attraction-zoo-W282687573": {
       "prefectures": [
         "兵庫県"
@@ -14910,6 +16960,24 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W588358737": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市灘区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W427747885": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県高砂市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W378490210": {
       "prefectures": [
         "兵庫県"
@@ -14917,6 +16985,11 @@
       "municipalities": [
         "兵庫県神戸市須磨区"
       ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1219842317": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-park-W264410595": {
@@ -14943,6 +17016,15 @@
       ],
       "municipalities": [
         "山形県東根市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57009243": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都神津島村"
       ],
       "groups": []
     },
@@ -14988,6 +17070,15 @@
       ],
       "municipalities": [
         "京都府京都市右京区"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-R7007109": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県十島村"
       ],
       "groups": []
     },
@@ -15141,6 +17232,15 @@
       ],
       "municipalities": [
         "岩手県奥州市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W370299610": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県倉敷市"
       ],
       "groups": []
     },
@@ -15442,6 +17542,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W99270647": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県山陽小野田市"
+      ],
+      "groups": []
+    },
     "attraction-large-world-heritage-W218470281": {
       "prefectures": [
         "京都府"
@@ -15712,6 +17821,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W615204117": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県四日市市"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W1353445007": {
       "prefectures": [
         "北海道"
@@ -15721,12 +17839,30 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W962283251": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道石狩市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W492811646": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道江別市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W931796255": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道小樽市"
       ],
       "groups": []
     },
@@ -15747,6 +17883,15 @@
         "大阪府羽曳野市",
         "大阪府柏原市",
         "大阪府富田林市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W361222009": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県東串良町"
       ],
       "groups": []
     },
@@ -15995,6 +18140,24 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W195668350": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県明石市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R6286362": {
+      "prefectures": [
+        "香川県"
+      ],
+      "municipalities": [
+        "香川県坂出市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W190381563": {
       "prefectures": [
         "広島県"
@@ -16010,6 +18173,15 @@
       ],
       "municipalities": [
         "千葉県千葉市若葉区"
+      ],
+      "groups": []
+    },
+    "attraction-large-park-W837804554": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府泉南市"
       ],
       "groups": []
     },
@@ -16122,6 +18294,15 @@
       "groups": []
     },
     "attraction-large-large-farm-W90763329": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県十和田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-W1076255347": {
       "prefectures": [
         "青森県"
       ],
@@ -16274,6 +18455,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-R2360780": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県多良間村"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R20362812": {
       "prefectures": [
         "千葉県"
@@ -16316,6 +18506,15 @@
       ],
       "municipalities": [
         "兵庫県姫路市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W945433694": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県西原町"
       ],
       "groups": []
     },
@@ -16508,6 +18707,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W367261464": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県姫路市"
+      ],
+      "groups": []
+    },
     "attraction-expo-1990": {
       "prefectures": [
         "大阪府"
@@ -16624,6 +18832,15 @@
       ],
       "municipalities": [
         "長野県南箕輪村"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W141057752": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道大樹町"
       ],
       "groups": []
     },
@@ -16749,6 +18966,11 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1537369585": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-park-R9503807": {
       "prefectures": [
         "滋賀県"
@@ -16785,12 +19007,30 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W960817839": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県西海市"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-W699843467": {
       "prefectures": [
         "愛媛県"
       ],
       "municipalities": [
         "愛媛県今治市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W605382252": {
+      "prefectures": [
+        "福井県"
+      ],
+      "municipalities": [
+        "福井県おおい町"
       ],
       "groups": []
     },
@@ -16821,7 +19061,34 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W643001955": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R15476088": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W866690235": {
+      "prefectures": [
+        "大分県"
+      ],
+      "municipalities": [
+        "大分県国東市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W551131529": {
       "prefectures": [
         "大分県"
       ],
@@ -17388,6 +19655,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W1146980650": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道石狩市"
+      ],
+      "groups": []
+    },
     "attraction-large-large-farm-R17555291": {
       "prefectures": [
         "北海道"
@@ -17485,6 +19761,15 @@
       ],
       "municipalities": [
         "長崎県長崎市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57015147": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県大村市"
       ],
       "groups": []
     },
@@ -17651,12 +19936,26 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W343204847": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-park-W765326143": {
       "prefectures": [
         "神奈川県"
       ],
       "municipalities": [
         "神奈川県相模原市緑区"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W1136964759": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県津市"
       ],
       "groups": []
     },
@@ -17822,12 +20121,30 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W552564708": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県北九州市門司区"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W216798224": {
       "prefectures": [
         "長崎県"
       ],
       "municipalities": [
         "長崎県松浦市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W370387827": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県高砂市"
       ],
       "groups": []
     },
@@ -18038,6 +20355,35 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W614842377": {
+      "prefectures": [
+        "三重県",
+        "山口県"
+      ],
+      "municipalities": [
+        "三重県四日市市",
+        "山口県周南市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W551638437": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県東海市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R9235324": {
+      "prefectures": [
+        "滋賀県"
+      ],
+      "municipalities": [
+        "滋賀県大津市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-R18529180": {
       "prefectures": [
         "東京都"
@@ -18053,6 +20399,15 @@
       ],
       "municipalities": [
         "京都府京都市右京区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W99690097": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県横浜市磯子区"
       ],
       "groups": []
     },
@@ -18107,6 +20462,15 @@
       ],
       "municipalities": [
         "東京都文京区"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W172627190": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都江東区"
       ],
       "groups": []
     },
@@ -18272,6 +20636,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W74943077": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都府中市"
+      ],
+      "groups": []
+    },
     "attraction-W539378799": {
       "prefectures": [
         "兵庫県"
@@ -18409,6 +20782,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W830289263": {
+      "prefectures": [
+        "山形県"
+      ],
+      "municipalities": [
+        "山形県酒田市"
+      ],
+      "groups": []
+    },
     "attraction-zoo-W814613607": {
       "prefectures": [
         "福島県"
@@ -18433,6 +20815,15 @@
       ],
       "municipalities": [
         "新潟県関川村"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W353552076": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県下松市"
       ],
       "groups": []
     },
@@ -18469,6 +20860,15 @@
       ],
       "municipalities": [
         "埼玉県春日部市"
+      ],
+      "groups": []
+    },
+    "attraction-world-heritage-component-W426531398": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県橿原市"
       ],
       "groups": []
     },
@@ -18533,6 +20933,11 @@
       "municipalities": [
         "栃木県宇都宮市"
       ],
+      "groups": []
+    },
+    "attraction-large-large-port-W682116539": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     },
     "attraction-large-park-R16754960": {
@@ -18607,6 +21012,24 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W57011413": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県天城町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W205775122": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県高根沢町"
+      ],
+      "groups": []
+    },
     "attraction-large-airport-W1136938529": {
       "prefectures": [
         "栃木県"
@@ -18631,6 +21054,15 @@
       ],
       "municipalities": [
         "栃木県宇都宮市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-W927225216": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道佐呂間町"
       ],
       "groups": []
     },
@@ -18913,6 +21345,15 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W589991969": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市住之江区"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W400527731": {
       "prefectures": [
         "大阪府"
@@ -18930,6 +21371,26 @@
         "神奈川県南足柄市"
       ],
       "groups": []
+    },
+    "attraction-large-airport-W57015551": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県南大東村"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W395670412": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都小笠原村"
+      ],
+      "groups": [
+        "小笠原諸島"
+      ]
     },
     "attraction-large-industrial-complex-W1118270394": {
       "prefectures": [
@@ -19066,6 +21527,60 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W609028310": {
+      "prefectures": [
+        "神奈川県"
+      ],
+      "municipalities": [
+        "神奈川県厚木市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W545476549": {
+      "prefectures": [
+        "富山県"
+      ],
+      "municipalities": [
+        "富山県富山市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W428676812": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道陸別町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W544261673": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県苅田町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W389006257": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県上三川町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W217270516": {
+      "prefectures": [
+        "広島県"
+      ],
+      "municipalities": [
+        "広島県呉市"
+      ],
+      "groups": []
+    },
     "attraction-W94120123": {
       "prefectures": [
         "兵庫県"
@@ -19102,6 +21617,33 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W828455847": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道苫小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W1513162392": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県東海村"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W768092637": {
+      "prefectures": [
+        "青森県"
+      ],
+      "municipalities": [
+        "青森県六ヶ所村"
+      ],
+      "groups": []
+    },
     "attraction-large-airport-W1089578158": {
       "prefectures": [
         "北海道"
@@ -19111,12 +21653,93 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W419484088": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県城里町"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W621294839": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道室蘭市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W828455842": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道苫小牧市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W619458040": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県岩国市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W444749702": {
+      "prefectures": [
+        "宮城県"
+      ],
+      "municipalities": [
+        "宮城県岩沼市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W604385821": {
+      "prefectures": [
+        "秋田県"
+      ],
+      "municipalities": [
+        "秋田県秋田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W942736122": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道白老町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W142804187": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道旭川市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R9663734": {
+      "prefectures": [
+        "静岡県"
+      ],
+      "municipalities": [
+        "静岡県富士市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W595170119": {
+      "prefectures": [
+        "宮城県"
+      ],
+      "municipalities": [
+        "宮城県石巻市"
       ],
       "groups": []
     },
@@ -19201,6 +21824,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-R9212359": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市此花区"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W64591805": {
       "prefectures": [
         "北海道"
@@ -19237,6 +21869,33 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W462838688": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県上越市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W641339390": {
+      "prefectures": [
+        "岡山県"
+      ],
+      "municipalities": [
+        "岡山県倉敷市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R9176223": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
     "attraction-W43896730": {
       "prefectures": [
         "東京都"
@@ -19255,6 +21914,62 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W155551774": {
+      "prefectures": [
+        "東京都",
+        "茨城県"
+      ],
+      "municipalities": [
+        "東京都羽村市",
+        "茨城県常陸大宮市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R10382747": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県古河市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W469589749": {
+      "prefectures": [
+        "群馬県"
+      ],
+      "municipalities": [
+        "群馬県太田市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W939110679": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道芽室町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W441721549": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県栃木市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W184439878": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県土浦市"
+      ],
+      "groups": []
+    },
     "attraction-zoo-R6003632": {
       "prefectures": [
         "茨城県"
@@ -19265,6 +21980,24 @@
       "groups": []
     },
     "attraction-large-industrial-complex-W384530856": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県日立市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W104151307": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県ひたちなか市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W588357201": {
       "prefectures": [
         "茨城県"
       ],
@@ -19309,6 +22042,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W57007545": {
+      "prefectures": [
+        "石川県"
+      ],
+      "municipalities": [
+        "石川県穴水町"
+      ],
+      "groups": []
+    },
     "attraction-large-large-farm-W649137248": {
       "prefectures": [
         "北海道"
@@ -19318,12 +22060,30 @@
       ],
       "groups": []
     },
+    "attraction-large-large-farm-W1168811255": {
+      "prefectures": [
+        "岩手県"
+      ],
+      "municipalities": [
+        "岩手県盛岡市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W168881981": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道札幌市西区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-R8820918": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県小山市"
       ],
       "groups": []
     },
@@ -19360,6 +22120,15 @@
       ],
       "municipalities": [
         "群馬県伊勢崎市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57015332": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県竹富町"
       ],
       "groups": []
     },
@@ -19453,6 +22222,20 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1538964642": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W425690872": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道白糠町"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W471883703": {
       "prefectures": [
         "新潟県"
@@ -19521,6 +22304,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W532438835": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県北九州市若松区"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-W397666713": {
       "prefectures": [
         "高知県"
@@ -19536,6 +22328,24 @@
       ],
       "municipalities": [
         "福岡県北九州市門司区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1353446769": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道白老町"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57007999": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道函館市"
       ],
       "groups": []
     },
@@ -19611,6 +22421,15 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W57009197": {
+      "prefectures": [
+        "東京都"
+      ],
+      "municipalities": [
+        "東京都八丈町"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W494435606": {
       "prefectures": [
         "神奈川県"
@@ -19665,6 +22484,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W662703019": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道札幌市西区"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W314669444": {
       "prefectures": [
         "徳島県"
@@ -19716,6 +22544,15 @@
       ],
       "municipalities": [
         "岐阜県高山市"
+      ],
+      "groups": []
+    },
+    "attraction-unesco-1757": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県橿原市"
       ],
       "groups": []
     },
@@ -20002,12 +22839,30 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-W57007579": {
+      "prefectures": [
+        "富山県"
+      ],
+      "municipalities": [
+        "富山県富山市"
+      ],
+      "groups": []
+    },
     "attraction-castle-W338862862": {
       "prefectures": [
         "富山県"
       ],
       "municipalities": [
         "富山県富山市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W605420895": {
+      "prefectures": [
+        "富山県"
+      ],
+      "municipalities": [
+        "富山県射水市"
       ],
       "groups": []
     },
@@ -20122,6 +22977,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W619265272": {
+      "prefectures": [
+        "千葉県"
+      ],
+      "municipalities": [
+        "千葉県袖ケ浦市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W442578238": {
       "prefectures": [
         "山梨県"
@@ -20182,6 +23046,15 @@
       "groups": []
     },
     "attraction-large-park-W480323927": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府富田林市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W161627417": {
       "prefectures": [
         "大阪府"
       ],
@@ -20334,12 +23207,39 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W728273382": {
+      "prefectures": [
+        "山口県"
+      ],
+      "municipalities": [
+        "山口県光市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W605420897": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県武豊町"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W269113553": {
       "prefectures": [
         "神奈川県"
       ],
       "municipalities": [
         "神奈川県横浜市戸塚区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W605420894": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
       ],
       "groups": []
     },
@@ -20353,6 +23253,15 @@
       "groups": []
     },
     "attraction-large-park-W550458524": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府舞鶴市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W131030235": {
       "prefectures": [
         "京都府"
       ],
@@ -20503,6 +23412,15 @@
       ],
       "municipalities": [
         "福島県福島市"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W1361581694": {
+      "prefectures": [
+        "宮崎県"
+      ],
+      "municipalities": [
+        "宮崎県串間市"
       ],
       "groups": []
     },
@@ -20692,6 +23610,15 @@
       ],
       "municipalities": [
         "大分県大分市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W1031637341": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県佐世保市"
       ],
       "groups": []
     },
@@ -20974,6 +23901,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W421436595": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県沖縄市"
+      ],
+      "groups": []
+    },
     "attraction-large-industrial-complex-W206948689": {
       "prefectures": [
         "栃木県"
@@ -21052,6 +23988,15 @@
       ],
       "municipalities": [
         "愛知県豊橋市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W930450813": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道豊頃町"
       ],
       "groups": []
     },
@@ -21256,12 +24201,30 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W625680275": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道苫小牧市"
+      ],
+      "groups": []
+    },
     "attraction-botanical-garden-W102474363": {
       "prefectures": [
         "北海道"
       ],
       "municipalities": [
         "北海道札幌市中央区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-farm-W509399566": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道札幌市豊平区"
       ],
       "groups": []
     },
@@ -21280,6 +24243,16 @@
       ],
       "municipalities": [
         "北海道紋別市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W130967700": {
+      "prefectures": [
+        "福岡県"
+      ],
+      "municipalities": [
+        "福岡県苅田町",
+        "福岡県北九州市小倉南区"
       ],
       "groups": []
     },
@@ -21379,6 +24352,15 @@
       ],
       "municipalities": [
         "千葉県印西市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57015536": {
+      "prefectures": [
+        "沖縄県"
+      ],
+      "municipalities": [
+        "沖縄県北大東村"
       ],
       "groups": []
     },
@@ -21512,6 +24494,42 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W640548118": {
+      "prefectures": [
+        "熊本県"
+      ],
+      "municipalities": [
+        "熊本県大津町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W452149494": {
+      "prefectures": [
+        "三重県"
+      ],
+      "municipalities": [
+        "三重県鈴鹿市"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-R9603975": {
+      "prefectures": [
+        "栃木県"
+      ],
+      "municipalities": [
+        "栃木県芳賀町"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W932905990": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道鷹栖町"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W95183768": {
       "prefectures": [
         "神奈川県"
@@ -21638,6 +24656,11 @@
       ],
       "groups": []
     },
+    "attraction-large-large-port-W1193576108": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-W385124935": {
       "prefectures": [
         "鹿児島県"
@@ -21653,6 +24676,33 @@
       ],
       "municipalities": [
         "神奈川県川崎市幸区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W628692836": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市此花区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W628692834": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市此花区"
+      ],
+      "groups": []
+    },
+    "attraction-large-large-port-W567598331": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府大阪市此花区"
       ],
       "groups": []
     },
@@ -21736,6 +24786,15 @@
       ],
       "municipalities": [
         "愛知県名古屋市北区"
+      ],
+      "groups": []
+    },
+    "attraction-large-industrial-complex-W996671568": {
+      "prefectures": [
+        "佐賀県"
+      ],
+      "municipalities": [
+        "佐賀県伊万里市"
       ],
       "groups": []
     },
@@ -22299,6 +25358,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W1257049333": {
+      "prefectures": [
+        "鹿児島県"
+      ],
+      "municipalities": [
+        "鹿児島県奄美市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-R6332578": {
       "prefectures": [
         "北海道"
@@ -22749,6 +25817,15 @@
       ],
       "municipalities": [
         "宮城県多賀城市"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W548592583": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道帯広市"
       ],
       "groups": []
     },
@@ -23234,6 +26311,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W598228287": {
+      "prefectures": [
+        "新潟県"
+      ],
+      "municipalities": [
+        "新潟県上越市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W598226657": {
       "prefectures": [
         "岩手県"
@@ -23432,6 +26518,15 @@
       ],
       "groups": []
     },
+    "attraction-large-military-base-W372736247": {
+      "prefectures": [
+        "島根県"
+      ],
+      "municipalities": [
+        "島根県出雲市"
+      ],
+      "groups": []
+    },
     "attraction-large-military-base-W50796774": {
       "prefectures": [
         "愛知県"
@@ -23591,6 +26686,15 @@
       ],
       "municipalities": [
         "福岡県北九州市小倉南区"
+      ],
+      "groups": []
+    },
+    "attraction-large-military-base-W695018324": {
+      "prefectures": [
+        "長崎県"
+      ],
+      "municipalities": [
+        "長崎県佐世保市"
       ],
       "groups": []
     },
@@ -24094,6 +27198,15 @@
       ],
       "groups": []
     },
+    "attraction-large-industrial-complex-W1513162381": {
+      "prefectures": [
+        "茨城県"
+      ],
+      "municipalities": [
+        "茨城県那珂市"
+      ],
+      "groups": []
+    },
     "attraction-large-park-W474724855": {
       "prefectures": [
         "北海道"
@@ -24136,6 +27249,15 @@
       ],
       "municipalities": [
         "群馬県前橋市"
+      ],
+      "groups": []
+    },
+    "attraction-large-airport-W57007881": {
+      "prefectures": [
+        "北海道"
+      ],
+      "municipalities": [
+        "北海道礼文町"
       ],
       "groups": []
     },
@@ -24310,54 +27432,19 @@
       ],
       "groups": []
     },
+    "attraction-large-airport-R8310416": {
+      "prefectures": [],
+      "municipalities": [],
+      "groups": []
+    },
     "attraction-large-airport-W75208014": {
       "prefectures": [],
       "municipalities": [],
       "groups": []
     },
-    "attraction-unesco-1757": {
-      "prefectures": [
-        "奈良県"
-      ],
-      "municipalities": [
-        "奈良県橿原市"
-      ],
-      "groups": []
-    },
-    "attraction-world-heritage-component-W426531398": {
-      "prefectures": [
-        "奈良県"
-      ],
-      "municipalities": [
-        "奈良県橿原市"
-      ],
-      "groups": []
-    },
-    "attraction-W1385731142": {
-      "prefectures": [
-        "愛知県"
-      ],
-      "municipalities": [
-        "愛知県名古屋市北区"
-      ],
-      "groups": []
-    },
-    "attraction-large-park-W837804554": {
-      "prefectures": [
-        "大阪府"
-      ],
-      "municipalities": [
-        "大阪府泉南市"
-      ],
-      "groups": []
-    },
-    "attraction-W1491742303": {
-      "prefectures": [
-        "大阪府"
-      ],
-      "municipalities": [
-        "大阪府大阪市北区"
-      ],
+    "attraction-large-airport-W151578860": {
+      "prefectures": [],
+      "municipalities": [],
       "groups": []
     }
   }
