@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-08T11:11:08.934Z",
+  "id": "administrative-area-R358696",
+  "name": "東大阪市",
+  "kind": "administrative-area",
+  "context": "大阪府・日本",
+  "aliases": [
+    "Higashiōsaka",
+    "Higashiōsaka-shi",
+    "Higashiosaka",
+    "Higashi-Ōsaka"
+  ],
+  "boundaryDefinition": "東大阪市の現在の行政区域。市境界の内側に含まれる陸域・水域を含み、隣接する大阪市・八尾市・生駒市などの区域は含めない。",
+  "boundarySourceLabel": "OpenStreetMap contributors",
+  "boundarySourceUrl": "https://www.openstreetmap.org/relation/358696",
+  "sourceQuery": "東大阪市 大阪府 日本",
+  "osm": {
+    "osmType": "relation",
+    "osmId": 358696,
+    "ref": "272272",
+    "tags": {
+      "admin_level": "7",
+      "boundary": "administrative",
+      "land_area": "administrative",
+      "name": "東大阪市",
+      "name:en": "Higashiōsaka",
+      "name:fr": "Higashiōsaka",
+      "name:ja": "東大阪市",
+      "name:ja-Hira": "ひがしおおさかし",
+      "name:ja-Latn": "Higashiōsaka-shi",
+      "name:ko": "히가시오사카시",
+      "name:th": "ฮิงาชิโอซากะ",
+      "name:zh": "東大阪市",
+      "name:zh-Hans": "东大阪市",
+      "name:zh-Hant": "東大阪市",
+      "population": "491314",
+      "ref": "272272",
+      "source": "KSJ2/N03",
+      "source:population": "http://www.city.higashiosaka.lg.jp/",
+      "start_date": "1967-02-01",
+      "type": "boundary",
+      "wikidata": "Q243863",
+      "wikimedia_commons": "Category:Higashiosaka, Osaka",
+      "wikipedia": "ja:東大阪市"
+    },
+    "fullResponseUrl": "https://api.openstreetmap.org/api/0.6/relation/358696/full.json",
+    "fetchedAt": "2026-08-08T11:11:08.934Z",
+    "responseSha256": "5e00f6be356672bd1bd0038c6f0370df0028cde575103248910afa657b15bf76",
+    "license": "OpenStreetMap contributors, ODbL 1.0"
+  },
+  "discovery": {
+    "endpoint": null,
+    "query": "東大阪市 大阪府 日本",
+    "method": "explicit-osm-id",
+    "fetchedAt": "2026-08-08T11:11:08.934Z",
+    "candidates": [],
+    "accepted": {
+      "osmType": "relation",
+      "osmId": 358696,
+      "category": "boundary",
+      "type": "administrative",
+      "source": "explicit-osm-id"
+    },
+    "rejectedCandidates": []
+  },
+  "relation": {
+    "type": "boundary",
+    "boundary": "administrative",
+    "adminLevel": "7",
+    "memberCount": 32,
+    "outerWayCount": 31,
+    "innerWayCount": 0,
+    "outerRingCount": 1,
+    "innerRingCount": 0,
+    "nodeCount": 1565,
+    "wayCount": 31,
+    "labelPoint": [
+      135.6009037,
+      34.679391
+    ]
+  },
+  "canonical": {
+    "file": "administrative-areas/R358696.geojson",
+    "geometryType": "Polygon",
+    "coordinateSystem": "WGS84 / EPSG:4326",
+    "bbox": [
+      135.5570973,
+      34.6321858,
+      135.6790506,
+      34.7042466
+    ],
+    "centroid": [
+      135.61756471,
+      34.67112622
+    ],
+    "geometryAreaKm2": 61.95310818,
+    "vertexCount": 1565,
+    "outerRingCount": 1,
+    "holeCount": 0,
+    "sha256": "c42f74ca1d11050bf309f4a7c663f0ad81d97a7290d00f454a1117137b2d2ed3"
+  },
+  "referenceComparison": {
+    "officialAreaKm2": 61.78,
+    "officialMunicipalityCode": "27227",
+    "officialAreaSourceLabel": "国土地理院 全国都道府県市区町村別面積調 令和8年4月1日",
+    "officialAreaSourceUrl": "https://www.gsi.go.jp/KOKUJYOHO/MENCHO-title",
+    "areaDifferencePercent": 0.2802,
+    "areaRatio": 1.00280201,
+    "tolerancePercent": 2,
+    "geoloniaCompared": false,
+    "geoloniaReferenceUrl": null,
+    "geoloniaAreaKm2": null,
+    "geoloniaBbox": null
+  },
+  "validation": {
+    "status": "passed",
+    "checks": {
+      "jsonAndGeojsonStructure": true,
+      "polygonOrMultiPolygon": true,
+      "coordinateOrder": "[longitude, latitude]",
+      "coordinateRangeValid": true,
+      "ringsClosed": true,
+      "noSelfIntersections": true,
+      "noDuplicateRings": true,
+      "holesContained": true,
+      "areaWithinTwoPercentOfOfficial": true,
+      "geoloniaReferenceFetched": false,
+      "geoloniaReferenceOptional": true,
+      "antimeridianHandling": "not applicable; longitude span is below 180 degrees",
+      "visualPreviewGenerated": true,
+      "visualAspectRatioPreserved": true
+    },
+    "ringIssues": [
+      {
+        "polygonIndex": 0,
+        "ringIndex": 0,
+        "closed": true,
+        "vertexCount": 1565,
+        "selfIntersection": null
+      }
+    ],
+    "areaDifferencePercent": 0.2802,
+    "areaRatio": 1.00280201,
+    "notes": [
+      "An explicit verified OSM relation ID was supplied; Nominatim discovery was skipped for the fast path.",
+      "The relation has one outer ring and no inner rings; the canonical output is therefore a Polygon.",
+      "The optional Geolonia shape/reference cross-check was skipped; the canonical source remains OSM."
+    ]
+  },
+  "export": {
+    "geojson": {
+      "file": "administrative-areas/R358696.geojson",
+      "crs": "WGS84 / EPSG:4326",
+      "simplificationTolerance": null,
+      "exactGeoreferencing": true
+    },
+    "svgPreview": {
+      "file": "administrative-areas/R358696.preview.svg",
+      "projection": "aspect-preserving local equirectangular affine transform over the canonical bbox",
+      "widthPx": 1392,
+      "heightPx": 1000,
+      "viewBox": [
+        0,
+        0,
+        1392,
+        1000
+      ],
+      "paddingPx": 24,
+      "centerLatitude": 34.6682162,
+      "longitudeScale": 0.82245971,
+      "coordinateBboxAspectRatio": 1.69236672,
+      "contentAspectRatio": 1.39190345,
+      "canvasAspectRatio": 1.392,
+      "yAxis": "inverted for SVG screen coordinates",
+      "fillRule": "evenodd",
+      "holesPreserved": true,
+      "exactGeoreferencing": false,
+      "sha256": "dfb2be300e33fc89dcfd63145a59a253a84f16c4e7703dbff86b7b7639c6c5fa"
+    },
+    "pngMask": {
+      "recommendedWidth": 2048,
+      "recommendedHeight": 1471,
+      "contentAspectRatio": 1.39190345,
+      "bounds": [
+        135.5570973,
+        34.6321858,
+        135.6790506,
+        34.7042466
+      ],
+      "outsideValue": 0,
+      "insideValue": 255,
+      "alpha": "transparent outside, opaque inside",
+      "antialiasing": "renderer-defined; preserve the canonical vector as source of truth",
+      "exactGeoreferencing": "not embedded; use a world file or GeoTIFF sidecar when required",
+      "simplificationTolerance": null
+    }
+  },
+  "files": {
+    "canonicalGeoJSON": "administrative-areas/R358696.geojson",
+    "metadata": "administrative-areas/R358696.metadata.json",
+    "previewSvg": "administrative-areas/R358696.preview.svg"
+  }
+}
