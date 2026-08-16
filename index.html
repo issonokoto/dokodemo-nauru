@@ -3333,6 +3333,7 @@
     const COMPARISON_OVERLAY_WATER_MIN_AREA_KM2 = 1;
     const COMPARISON_OVERLAY_COUNTRY_WATER_MIN_AREA_KM2 = 20;
     const COMPARISON_OVERLAY_ISLAND_MIN_AREA_KM2 = 0.1;
+    const COMPARISON_OVERLAY_COUNTRY_ISLAND_MIN_AREA_KM2 = 1;
     let activeComparison = null;
     let appliedComparisonConditionQuery = '';
     let searchBuilderTargets = [];
@@ -7744,6 +7745,22 @@
         || PREFECTURES.some(prefecture => String(properties.context || '').includes(prefecture.name));
     }
 
+    function comparisonWaterIsExcluded(feature) {
+      const properties = feature && feature.properties || {};
+      const aliases = Array.isArray(properties.aliases) ? properties.aliases : [];
+      return properties.name === '黒海'
+        || aliases.some(alias => String(alias).trim().toLowerCase() === 'black sea');
+    }
+
+    function comparisonFeatureBelongsToCountry(feature, target, administrativeIndex) {
+      if (target.code === 'JPN') return comparisonFeatureIsJapanese(feature, administrativeIndex);
+      const properties = feature && feature.properties || {};
+      const countryName = String(target.name || target.shortName || '').trim();
+      if (!countryName) return false;
+      return String(properties.context || '').includes(countryName)
+        || (Array.isArray(properties.aliases) && properties.aliases.includes(countryName));
+    }
+
     function comparisonFeatureBelongsToAdministrativeTarget(feature, target, administrativeIndex) {
       const administrative = administrativeMetadata(feature, administrativeIndex);
       if (target.kind === 'prefecture') return administrative.prefectures.includes(target.name);
@@ -7798,10 +7815,13 @@
           const kind = properties.kind;
           if (!['water', 'island'].includes(kind) || !properties.geometryFile) return false;
           if (target.kind === 'country') {
-            if (kind !== 'water') return false;
-            const id = String(properties.id || feature.id || '');
-            if (id.startsWith('water-global-')) return true;
-            return target.code === 'JPN' && comparisonFeatureIsJapanese(feature, administrativeIndex);
+            if (kind === 'water') {
+              if (comparisonWaterIsExcluded(feature)) return false;
+              const id = String(properties.id || feature.id || '');
+              if (id.startsWith('water-global-')) return true;
+              return target.code === 'JPN' && comparisonFeatureIsJapanese(feature, administrativeIndex);
+            }
+            return comparisonFeatureBelongsToCountry(feature, target, administrativeIndex);
           }
           return comparisonFeatureBelongsToAdministrativeTarget(feature, target, administrativeIndex);
         });
@@ -7813,7 +7833,9 @@
             const properties = feature.properties || {};
             const areaKm2 = comparisonFeatureAreaKm2(feature, areaIndex, polygons);
             const minimumArea = target.kind === 'country'
-              ? COMPARISON_OVERLAY_COUNTRY_WATER_MIN_AREA_KM2
+              ? properties.kind === 'island'
+                ? COMPARISON_OVERLAY_COUNTRY_ISLAND_MIN_AREA_KM2
+                : COMPARISON_OVERLAY_COUNTRY_WATER_MIN_AREA_KM2
               : properties.kind === 'island'
                 ? COMPARISON_OVERLAY_ISLAND_MIN_AREA_KM2
                 : COMPARISON_OVERLAY_WATER_MIN_AREA_KM2;
@@ -7947,7 +7969,7 @@
         comparisonNote.append(countryBoundaryLink, ' の高精細データを表示。');
         comparisonNote.append(' 海域は面積・比較形状に含めていません。');
         if (hasComparisonOverlay) {
-          comparisonNote.append('水色は収録済みの主要な湖沼・池（表示のみ）です。');
+          comparisonNote.append('水色は収録済みの主要な湖沼・池、緑の島は表示上の補助です。');
         }
       } else if (natural || attraction) {
         comparisonNote.replaceChildren();
