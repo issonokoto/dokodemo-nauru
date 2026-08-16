@@ -8,6 +8,14 @@ const reportPath = path.join(root, 'scripts', 'japan-theme-parks-report.json');
 const osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
 const expoSourceLabel = '経済産業省「日本で開かれた国際博覧会」';
 const expoSourceUrl = 'https://www.meti.go.jp/policy/exhibition/jpofficialrecordbook.pdf';
+const retiredThemeParkIds = new Set([
+  'attraction-W1455979270',
+  'attraction-W431328611',
+  'attraction-W634473695',
+  'attraction-W478996501',
+  'attraction-W361861392',
+  'attraction-R2573768'
+]);
 
 const expoHeritage = {
   '万博記念公園': {
@@ -152,6 +160,54 @@ function contextFromTags(tags) {
   return tags['addr:province'] || tags['is_in:province'] || tags['addr:city'] || tags['is_in:city'] || '日本';
 }
 
+function normalizedName(value) {
+  return String(value || '').normalize('NFKC').toLowerCase().replace(/[・･\s　()（）「」『』【】［］\-_]/g, '');
+}
+
+function distanceKm(first, second) {
+  const radians = value => value * Math.PI / 180;
+  const latitudeDelta = radians(second[1] - first[1]);
+  const longitudeDelta = radians(second[0] - first[0]);
+  const value = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(radians(first[1])) * Math.cos(radians(second[1]))
+    * Math.sin(longitudeDelta / 2) ** 2;
+  return 6371.0088 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
+function deduplicateNearbySameName(features) {
+  const ranked = features.map(feature => {
+    const properties = feature.properties || {};
+    const filename = properties.geometryFile && path.join(root, 'data', properties.geometryFile);
+    const detailed = filename && fs.existsSync(filename)
+      ? JSON.parse(fs.readFileSync(filename, 'utf8'))
+      : null;
+    const geometry = detailed && detailed.geometry;
+    return {
+      feature,
+      name: normalizedName(properties.name),
+      area: geometry ? geometryAreaKm2(geometry) : 0,
+      center: geometry ? geometryCenter(geometry) : null
+    };
+  }).sort((a, b) => b.area - a.area);
+  const selected = [];
+  for (const candidate of ranked) {
+    const properties = candidate.feature.properties || {};
+    if (properties.subtype !== 'theme-park' || !candidate.center) {
+      selected.push(candidate);
+      continue;
+    }
+    const duplicate = selected.some(existing => {
+      const existingProperties = existing.feature.properties || {};
+      return existingProperties.subtype === 'theme-park'
+        && candidate.name === existing.name
+        && existing.center
+        && distanceKm(candidate.center, existing.center) <= 1;
+    });
+    if (!duplicate) selected.push(candidate);
+  }
+  return selected.map(item => item.feature);
+}
+
 async function fetchOverpass() {
   const expoNames = Object.keys(expoHeritage).map(name => `nwr["name"="${name}"](area.japan);`).join('\n');
   const query = `[out:json][timeout:300][maxsize:536870912];
@@ -204,6 +260,10 @@ async function main() {
   for (const element of data.elements) {
     const tags = element.tags || {};
     const originalName = tags.name || tags['name:ja'] || '';
+    const prospectiveId = element.type === 'relation'
+      ? `attraction-R${element.id}`
+      : element.type === 'way' ? `attraction-W${element.id}` : '';
+    if (retiredThemeParkIds.has(prospectiveId)) continue;
     const expo = expoHeritage[originalName];
     const isThemePark = tags.tourism === 'theme_park';
     if (!expo && !isThemePark) continue;
@@ -280,6 +340,8 @@ async function main() {
 
   for (const feature of existingFeatures) {
     const properties = feature.properties || {};
+    const id = properties.id || feature.id;
+    if (retiredThemeParkIds.has(id)) continue;
     if (properties.subtype === 'expo-site') continue;
     const key = featureKey(properties.osmType, properties.osmId);
     if (generatedKeys.has(key)) continue;
@@ -287,19 +349,20 @@ async function main() {
     generatedKeys.add(key);
   }
 
-  generated.sort((a, b) => {
+  const outputFeatures = deduplicateNearbySameName(generated);
+  outputFeatures.sort((a, b) => {
     const subtypeA = a.properties && a.properties.subtype;
     const subtypeB = b.properties && b.properties.subtype;
     const rank = subtype => subtype === 'expo-site' || subtype === 'event-site' || subtype === 'landmark' ? 0 : 1;
     return rank(subtypeA) - rank(subtypeB) || String(a.properties.name).localeCompare(String(b.properties.name), 'ja');
   });
-  fs.writeFileSync(catalogPath, `${JSON.stringify({ type: 'FeatureCollection', features: generated })}\n`);
+  fs.writeFileSync(catalogPath, `${JSON.stringify({ type: 'FeatureCollection', features: outputFeatures })}\n`);
   const report = {
     generatedAt: new Date().toISOString(),
     source: 'OpenStreetMap tourism=theme_park in Japan',
-    totalCatalogFeatures: generated.length,
-    themeParkPolygons: generated.filter(feature => feature.properties && feature.properties.subtype === 'theme-park').length,
-    expoHeritageFeatures: generated.filter(feature => feature.properties && feature.properties.subtype === 'expo-site').length,
+    totalCatalogFeatures: outputFeatures.length,
+    themeParkPolygons: outputFeatures.filter(feature => feature.properties && feature.properties.subtype === 'theme-park').length,
+    expoHeritageFeatures: outputFeatures.filter(feature => feature.properties && feature.properties.subtype === 'expo-site').length,
     unresolvedNodeCount: unresolvedNodes.length,
     unresolvedAreaCount: unresolvedAreas.length,
     unresolvedNodes,

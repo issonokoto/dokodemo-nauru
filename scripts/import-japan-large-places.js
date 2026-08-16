@@ -79,7 +79,9 @@ const officialAreas = new Map([
   ['嘉手納飛行場', { area: 19.856, label: '防衛省「在日米軍施設・区域（専用施設）面積」', url: 'https://www.mod.go.jp/j/approach/zaibeigun/us_sisetsu/pdf/menseki_2025.pdf' }],
   ['三沢飛行場', { area: 15.78, label: '防衛省「在日米軍施設・区域（専用施設）面積」', url: 'https://www.mod.go.jp/j/approach/zaibeigun/us_sisetsu/pdf/menseki_2025.pdf' }],
   ['Misawa Air Base - 三沢飛行場', { area: 15.78, label: '防衛省「在日米軍施設・区域（専用施設）面積」', url: 'https://www.mod.go.jp/j/approach/zaibeigun/us_sisetsu/pdf/menseki_2025.pdf' }],
-  ['三沢基地', { area: 16, label: '航空自衛隊 三沢基地「基地紹介」', url: 'https://www.mod.go.jp/asdf/misawa/about_base/about_base/' }]
+  ['三沢基地', { area: 16, label: '航空自衛隊 三沢基地「基地紹介」', url: 'https://www.mod.go.jp/asdf/misawa/about_base/about_base/' }],
+  ['岩国錦帯橋空港', { area: 1.152, label: '山口県「岩国錦帯橋空港」空港面積', url: 'https://www.pref.yamaguchi.lg.jp/uploaded/attachment/70576.pdf' }],
+  ['粟国空港', { area: 0.09, label: '沖縄県「粟国空港の概要」', url: 'https://www.pref.okinawa.lg.jp/machizukuri/kowankuko/1012617/1012690/1012697.html' }]
 ]);
 
 function samePoint(a, b) {

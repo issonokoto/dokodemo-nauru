@@ -209,6 +209,13 @@ function classify(tags, name) {
   if (tags.tourism === 'zoo') {
     return { subtype: 'zoo', subtypeLabel: '動物園', minimumArea: 0.005 };
   }
+  if (/動植物公園.+植物園/.test(name)) {
+    return {
+      subtype: 'botanical-garden',
+      subtypeLabel: '植物園・植物公園',
+      minimumArea: 0.005
+    };
+  }
   if (/動植物公園|動植物園/.test(name)) {
     return {
       subtype: 'zoological-botanical-park',
