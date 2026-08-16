@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:19:12.952Z",
+  "name": "京都御所",
+  "kind": "facility",
+  "context": "京都府京都市上京区",
+  "boundaryDefinition": "京都御所の施設敷地・外周境界。隣接する京都御苑全体は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 554879249,
+    "objectUrl": "https://www.openstreetmap.org/way/554879249",
+    "responseSha256": "81467841f367033911cb29d61e2f1aa9bda2c6b98a1896bd53f25d49b8ab784d",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W554879249.osm-full.json",
+    "rawResponseSourceFile": "cache/W554879249.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/554879249/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/554879249/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W554879249.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.760953,
+      35.0232258,
+      135.7637449,
+      35.0273041
+    ],
+    "sha256": "35327e6e29115d247888282a7d0ee3d175136273c6e7faf56053c952a3051dd5",
+    "areaKm2": 0.11179164,
+    "lineLengthKm": null,
+    "vertexCount": 36,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 0.68457446,
+    "projectedAspectRatio": 0.56059737,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W554879249.preview.svg",
+      "width": 1148,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1148,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.56054688,
+      "contentAspectRatio": 0.56059737,
+      "aspectRatioDifferencePercent": -0.00900658,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1148,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.56059737,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "imperial-site-W554879249.geojson",
+    "geojsonSha256": "cb2d32053f69470b4113cb328dce2b67e12d931d3881d16559f201d30cb69619",
+    "metadata": "imperial-site-W554879249.metadata.json",
+    "previewSvg": "imperial-site-W554879249.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W554879249.osm-full.json",
+    "rawResponseSource": "cache/W554879249.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-imperial-site-W554879249",
+  "catalog": {
+    "id": "attraction-imperial-site-W554879249",
+    "geometryFile": "attractions/imperial-site-W554879249.geojson",
+    "subtype": "imperial-site",
+    "subtypeLabel": "皇居・御所",
+    "statusLabel": "京都御苑内・宮内庁管理の御所"
+  }
+}

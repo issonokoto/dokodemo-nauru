@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:20:53.49Z",
+  "name": "箸墓古墳",
+  "kind": "facility",
+  "context": "奈良県桜井市",
+  "boundaryDefinition": "箸墓古墳の墳丘・周濠を含むOSM記録の古墳境界。周辺の道路や集落は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 41125619,
+    "objectUrl": "https://www.openstreetmap.org/way/41125619",
+    "responseSha256": "44f53908b6e02f53beabdd73b176f640c73b3f270865843177828a94bc41af56",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W41125619.osm-full.json",
+    "rawResponseSourceFile": "cache/W41125619.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/41125619/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/41125619/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W41125619.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.8390161,
+      34.5381384,
+      135.8420373,
+      34.5399031
+    ],
+    "sha256": "540a46cfa82b5d8bc8a0ff953737e7178c2c003ee70045794f9f6085b2a4c51a",
+    "areaKm2": 0.02934961,
+    "lineLengthKm": null,
+    "vertexCount": 31,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.71201904,
+    "projectedAspectRatio": 1.410259,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W41125619.preview.svg",
+      "width": 2048,
+      "height": 1452,
+      "viewBox": [
+        0,
+        0,
+        2048,
+        1452
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 1.41046832,
+      "contentAspectRatio": 1.410259,
+      "aspectRatioDifferencePercent": 0.01484296,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 2048,
+      "recommendedHeight": 1452,
+      "aspectRatio": 1.410259,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "kofun-W41125619.geojson",
+    "geojsonSha256": "f739a9b897b41c215c7c1637d8b5de714e9827527b93dc3450bbee8bb4a4fa35",
+    "metadata": "kofun-W41125619.metadata.json",
+    "previewSvg": "kofun-W41125619.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W41125619.osm-full.json",
+    "rawResponseSource": "cache/W41125619.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-kofun-W41125619",
+  "catalog": {
+    "id": "attraction-kofun-W41125619",
+    "geometryFile": "attractions/kofun-W41125619.geojson",
+    "subtype": "kofun",
+    "subtypeLabel": "古墳・前方後円墳",
+    "statusLabel": "前方後円墳・倭迹迹日百襲姫命墓"
+  }
+}

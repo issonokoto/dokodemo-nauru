@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:26:08.399Z",
+  "name": "津堂城山古墳",
+  "kind": "facility",
+  "context": "大阪府藤井寺市",
+  "boundaryDefinition": "津堂城山古墳の墳丘・周濠を含むOSM記録の古墳境界。周辺の道路や公園は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 699645282,
+    "objectUrl": "https://www.openstreetmap.org/way/699645282",
+    "responseSha256": "403ba9c317e282855586d063579dbf03a0f4f75ec12fce7c2c820d4a7e87a3d6",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W699645282.osm-full.json",
+    "rawResponseSourceFile": "cache/W699645282.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/699645282/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/699645282/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W699645282.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.5924463,
+      34.5802311,
+      135.5953646,
+      34.5828512
+    ],
+    "sha256": "575a99f7baf927398b3df4707a0b9f2d79dff4ec51a67d4e7fe51810b0bd2245",
+    "areaKm2": 0.04708978,
+    "lineLengthKm": null,
+    "vertexCount": 20,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.11381245,
+    "projectedAspectRatio": 0.91702325,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W699645282.preview.svg",
+      "width": 1878,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1878,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.91699219,
+      "contentAspectRatio": 0.91702325,
+      "aspectRatioDifferencePercent": -0.00338727,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1878,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.91702325,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "kofun-W699645282.geojson",
+    "geojsonSha256": "4790abe698d288fc79199ee2e18045ce8676fc73f938ff2b70706a5a3e24f662",
+    "metadata": "kofun-W699645282.metadata.json",
+    "previewSvg": "kofun-W699645282.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W699645282.osm-full.json",
+    "rawResponseSource": "cache/W699645282.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-kofun-W699645282",
+  "catalog": {
+    "id": "attraction-kofun-W699645282",
+    "geometryFile": "attractions/kofun-W699645282.geojson",
+    "subtype": "kofun",
+    "subtypeLabel": "古墳・前方後円墳",
+    "statusLabel": "前方後円墳・津堂城山古墳"
+  }
+}

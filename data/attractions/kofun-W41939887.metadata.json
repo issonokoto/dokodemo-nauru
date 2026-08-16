@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:20:54.456Z",
+  "name": "五色塚古墳",
+  "kind": "facility",
+  "context": "兵庫県神戸市垂水区",
+  "boundaryDefinition": "五色塚古墳の墳丘・周濠を含むOSM記録の古墳境界。周辺の公園や道路は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 41939887,
+    "objectUrl": "https://www.openstreetmap.org/way/41939887",
+    "responseSha256": "f4b44acc348bfc6917fe6c693b8ef4054bd4a5c8ae90dfe5b571cb8b6e5626f7",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W41939887.osm-full.json",
+    "rawResponseSourceFile": "cache/W41939887.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/41939887/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/41939887/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W41939887.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.0449904,
+      34.628745,
+      135.0468691,
+      34.6306036
+    ],
+    "sha256": "46c18db6402f12660e7068e9e6f72a9af067ef0a7c844855d2dce3eddae7401f",
+    "areaKm2": 0.023601,
+    "lineLengthKm": null,
+    "vertexCount": 43,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.01081459,
+    "projectedAspectRatio": 0.83174087,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W41939887.preview.svg",
+      "width": 1703,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1703,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.83154297,
+      "contentAspectRatio": 0.83174087,
+      "aspectRatioDifferencePercent": -0.02379311,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1703,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.83174087,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "kofun-W41939887.geojson",
+    "geojsonSha256": "580bb5ee7fed52ea97d1fce94adddac2159fe19d910b5401a3aef366b86d95b5",
+    "metadata": "kofun-W41939887.metadata.json",
+    "previewSvg": "kofun-W41939887.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W41939887.osm-full.json",
+    "rawResponseSource": "cache/W41939887.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-kofun-W41939887",
+  "catalog": {
+    "id": "attraction-kofun-W41939887",
+    "geometryFile": "attractions/kofun-W41939887.geojson",
+    "subtype": "kofun",
+    "subtypeLabel": "古墳・前方後円墳",
+    "statusLabel": "前方後円墳・史跡五色塚古墳"
+  }
+}

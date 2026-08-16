@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T00:46:58.095Z",
+  "generatedAt": "2026-08-16T01:28:34.775Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 3055,
-    "withPrefectures": 2901,
-    "withMunicipalities": 2882,
+    "total": 3062,
+    "withPrefectures": 2908,
+    "withMunicipalities": 2889,
     "multiPrefecture": 22,
     "multiMunicipality": 99,
     "withGroups": 160
@@ -11861,6 +11861,15 @@
       ],
       "groups": []
     },
+    "attraction-imperial-site-W554879249": {
+      "prefectures": [
+        "京都府"
+      ],
+      "municipalities": [
+        "京都府京都市上京区"
+      ],
+      "groups": []
+    },
     "attraction-zoo-R11685246": {
       "prefectures": [
         "京都府"
@@ -12833,6 +12842,15 @@
       ],
       "municipalities": [
         "新潟県新発田市"
+      ],
+      "groups": []
+    },
+    "attraction-kofun-W41939887": {
+      "prefectures": [
+        "兵庫県"
+      ],
+      "municipalities": [
+        "兵庫県神戸市垂水区"
       ],
       "groups": []
     },
@@ -15696,6 +15714,15 @@
       ],
       "groups": []
     },
+    "attraction-kofun-W44348046": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県天理市"
+      ],
+      "groups": []
+    },
     "attraction-large-large-mine-R17484678": {
       "prefectures": [
         "山口県"
@@ -17511,6 +17538,15 @@
       ],
       "municipalities": [
         "福井県鯖江市"
+      ],
+      "groups": []
+    },
+    "attraction-kofun-W307990128": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県天理市"
       ],
       "groups": []
     },
@@ -19959,6 +19995,15 @@
       ],
       "groups": []
     },
+    "attraction-kofun-W699645282": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府藤井寺市"
+      ],
+      "groups": []
+    },
     "attraction-botanical-garden-W439428868": {
       "prefectures": [
         "神奈川県"
@@ -22355,6 +22400,15 @@
       ],
       "municipalities": [
         "北海道函館市"
+      ],
+      "groups": []
+    },
+    "attraction-kofun-W41125619": {
+      "prefectures": [
+        "奈良県"
+      ],
+      "municipalities": [
+        "奈良県桜井市"
       ],
       "groups": []
     },
@@ -25210,6 +25264,15 @@
       ],
       "municipalities": [
         "鹿児島県与論町"
+      ],
+      "groups": []
+    },
+    "attraction-kofun-W44774270": {
+      "prefectures": [
+        "大阪府"
+      ],
+      "municipalities": [
+        "大阪府羽曳野市"
       ],
       "groups": []
     },

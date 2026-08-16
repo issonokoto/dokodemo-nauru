@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:26:06.421Z",
+  "name": "渋谷向山古墳",
+  "kind": "facility",
+  "context": "奈良県天理市",
+  "boundaryDefinition": "渋谷向山古墳（景行天皇陵）の墳丘・周濠を含むOSM記録の古墳境界。周辺の道路や集落は含めない。",
+  "source": {
+    "osmType": "way",
+    "osmId": 44348046,
+    "objectUrl": "https://www.openstreetmap.org/way/44348046",
+    "responseSha256": "9be419d1ae2c341c1d7718ac1ca02d502b0907d0fc071a745ea5593fccbb0397",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "cache",
+    "rawResponseFile": "cache/W44348046.osm-full.json",
+    "rawResponseSourceFile": "cache/W44348046.osm-full.source.json",
+    "retrieval": {
+      "service": "OpenStreetMap API",
+      "url": "https://api.openstreetmap.org/api/0.6/way/44348046/full.json",
+      "query": null,
+      "querySha256": null,
+      "queries": [],
+      "attempts": [
+        {
+          "url": "https://api.openstreetmap.org/api/0.6/way/44348046/full.json",
+          "status": "succeeded"
+        }
+      ],
+      "sourceFile": "cache/W44348046.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.8471627,
+      34.5496681,
+      135.8505806,
+      34.5517252
+    ],
+    "sha256": "44635d36e04a2aa2b082c45e33a4a4973891ee417921c5029ace9c0aa872ad90",
+    "areaKm2": 0.04805983,
+    "lineLengthKm": null,
+    "vertexCount": 31,
+    "ringCount": 1,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.66151378,
+    "projectedAspectRatio": 1.36846378,
+    "integrity": {
+      "ringCount": 1,
+      "holeCount": 0,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": null
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "W44348046.preview.svg",
+      "width": 2048,
+      "height": 1497,
+      "viewBox": [
+        0,
+        0,
+        2048,
+        1497
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 1.36806947,
+      "contentAspectRatio": 1.36846378,
+      "aspectRatioDifferencePercent": -0.0288142,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 2048,
+      "recommendedHeight": 1497,
+      "aspectRatio": 1.36846378,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": null
+  },
+  "files": {
+    "geojson": "kofun-W44348046.geojson",
+    "geojsonSha256": "a57765237470d8c0e8c9a7976dfbc82a70e2a793bf956b3bfaa5c61b20f82a4e",
+    "metadata": "kofun-W44348046.metadata.json",
+    "previewSvg": "kofun-W44348046.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "cache/W44348046.osm-full.json",
+    "rawResponseSource": "cache/W44348046.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  },
+  "id": "attraction-kofun-W44348046",
+  "catalog": {
+    "id": "attraction-kofun-W44348046",
+    "geometryFile": "attractions/kofun-W44348046.geojson",
+    "subtype": "kofun",
+    "subtypeLabel": "古墳・前方後円墳",
+    "statusLabel": "前方後円墳・景行天皇陵"
+  }
+}
