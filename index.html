@@ -546,6 +546,7 @@
     }
     #notice-modal.hidden-modal { display: none; }
     #notice-modal.fade-out { opacity: 0; }
+    #notice-modal { overscroll-behavior: contain; }
     aside.panel,
     .ui-main-panel {
       scrollbar-width: thin;
@@ -1886,11 +1887,11 @@
       }
       #notice-modal {
         align-items: stretch;
-        padding: 0.5rem;
+        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
         overflow-y: auto;
       }
       #notice-modal > .panel {
-        max-height: calc(100dvh - 1rem);
+        max-height: calc(100dvh - max(1rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom)));
         margin: auto;
         padding: 0.85rem;
         overflow: hidden;
@@ -1911,6 +1912,28 @@
       }
     }
     @media (max-width: 767.98px) {
+      #notice-modal {
+        align-items: stretch;
+        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        overflow-y: auto;
+      }
+      #notice-modal > .panel {
+        max-height: calc(100dvh - 1rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        margin: auto;
+        padding: 0.85rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      #notice-modal > .panel > div:nth-child(2) {
+        min-height: 0;
+        padding-right: 0.25rem;
+        overflow-y: auto;
+      }
+      #close-notice-btn {
+        flex: 0 0 auto;
+        margin-top: 0.55rem;
+      }
       #search-builder-modal {
         align-items: stretch;
         padding: 0;
@@ -4426,7 +4449,10 @@
         return searchable.includes(term);
       };
       if (parsedSearch.excludedTerms.some(matchesTerm)) return false;
-      return parsedSearch.groups.some(group => group.every(matchesTerm));
+      if (parsedSearch.groups.length) {
+        return parsedSearch.groups.some(group => group.every(matchesTerm));
+      }
+      return parsedSearch.excludedTerms.length > 0;
     }
 
     async function loadOfficialAreaData() {
@@ -6276,13 +6302,32 @@
       document.getElementById('mobile-btn-share-other').addEventListener('click', () => shareOther());
 
       // スマホ: メニュー開閉（PCは常時表示のまま）
+      let activeOverlayHistory = null;
+      let closingOverlayHistory = false;
+      const beginOverlayHistory = (name) => {
+        if (activeOverlayHistory || !name) return;
+        history.pushState(Object.assign({}, history.state || {}, { nauruOverlay: name }), '', location.href);
+        activeOverlayHistory = name;
+      };
+      const endOverlayHistory = (name, fromHistory = false) => {
+        if (activeOverlayHistory !== name) return;
+        activeOverlayHistory = null;
+        if (!fromHistory) {
+          closingOverlayHistory = true;
+          history.back();
+        }
+      };
       const mobileToggle = document.getElementById('mobile-toggle');
-      const setMobileMenu = (open) => {
+      const setMobileMenu = (open, { fromHistory = false } = {}) => {
+        const wasOpen = document.body.classList.contains('m-open');
+        if (wasOpen === open) return;
         document.body.classList.toggle('m-open', open);
         if (mobileToggle) {
           mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
           mobileToggle.title = open ? 'メニューを閉じる' : 'メニューを開く';
         }
+        if (open) beginOverlayHistory('mobile-menu');
+        else endOverlayHistory('mobile-menu', fromHistory);
       };
       const mobileEditDock = document.getElementById('mobile-edit-dock');
       const mobileToolTitles = {
@@ -6446,6 +6491,7 @@
       let noticeReturnFocus = null;
       let noticeCloseTimer = 0;
       const openModal = (trigger = null) => {
+        beginOverlayHistory('notice');
         clearTimeout(noticeCloseTimer);
         noticeReturnFocus = trigger || document.activeElement;
         noticeModal.classList.remove('hidden-modal');
@@ -6454,16 +6500,28 @@
         helpButton.setAttribute('aria-expanded', 'true');
         closeNoticeButton.focus();
       };
-      const closeModal = () => {
+      const closeModal = ({ fromHistory = false } = {}) => {
         try { localStorage.setItem(NOTICE_STORAGE_KEY, '1'); } catch (_) {}
         noticeModal.classList.add('fade-out');
         noticeModal.setAttribute('aria-hidden', 'true');
         helpButton.setAttribute('aria-expanded', 'false');
+        endOverlayHistory('notice', fromHistory);
         noticeCloseTimer = setTimeout(() => {
           noticeModal.classList.add('hidden-modal');
           if (noticeReturnFocus && typeof noticeReturnFocus.focus === 'function') noticeReturnFocus.focus();
         }, 280);
       };
+      window.addEventListener('popstate', () => {
+        if (closingOverlayHistory) {
+          closingOverlayHistory = false;
+          return;
+        }
+        const overlay = activeOverlayHistory;
+        if (!overlay) return;
+        activeOverlayHistory = null;
+        if (overlay === 'mobile-menu') setMobileMenu(false, { fromHistory: true });
+        if (overlay === 'notice') closeModal({ fromHistory: true });
+      });
       helpButton.addEventListener('click', () => openModal(helpButton));
       closeNoticeButton.addEventListener('click', closeModal);
       noticeModal.addEventListener('click', (e) => {
