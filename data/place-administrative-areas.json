@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-15T16:21:34.288Z",
+  "generatedAt": "2026-08-15T15:30:08.370Z",
   "source": "国土交通省 国土数値情報（行政区域）由来の国土地理院 位置参照情報 逆ジオコーダー",
   "summary": {
-    "total": 2713,
-    "withPrefectures": 2582,
-    "withMunicipalities": 2563,
+    "total": 2704,
+    "withPrefectures": 2573,
+    "withMunicipalities": 2554,
     "multiPrefecture": 18,
     "multiMunicipality": 90,
     "withGroups": 158
@@ -5292,15 +5292,6 @@
       ],
       "groups": []
     },
-    "attraction-R19120714": {
-      "prefectures": [
-        "愛知県"
-      ],
-      "municipalities": [
-        "愛知県名古屋市北区"
-      ],
-      "groups": []
-    },
     "attraction-large-large-farm-W429905984": {
       "prefectures": [
         "北海道"
@@ -5794,15 +5785,6 @@
       ],
       "municipalities": [
         "千葉県御宿町"
-      ],
-      "groups": []
-    },
-    "attraction-W1455979270": {
-      "prefectures": [
-        "奈良県"
-      ],
-      "municipalities": [
-        "奈良県生駒市"
       ],
       "groups": []
     },
@@ -6828,15 +6810,6 @@
       ],
       "groups": []
     },
-    "attraction-W431328611": {
-      "prefectures": [
-        "兵庫県"
-      ],
-      "municipalities": [
-        "兵庫県神戸市北区"
-      ],
-      "groups": []
-    },
     "attraction-W521825126": {
       "prefectures": [
         "石川県"
@@ -7783,15 +7756,6 @@
       ],
       "municipalities": [
         "山形県上山市"
-      ],
-      "groups": []
-    },
-    "attraction-W634473695": {
-      "prefectures": [
-        "栃木県"
-      ],
-      "municipalities": [
-        "栃木県那須町"
       ],
       "groups": []
     },
@@ -14919,15 +14883,6 @@
       ],
       "groups": []
     },
-    "attraction-W478996501": {
-      "prefectures": [
-        "兵庫県"
-      ],
-      "municipalities": [
-        "兵庫県神戸市北区"
-      ],
-      "groups": []
-    },
     "attraction-zoo-W282687573": {
       "prefectures": [
         "兵庫県"
@@ -16418,15 +16373,6 @@
       ],
       "groups": []
     },
-    "attraction-R2573768": {
-      "prefectures": [
-        "茨城県"
-      ],
-      "municipalities": [
-        "茨城県大洗町"
-      ],
-      "groups": []
-    },
     "attraction-large-large-port-W1368926129": {
       "prefectures": [
         "神奈川県"
@@ -17192,15 +17138,6 @@
       ],
       "municipalities": [
         "埼玉県狭山市"
-      ],
-      "groups": []
-    },
-    "attraction-W361861392": {
-      "prefectures": [
-        "長野県"
-      ],
-      "municipalities": [
-        "長野県立科町"
       ],
       "groups": []
     },
@@ -18110,24 +18047,6 @@
       ],
       "groups": []
     },
-    "attraction-W286179918": {
-      "prefectures": [
-        "京都府"
-      ],
-      "municipalities": [
-        "京都府京都市右京区"
-      ],
-      "groups": []
-    },
-    "attraction-W836796370": {
-      "prefectures": [
-        "京都府"
-      ],
-      "municipalities": [
-        "京都府京都市右京区"
-      ],
-      "groups": []
-    },
     "attraction-R11500276": {
       "prefectures": [
         "京都府"
@@ -18138,15 +18057,6 @@
       "groups": []
     },
     "attraction-W211459573": {
-      "prefectures": [
-        "東京都"
-      ],
-      "municipalities": [
-        "東京都あきる野市"
-      ],
-      "groups": []
-    },
-    "attraction-W211459575": {
       "prefectures": [
         "東京都"
       ],
@@ -24420,6 +24330,15 @@
       ],
       "municipalities": [
         "奈良県橿原市"
+      ],
+      "groups": []
+    },
+    "attraction-W1385731142": {
+      "prefectures": [
+        "愛知県"
+      ],
+      "municipalities": [
+        "愛知県名古屋市北区"
       ],
       "groups": []
     },

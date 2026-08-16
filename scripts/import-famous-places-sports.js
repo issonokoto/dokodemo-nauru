@@ -6,6 +6,13 @@ const catalogPath = path.join(root, 'data', 'attractions.geojson');
 const geometryDir = path.join(root, 'data', 'attractions');
 const reportPath = path.join(__dirname, 'famous-places-sports-report.json');
 const osmCopyrightUrl = 'https://www.openstreetmap.org/copyright';
+const officialAreas = new Map([
+  ['IGアリーナ', {
+    officialAreaKm2: 0.0265,
+    areaSourceLabel: '愛知県「愛知県新体育館」建築面積',
+    areaSourceUrl: 'https://www.pref.aichi.jp/soshiki/kokusai-arena/kokusai-arena.html'
+  }]
+]);
 const managedSubtypes = new Set([
   'funny-place', 'sports-baseball', 'sports-football', 'sports-rugby', 'sports-park', 'sports-arena'
 ]);
@@ -114,7 +121,7 @@ const entries = [
     ['横浜アリーナ', '神奈川県横浜市', ['Yokohama Arena'], '横浜アリーナ, Japan'],
     ['大阪城ホール', '大阪府大阪市', ['Osaka-jō Hall'], 'Osaka-jo Hall', 'way', 176303041],
     ['Asueアリーナ大阪', '大阪府大阪市', ['大阪市中央体育館', '丸善インテックアリーナ大阪'], 'Asueアリーナ大阪, Japan'],
-    ['IGアリーナ', '愛知県名古屋市', ['愛知国際アリーナ', '愛知県新体育館'], 'IGアリーナ, Nagoya, Japan'],
+    ['IGアリーナ', '愛知県名古屋市', ['愛知国際アリーナ', '愛知県新体育館'], 'IGアリーナ, Nagoya, Japan', 'way', 1385731142],
     ['マリンメッセ福岡A館', '福岡県福岡市', ['マリンメッセ福岡'], 'マリンメッセ福岡, Japan'],
     ['沖縄アリーナ', '沖縄県沖縄市', ['Okinawa Arena'], '沖縄アリーナ, Japan'],
     ['両国国技館', '東京都墨田区', ['国技館'], '両国国技館, Tokyo, Japan']
@@ -197,7 +204,11 @@ async function lookupNominatim(osmType, osmId) {
 
 async function resolveEntry(entry, existingByName) {
   const existing = existingByName.get(entry.name);
-  if (existing && existing.properties && existing.properties.geometryFile) {
+  const existingMatchesPinnedOsm = !entry.osmType || !entry.osmId
+    || (existing && existing.properties
+      && existing.properties.osmType === entry.osmType
+      && Number(existing.properties.osmId) === Number(entry.osmId));
+  if (existingMatchesPinnedOsm && existing && existing.properties && existing.properties.geometryFile) {
     const filePath = path.join(root, 'data', existing.properties.geometryFile);
     if (fs.existsSync(filePath)) {
       const feature = JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -257,6 +268,7 @@ async function main() {
     const prefix = osmPrefix(source.osm_type);
     const id = `attraction-${prefix}${source.osm_id}`;
     const geometryFile = `attractions/${prefix}${source.osm_id}.geojson`;
+    const officialArea = officialAreas.get(entry.name);
     const properties = {
       id,
       kind: 'attraction',
@@ -270,9 +282,9 @@ async function main() {
       osmType: source.osm_type,
       osmId: Number(source.osm_id),
       osmDate: null,
-      officialAreaKm2: null,
-      areaSourceLabel: '',
-      areaSourceUrl: '',
+      officialAreaKm2: officialArea ? officialArea.officialAreaKm2 : null,
+      areaSourceLabel: officialArea ? officialArea.areaSourceLabel : '',
+      areaSourceUrl: officialArea ? officialArea.areaSourceUrl : '',
       boundarySourceLabel: entry.referenceBufferMeters ? '© OpenStreetMap contributors（中心線・代表点から作成した暫定比較範囲）' : '© OpenStreetMap contributors',
       boundarySourceUrl: osmCopyrightUrl,
       geometryFile
