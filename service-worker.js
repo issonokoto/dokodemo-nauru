@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v83';
+const CACHE_NAME = 'dokodemo-nauru-v84';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './index.html',
@@ -45,7 +45,10 @@ function stableCacheRequest(requestUrl, navigation) {
     const scopePath = new URL(self.registration.scope).pathname;
     const relativePath = requestUrl.pathname.slice(scopePath.length);
     const gameNavigation = relativePath === 'game' || relativePath === 'game/' || relativePath === 'game/index.html';
-    url = new URL(gameNavigation ? './game/index.html' : './index.html', self.registration.scope);
+    const homeNavigation = relativePath === '' || relativePath === 'index.html';
+    url = gameNavigation || homeNavigation
+      ? new URL(gameNavigation ? './game/index.html' : './index.html', self.registration.scope)
+      : new URL(requestUrl.pathname, requestUrl.origin);
   } else {
     url = new URL(requestUrl.pathname, requestUrl.origin);
   }
@@ -68,7 +71,7 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(keys
-      .filter(key => key !== CACHE_NAME)
+      .filter(key => /^dokodemo-nauru-v\d+$/.test(key) && key !== CACHE_NAME)
       .filter(key => !PRESERVED_CACHE_PREFIXES.some(prefix => key.startsWith(prefix)))
       .map(key => caches.delete(key)));
     await self.clients.claim();

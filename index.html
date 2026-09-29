@@ -7860,6 +7860,9 @@
             .then(response => {
               if (!response.ok) throw new Error('都道府県境界を取得できませんでした');
               return response.json();
+            }).catch(error => {
+              prefecturesGeojsonPromise = null;
+              throw error;
             });
         }
         const collection = await prefecturesGeojsonPromise;
@@ -8138,9 +8141,10 @@
         }
       } else if (natural || attraction) {
         comparisonNote.replaceChildren();
+        const officialArea = Number(result.target.feature?.properties?.officialAreaKm2);
         const hasOfficialArea = attraction
           ? Boolean(result.target.hasOfficialArea)
-          : Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0;
+          : Number.isFinite(officialArea) && officialArea > 0;
         if (attraction && result.target.facilityRelationNote) {
           comparisonNote.append(`施設関係：${result.target.facilityRelationNote}（表示上の区分であり、法的な所有権を示すものではありません。） `);
         }

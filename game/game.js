@@ -203,17 +203,24 @@
   async function rankingRpc(functionName, body) {
     const config = getRankingConfig();
     if (!config) throw new Error('ランキングは準備中です');
-    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/${functionName}`, {
-      method: 'POST',
-      headers: {
-        apikey: config.supabaseAnonKey,
-        Authorization: `Bearer ${config.supabaseAnonKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-    if (!response.ok) throw new Error(`ランキング通信エラー (${response.status})`);
-    return response.json();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/${functionName}`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          apikey: config.supabaseAnonKey,
+          Authorization: `Bearer ${config.supabaseAnonKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      if (!response.ok) throw new Error(`ランキング通信エラー (${response.status})`);
+      return await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   function firstRpcRow(result) {
@@ -500,6 +507,7 @@
     elements['timer-number'].textContent = '12';
     elements['timer'].setAttribute('aria-label', '残り12秒');
 
+    let questionStartedAt = performance.now();
     if (state.serverSessionId) {
       try {
         const result = await rankingRpc('open_quiz_question', {
@@ -516,6 +524,7 @@
         state.serverSessionId = null;
         state.serverClientId = null;
         state.serverCompleted = false;
+        questionStartedAt = performance.now();
         showToast('通信が切れたため、この記録はランキング対象外です');
       }
     }
@@ -524,8 +533,10 @@
     elements.answerButtons.forEach(button => {
       button.disabled = false;
     });
-    state.questionStartedAt = performance.now();
-    tickTimer(state.questionStartedAt);
+    // Include the opening request in the countdown instead of granting a new
+    // 12 seconds after the server has already started its clock.
+    state.questionStartedAt = questionStartedAt;
+    tickTimer(performance.now());
     elements.answerButtons[0].focus({ preventScroll: true });
   }
 
