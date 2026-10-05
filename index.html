@@ -2026,7 +2026,8 @@
       .game-entry {
         display: none;
       }
-      .mobile-launcher.game-launcher {
+      .mobile-launcher.game-launcher,
+      .mobile-launcher.photo-launcher {
         grid-column: 1 / -1;
         border-color: rgba(245, 197, 66, 0.58);
         background:
@@ -2559,6 +2560,14 @@
       <p class="text-[9px] text-ocean-300/80 mt-1 leading-snug">実寸は一定 · 高緯度ほど地図上では大きく見える</p>
     </div>
 
+    <a class="game-entry photo-entry" href="./camera/" aria-label="写真で遊ぶ、撮影・画像にキャラクターを貼る">
+      <span class="game-entry-copy">
+        <strong>📸 写真で遊ぶ</strong>
+        <small>撮影・画像にキャラクターを貼る</small>
+      </span>
+      <span class="game-entry-icon" aria-hidden="true">＋</span>
+    </a>
+
     <a class="game-entry" href="./game/" aria-label="面積クイズ、ナウルより大きいか小さいかを当てるゲームを開く">
       <span class="game-entry-copy">
         <strong>面積クイズに挑戦</strong>
@@ -2569,6 +2578,9 @@
 
     <!-- スマホ: 操作カテゴリだけを表示 -->
     <div id="mobile-launchers" aria-label="操作を選択">
+      <a class="mobile-launcher photo-launcher" href="./camera/" aria-label="写真で遊ぶ、撮影・画像にキャラクターを貼る">
+        <strong>📸 写真で遊ぶ</strong><small>撮影・画像にキャラクターを貼る</small>
+      </a>
       <a class="mobile-launcher game-launcher" href="./game/">
         <strong>面積クイズ</strong><small>大きい？ 小さい？ 全10問</small>
       </a>

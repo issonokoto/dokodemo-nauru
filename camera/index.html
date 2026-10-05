@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061525">
+  <title>写真で遊ぶ | どこでもナウル</title>
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="stylesheet" href="camera.css">
+  <script type="module" src="camera.js"></script>
+</head>
+<body>
+  <header class="camera-header">
+    <a href="../" class="back-link">← 地図へ</a>
+    <h1>写真で遊ぶ</h1>
+    <span class="header-tag">一緒に撮ろう</span>
+  </header>
+  <main class="camera-layout">
+    <section class="viewfinder" aria-label="合成プレビュー">
+      <div class="source-bar" role="group" aria-label="背景を選ぶ">
+        <button id="use-camera" type="button" aria-pressed="true">カメラで撮る</button>
+        <button id="choose-background" type="button" aria-pressed="false">画像を開く</button>
+      </div>
+      <input id="background-file" type="file" accept="image/*" hidden>
+      <input id="overlay-file" type="file" accept="image/*" hidden>
+      <div class="stage-shell">
+        <div id="camera-stage" class="camera-stage">
+          <video id="camera-video" autoplay playsinline muted aria-label="カメラ映像"></video>
+          <img id="background-image" alt="背景に選んだ画像" draggable="false" hidden>
+          <div id="camera-placeholder" class="camera-placeholder">
+            <span class="camera-mark" aria-hidden="true">◎</span>
+            <h2>ナウルのみんなと、記念写真。</h2>
+            <p>カメラで撮るか、「画像を開く」で写真を選ぼう。</p>
+            <button id="start-camera" class="primary-button" type="button">カメラを開く</button>
+          </div>
+          <img id="logo-layer" class="photo-layer logo-layer" data-layer-id="logo" src="../assets/dokodemo-nauru-logo-transparent-v3.png" alt="どこでもナウルのロゴ" draggable="false" tabindex="0">
+          <canvas id="credit-layer" class="photo-layer credit-layer" data-layer-id="credit" role="img" aria-label="© ナウル共和国政府観光局" tabindex="0"></canvas>
+          <span class="preview-badge">指1本で移動・2本で拡大／回転</span>
+        </div>
+      </div>
+      <div class="shutter-bar">
+        <button id="switch-camera" type="button" class="secondary-button" disabled>↻ インカメラへ</button>
+        <button id="capture-photo" type="button" class="shutter-button" disabled aria-label="写真を撮る"><span></span></button>
+        <button id="reset-placement" type="button" class="secondary-button">配置を戻す</button>
+      </div>
+      <p id="camera-status" class="status" role="status" aria-live="polite">写真は端末内で処理します。</p>
+    </section>
+    <aside class="control-panel" aria-label="写真の設定">
+      <section class="control-section">
+        <div class="section-heading"><h2>貼る画像</h2><span id="character-count">タップで追加 · 1 / 3枚</span><button id="add-overlay-image" type="button">＋ 画像</button></div>
+        <div id="character-list" class="character-list" role="group" aria-label="キャラクターを追加（最大3体）"></div>
+      </section>
+      <section class="control-section">
+        <div class="section-heading"><h2>配置した画像</h2><span>タップで編集</span></div>
+        <div id="placed-characters" class="placed-characters" role="group" aria-label="編集する画像"></div>
+        <div class="edit-actions">
+          <span id="selected-name" class="selected-name">ナウルくん</span>
+          <button id="flip-layer" class="secondary-button" type="button">左右反転</button>
+          <button id="remove-character" class="secondary-button" type="button">削除</button>
+        </div>
+        <div class="logo-controls">
+          <button id="select-logo" type="button" aria-pressed="false">ロゴを編集</button>
+          <label class="check-row"><input id="show-logo" type="checkbox" checked>ロゴを入れる</label>
+          <label class="check-row"><input id="mirror-selfie" type="checkbox" checked>自撮り鏡表示</label>
+        </div>
+      </section>
+      <div class="credit credit-controls">
+        <button id="select-credit" type="button" aria-pressed="false">© 表記を編集</button>
+        <label class="check-row"><input id="show-credit" type="checkbox" checked>© 表記を入れる</label>
+      </div>
+    </aside>
+  </main>
+  <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="photo-title">
+    <div class="dialog-heading"><h2 id="photo-title">一緒に撮れた！</h2><button id="close-photo" type="button" class="secondary-button">閉じる</button></div>
+    <canvas id="captured-photo" role="img" aria-label="キャラクターとロゴを合成した写真"></canvas>
+    <div class="photo-actions"><button id="save-photo" type="button" class="primary-button">画像を保存</button><button id="share-photo" type="button" class="secondary-button">共有・写真に保存</button><button id="retake-photo" type="button" class="secondary-button">撮り直す</button></div>
+    <p id="photo-status" class="status" role="status">iPhoneでは共有メニューから写真に保存できます。</p>
+  </dialog>
+</body>
+</html>

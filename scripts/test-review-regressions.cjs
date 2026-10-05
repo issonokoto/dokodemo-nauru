@@ -6,6 +6,8 @@ const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 async function main() {
+  const cacheName = read('service-worker.js').match(/const CACHE_NAME = '([^']+)'/)[1];
+  const previousCacheName = cacheName.replace(/\d+$/, value => String(Number(value) - 1));
   const handlers = {}, deleted = [], stored = new Map();
   const context = {
     URL, Request, Response,
@@ -16,19 +18,19 @@ async function main() {
       clients: { claim: async () => {} }
     },
     caches: {
-      keys: async () => ['dokodemo-nauru-v83', 'dokodemo-nauru-v84', 'dokodemo-nauru-map-tiles-v1', 'other-app'],
+      keys: async () => [previousCacheName, cacheName, 'dokodemo-nauru-map-tiles-v1', 'other-app'],
       delete: async key => deleted.push(key),
       open: async () => ({ put: async (key, value) => stored.set(key.url || key, await value.text()) }),
       match: async key => stored.has(key.url) ? new Response(stored.get(key.url)) : undefined
     },
-    fetch: async request => new Response(request.url.endsWith('privacy.html') ? 'privacy' : 'home')
+    fetch: async request => new Response(request.url.endsWith('privacy.html') ? 'privacy' : request.url.includes('/camera/') ? 'photo-editor' : 'home')
   };
   vm.createContext(context);
   vm.runInContext(read('service-worker.js'), context);
   let pending;
   handlers.activate({ waitUntil: promise => { pending = promise; } });
   await pending;
-  assert.deepEqual(deleted, ['dokodemo-nauru-v83']);
+  assert.deepEqual(deleted, [previousCacheName]);
   // Use a Request-compatible stub to model browser navigation requests.
   context.Request = class { constructor(value) { this.url = value.url || String(value); } };
   async function navigate(url) {
@@ -41,9 +43,12 @@ async function main() {
   }
   await navigate('https://example.com/dokodemo-nauru/');
   await navigate('https://example.com/dokodemo-nauru/privacy.html');
+  await navigate('https://example.com/dokodemo-nauru/camera/');
   context.fetch = async () => { throw new Error('offline'); };
   assert.equal(await navigate('https://example.com/dokodemo-nauru/'), 'home');
   assert.equal(await navigate('https://example.com/dokodemo-nauru/privacy.html'), 'privacy');
+  assert.equal(await navigate('https://example.com/dokodemo-nauru/camera/'), 'photo-editor');
+  assert.equal(await navigate('https://example.com/dokodemo-nauru/camera/index.html'), 'photo-editor');
 
   const game = read('game/game.js');
   const rpc = game.slice(game.indexOf('  async function rankingRpc('), game.indexOf('  function firstRpcRow('));

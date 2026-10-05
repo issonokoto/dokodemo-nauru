@@ -1,6 +1,13 @@
-const CACHE_NAME = 'dokodemo-nauru-v84';
+const CACHE_NAME = 'dokodemo-nauru-v85';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
+  './camera/index.html',
+  './camera/camera.css',
+  './camera/camera.js',
+  './camera/assets/onlion.png',
+  './camera/assets/nauruchan.png',
+  './camera/assets/fake-phosphate.png',
+  './camera/assets/phosphate.png',
   './index.html',
   './game/index.html',
   './game/game.css',
@@ -21,6 +28,9 @@ const STATIC_SHELL = [
 ];
 
 const NETWORK_FIRST_PATHS = new Set([
+  './camera/index.html',
+  './camera/camera.css',
+  './camera/camera.js',
   './index.html',
   './game/index.html',
   './game/game.css',
@@ -45,9 +55,10 @@ function stableCacheRequest(requestUrl, navigation) {
     const scopePath = new URL(self.registration.scope).pathname;
     const relativePath = requestUrl.pathname.slice(scopePath.length);
     const gameNavigation = relativePath === 'game' || relativePath === 'game/' || relativePath === 'game/index.html';
+    const cameraNavigation = relativePath === 'camera' || relativePath === 'camera/' || relativePath === 'camera/index.html';
     const homeNavigation = relativePath === '' || relativePath === 'index.html';
-    url = gameNavigation || homeNavigation
-      ? new URL(gameNavigation ? './game/index.html' : './index.html', self.registration.scope)
+    url = gameNavigation || cameraNavigation || homeNavigation
+      ? new URL(gameNavigation ? './game/index.html' : cameraNavigation ? './camera/index.html' : './index.html', self.registration.scope)
       : new URL(requestUrl.pathname, requestUrl.origin);
   } else {
     url = new URL(requestUrl.pathname, requestUrl.origin);
