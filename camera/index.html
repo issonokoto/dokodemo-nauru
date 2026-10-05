@@ -34,7 +34,7 @@
             <button id="start-camera" class="primary-button" type="button">カメラを開く</button>
           </div>
           <img id="logo-layer" class="photo-layer logo-layer" data-layer-id="logo" src="../assets/dokodemo-nauru-logo-transparent-v3.png" alt="どこでもナウルのロゴ" draggable="false" tabindex="0">
-          <canvas id="credit-layer" class="photo-layer credit-layer" data-layer-id="credit" role="img" aria-label="© ナウル共和国政府観光局" tabindex="0"></canvas>
+          <canvas id="credit-layer" class="credit-layer" role="img" aria-label="© ナウル共和国政府観光局"></canvas>
           <span class="preview-badge">指1本で移動・2本で拡大／回転</span>
         </div>
       </div>
@@ -64,10 +64,6 @@
           <label class="check-row"><input id="mirror-selfie" type="checkbox" checked>自撮り鏡表示</label>
         </div>
       </section>
-      <div class="credit credit-controls">
-        <button id="select-credit" type="button" aria-pressed="false">© 表記を編集</button>
-        <label class="check-row"><input id="show-credit" type="checkbox" checked>© 表記を入れる</label>
-      </div>
     </aside>
   </main>
   <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="photo-title">

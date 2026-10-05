@@ -10,9 +10,9 @@ const stage = $('camera-stage');
 const video = $('camera-video');
 let backgroundImage = $('background-image');
 const layers = {
-  logo: { element: $('logo-layer'), x: .79, y: .87, size: .3, rotation: 0, flip: false },
-  credit: { element: $('credit-layer'), x: .81, y: .965, size: .34, rotation: 0, flip: false, autoPlace: true }
+  logo: { element: $('logo-layer'), x: .79, y: .87, size: .3, rotation: 0, flip: false }
 };
+const creditCanvas = $('credit-layer');
 const CREDIT_TEXT = '© ナウル共和国政府観光局';
 const MAX_CHARACTERS = 3;
 const characters = [];
@@ -35,12 +35,11 @@ function renderLayers() {
     layer.element.classList.toggle('selected', state.selected === id);
   }
   layers.logo.element.hidden = !$('show-logo').checked;
-  layers.credit.element.hidden = !$('show-credit').checked;
   video.classList.toggle('mirrored', state.facing === 'user' && $('mirror-selfie').checked);
 }
 function selectLayer(id) {
   if (id && !layers[id]) return;
-  if (['logo', 'credit'].includes(id) && !$('show-' + id).checked) return;
+  if (id === 'logo' && !$('show-logo').checked) return;
   if (state.selected !== id) clearGesture();
   state.selected = id;
   syncControls();
@@ -49,11 +48,9 @@ function selectLayer(id) {
 function syncControls() {
   $('select-logo').setAttribute('aria-pressed', String(state.selected === 'logo'));
   $('select-logo').disabled = !$('show-logo').checked;
-  $('select-credit').setAttribute('aria-pressed', String(state.selected === 'credit'));
-  $('select-credit').disabled = !$('show-credit').checked;
-  $('flip-layer').disabled = !state.selected || state.selected === 'credit';
+  $('flip-layer').disabled = !state.selected;
   $('remove-character').disabled = !characters.includes(state.selected);
-  $('selected-name').textContent = state.selected === 'credit' ? '© 表記' : state.selected === 'logo' ? 'ロゴ' : layers[state.selected]?.element.alt || 'キャラクターを追加しよう';
+  $('selected-name').textContent = state.selected === 'logo' ? 'ロゴ' : layers[state.selected]?.element.alt || 'キャラクターを追加しよう';
   for (const button of $('placed-characters').querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.layerId === state.selected));
 }
 function renderCharacters() {
@@ -136,7 +133,7 @@ function removeCharacter() {
   layers[id].element.remove();
   if (layers[id].objectUrl) URL.revokeObjectURL(layers[id].objectUrl);
   delete layers[id];
-  selectLayer(characters[Math.min(index, characters.length - 1)] || ($('show-logo').checked ? 'logo' : $('show-credit').checked ? 'credit' : null));
+  selectLayer(characters[Math.min(index, characters.length - 1)] || ($('show-logo').checked ? 'logo' : null));
   renderPlacements();
 }
 function fitStage() {
@@ -146,16 +143,24 @@ function fitStage() {
   const width = Math.max(0, Math.min(shell.clientWidth - 2, (shell.clientHeight - 2) * ratio));
   stage.style.width = `${width}px`;
   stage.style.height = `${width / ratio}px`;
-  if (layers.credit.autoPlace) {
-    const creditRatio = layers.credit.element.height / layers.credit.element.width;
-    layers.credit.size = Math.min(.34, .4 / (ratio * creditRatio));
-    layers.credit.x = .98 - layers.credit.size / 2;
-    layers.credit.y = .98 - layers.credit.size * creditRatio * ratio / 2;
-  }
+  const credit = creditPlacement(ratio);
+  Object.assign(creditCanvas.style, { left: `${credit.x * 100}%`, top: `${credit.y * 100}%`, width: `${credit.size * 100}%` });
   renderLayers();
 }
+function creditPlacement(ratio) {
+  const creditRatio = creditCanvas.height / creditCanvas.width;
+  const size = Math.min(.34, .4 / (ratio * creditRatio));
+  return { size, x: .98 - size / 2, y: .98 - size * creditRatio * ratio / 2 };
+}
+function drawCredit(context, width, height) {
+  // The mandatory credit is independent of editable layers and DOM visibility.
+  const credit = creditPlacement(width / height);
+  const drawWidth = width * credit.size;
+  const drawHeight = drawWidth * creditCanvas.height / creditCanvas.width;
+  context.drawImage(creditCanvas, width * credit.x - drawWidth / 2, height * credit.y - drawHeight / 2, drawWidth, drawHeight);
+}
 function prepareCredit() {
-  const canvas = layers.credit.element;
+  const canvas = creditCanvas;
   const context = canvas.getContext('2d');
   const font = '600 96px system-ui, -apple-system, "Segoe UI", sans-serif';
   context.font = font;
@@ -169,7 +174,6 @@ function prepareCredit() {
   context.fillStyle = '#fff';
   context.strokeText(CREDIT_TEXT, 20, canvas.height / 2);
   context.fillText(CREDIT_TEXT, 20, canvas.height / 2);
-  canvas.title = '© 表記：ドラッグで移動・ピンチで拡大縮小・回転';
 }
 function sourceReady() {
   return state.mode === 'image' ? !!backgroundImage.naturalWidth : !!state.stream && video.readyState >= 2;
@@ -345,7 +349,7 @@ async function capturePhoto() {
     context.restore();
     for (const id of characters) drawLayer(context, layers[id], canvas.width, canvas.height);
     drawLayer(context, layers.logo, canvas.width, canvas.height);
-    drawLayer(context, layers.credit, canvas.width, canvas.height);
+    drawCredit(context, canvas.width, canvas.height);
     // Paint the frozen, fully composed frame before any JPEG encoding. Keep
     // the same canvas for preview and save, so no decode or extra copy is needed.
     $('photo-status').textContent = `${canvas.width} × ${canvas.height}px・保存用の画像を準備しています…`;
@@ -412,7 +416,6 @@ stage.addEventListener('keydown', event => {
     if (!movement && !['Delete', '+', '=', '-', '[', ']'].includes(event.key)) return;
     event.preventDefault();
     selectLayer(id);
-    if (id === 'credit') layer.autoPlace = false;
     if (event.key === 'Delete') { removeCharacter(); return; }
     if (movement) {
       layer.x = clamp(layer.x + movement[0], 0, 1);
@@ -429,7 +432,6 @@ stage.addEventListener('pointermove', event => {
   const a = points[0], b = points[1] || a;
   const bounds = stage.getBoundingClientRect();
   const layer = layers[gesture.id];
-  if (gesture.id === 'credit') layer.autoPlace = false;
   layer.x = clamp(gesture.x + ((a.x + b.x) / 2 - gesture.cx) / bounds.width, 0, 1);
   layer.y = clamp(gesture.y + ((a.y + b.y) / 2 - gesture.cy) / bounds.height, 0, 1);
   if (points.length > 1 && gesture.distance > 0) {
@@ -449,7 +451,6 @@ stage.addEventListener('wheel', event => {
   if (!layers[id]) return;
   event.preventDefault();
   selectLayer(id);
-  if (id === 'credit') layers.credit.autoPlace = false;
   if (event.shiftKey) layers[id].rotation += event.deltaY > 0 ? 5 : -5;
   else layers[id].size = clamp(layers[id].size * (event.deltaY > 0 ? .95 : 1.05), .08, 1.1);
   renderLayers();
@@ -463,26 +464,19 @@ for (const [id, open] of [['background-file', openBackground], ['overlay-file', 
 $('switch-camera').addEventListener('click', () => state.mode === 'image' ? $('background-file').click() : openCamera(state.facing === 'user' ? 'environment' : 'user', true));
 $('capture-photo').addEventListener('click', capturePhoto);
 $('select-logo').addEventListener('click', () => selectLayer('logo'));
-$('select-credit').addEventListener('click', () => selectLayer('credit'));
 $('remove-character').addEventListener('click', removeCharacter);
 $('flip-layer').addEventListener('click', () => { if (state.selected) { layers[state.selected].flip = !layers[state.selected].flip; renderLayers(); } });
 $('show-logo').addEventListener('change', () => {
-  if (!$('show-logo').checked && state.selected === 'logo') selectLayer(characters[0] || ($('show-credit').checked ? 'credit' : null));
+  if (!$('show-logo').checked && state.selected === 'logo') selectLayer(characters[0] || null);
   if ($('show-logo').checked && !state.selected) selectLayer('logo');
   syncControls();
   renderLayers();
-});
-$('show-credit').addEventListener('change', () => {
-  if (!$('show-credit').checked && state.selected === 'credit') selectLayer(characters[0] || ($('show-logo').checked ? 'logo' : null));
-  if ($('show-credit').checked && !state.selected) selectLayer('credit');
-  syncControls(); renderLayers();
 });
 $('mirror-selfie').addEventListener('change', renderLayers);
 $('reset-placement').addEventListener('click', () => {
   clearGesture();
   characters.forEach((id, index) => Object.assign(layers[id], { x: (index + 1) / (characters.length + 1), y: .62, size: characters.length === 1 ? .38 : .3, rotation: 0, flip: false }));
   Object.assign(layers.logo, { x: .79, y: .87, size: .3, rotation: 0, flip: false });
-  Object.assign(layers.credit, { size: .34, rotation: 0, flip: false, autoPlace: true });
   syncControls(); fitStage();
 });
 for (const id of ['close-photo', 'retake-photo']) $(id).addEventListener('click', () => $('photo-dialog').close());
