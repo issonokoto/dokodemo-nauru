@@ -47,7 +47,7 @@
     </section>
     <aside class="control-panel" aria-label="写真の設定">
       <section class="control-section">
-        <div class="section-heading"><h2>貼る画像</h2><span id="character-count">タップで追加 · 1 / 3枚</span><button id="add-overlay-image" type="button">＋ 画像</button></div>
+        <div class="section-heading"><h2>貼る画像</h2><span id="character-count">1 / 3枚</span><button id="add-shape" type="button">＋ 図形</button><button id="add-overlay-image" type="button">＋ 画像</button></div>
         <div id="character-list" class="character-list" role="group" aria-label="キャラクターを追加（最大3体）"></div>
       </section>
       <section class="control-section">
@@ -66,6 +66,14 @@
       </section>
     </aside>
   </main>
+  <dialog id="shape-dialog" class="shape-dialog" aria-labelledby="shape-title">
+    <div class="dialog-heading"><h2 id="shape-title">図形を追加</h2><button id="close-shapes" type="button" class="secondary-button">閉じる</button></div>
+    <button id="add-nauru-shape" type="button" class="nauru-shape-choice">ナウル共和国</button>
+    <div class="shape-filters"><label>都道府県<select id="shape-prefecture"></select></label><label>名前で検索<input id="shape-search" type="search" placeholder="例：大阪府、東大阪市" autocomplete="off"></label></div>
+    <p id="shape-message" class="shape-message" role="status" aria-live="polite"></p>
+    <div id="shape-results" class="shape-results" role="group" aria-label="追加する都道府県・市区町村"></div>
+    <p class="shape-note">キャラクター・図形・手持ち画像を合わせて最大3枚<br>行政区域：国土数値情報・Geolonia（加工）</p>
+  </dialog>
   <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="photo-title">
     <div class="dialog-heading"><h2 id="photo-title">一緒に撮れた！</h2><button id="close-photo" type="button" class="secondary-button">閉じる</button></div>
     <canvas id="captured-photo" role="img" aria-label="キャラクターとロゴを合成した写真"></canvas>

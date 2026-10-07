@@ -1,9 +1,12 @@
-const CACHE_NAME = 'dokodemo-nauru-v86';
+const CACHE_NAME = 'dokodemo-nauru-v87';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './camera/index.html',
   './camera/camera.css',
   './camera/camera.js',
+  './camera/shapes.js',
+  './camera/assets/shape-catalog.json',
+  './camera/assets/nauru-boundary.json',
   './camera/assets/onlion.png',
   './camera/assets/nauruchan.png',
   './camera/assets/fake-phosphate.png',
@@ -31,6 +34,9 @@ const NETWORK_FIRST_PATHS = new Set([
   './camera/index.html',
   './camera/camera.css',
   './camera/camera.js',
+  './camera/shapes.js',
+  './camera/assets/shape-catalog.json',
+  './camera/assets/nauru-boundary.json',
   './index.html',
   './game/index.html',
   './game/game.css',

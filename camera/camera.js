@@ -1,3 +1,4 @@
+import { loadShapeCatalog, normalizeShapeSearch, createShapeImage } from './shapes.js';
 const CHARACTERS = [
   { id: 'nauru', name: 'ナウルくん', src: '../nauru_kun_outline.png' },
   { id: 'onlion', name: 'おんライオン', src: './assets/onlion.png' },
@@ -17,7 +18,7 @@ const CREDIT_TEXT = '© ナウル共和国政府観光局';
 const MAX_CHARACTERS = 3;
 const characters = [];
 let nextCharacterId = 1;
-const state = { selected: null, mode: 'camera', backgroundUrl: null, backgroundType: 'image/jpeg', backgroundSequence: 0, overlaySequence: 0, overlayLoading: false, facing: 'environment', stream: null, opening: false, captureBusy: false, captureSequence: 0, sequence: 0, blob: null, photoUrl: null, fileName: '' };
+const state = { selected: null, mode: 'camera', backgroundUrl: null, backgroundType: 'image/jpeg', backgroundSequence: 0, overlaySequence: 0, overlayLoading: false, facing: 'environment', stream: null, opening: false, captureBusy: false, captureSequence: 0, shapeSequence: 0, shapeLoading: false, sequence: 0, blob: null, photoUrl: null, fileName: '' };
 const pointers = new Map();
 let gesture = null;
 const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
@@ -35,6 +36,7 @@ function renderLayers() {
     layer.element.classList.toggle('selected', state.selected === id);
   }
   layers.logo.element.hidden = !$('show-logo').checked;
+  creditCanvas.hidden = !characters.some(id => layers[id].requiresCredit);
   video.classList.toggle('mirrored', state.facing === 'user' && $('mirror-selfie').checked);
 }
 function selectLayer(id) {
@@ -99,9 +101,10 @@ function renderPlacements() {
     list.append(slot);
   }
   const full = characters.length === MAX_CHARACTERS;
-  $('character-count').textContent = `${full ? '上限3枚' : 'タップで追加'} · ${characters.length} / 3枚`;
+  $('character-count').textContent = `${characters.length} / 3枚`;
   $('character-list').querySelectorAll('button').forEach(button => { button.disabled = full; });
   $('add-overlay-image').disabled = full || state.overlayLoading;
+  $('add-shape').disabled = full || state.shapeLoading;
   syncControls();
 }
 function addCharacter(character, preparedImage = null, objectUrl = null) {
@@ -118,7 +121,7 @@ function addCharacter(character, preparedImage = null, objectUrl = null) {
   image.title = 'ドラッグで移動・ホイールで拡大縮小・Shift＋ホイールで回転';
   // DOM order and export order stay identical, with the logo above every character.
   stage.insertBefore(image, layers.logo.element);
-  layers[id] = { element: image, objectUrl, x: [.5, .22, .78][characters.length], y: .62, size: characters.length ? .3 : .38, rotation: 0, flip: false };
+  layers[id] = { element: image, objectUrl, requiresCredit: !preparedImage && CHARACTERS.includes(character), x: [.5, .22, .78][characters.length], y: .62, size: characters.length ? .3 : .38, rotation: 0, flip: false };
   characters.push(id);
   selectLayer(id);
   renderPlacements();
@@ -153,7 +156,8 @@ function creditPlacement(ratio) {
   return { size, x: .98 - size / 2, y: .98 - size * creditRatio * ratio / 2 };
 }
 function drawCredit(context, width, height) {
-  // The mandatory credit is independent of editable layers and DOM visibility.
+  if (!characters.some(id => layers[id].requiresCredit)) return;
+  // Character copyright is independent of editable layers and DOM visibility.
   const credit = creditPlacement(width / height);
   const drawWidth = width * credit.size;
   const drawHeight = drawWidth * creditCanvas.height / creditCanvas.width;
@@ -455,6 +459,61 @@ stage.addEventListener('wheel', event => {
   else layers[id].size = clamp(layers[id].size * (event.deltaY > 0 ? .95 : 1.05), .08, 1.1);
   renderLayers();
 }, { passive: false });
+
+let shapeCatalog;
+function renderShapeResults() {
+  const list = $('shape-results'); list.replaceChildren();
+  if (!shapeCatalog) return;
+  const query = normalizeShapeSearch($('shape-search').value.trim());
+  const terms = query.split(/\s+/).filter(Boolean);
+  const pref = $('shape-prefecture').value;
+  const targets = [...shapeCatalog.prefectures, ...shapeCatalog.municipalities].filter(target => {
+    if (pref && target.prefCode !== pref) return false;
+    if (!terms.length && !pref && target.kind !== 'prefecture') return false;
+    const text = normalizeShapeSearch(`${target.name} ${target.kana || ''}`);
+    return terms.every(term => text.includes(term));
+  });
+  targets.sort((a, b) => Number(normalizeShapeSearch(b.shortName || b.name) === query) - Number(normalizeShapeSearch(a.shortName || a.name) === query));
+  for (const target of targets.slice(0, 80)) {
+    const button = document.createElement('button'); button.type = 'button'; button.textContent = target.name;
+    button.disabled = state.shapeLoading; button.addEventListener('click', () => addShape(target)); list.append(button);
+  }
+  $('shape-message').textContent = targets.length ? `${targets.length}件${targets.length > 80 ? ' · 先頭80件を表示。名前で絞り込めます。' : ''}` : '該当する図形がありません。別の名前で検索してください。';
+}
+async function openShapePicker() {
+  if (characters.length >= MAX_CHARACTERS) return;
+  $('shape-dialog').showModal(); $('shape-message').textContent = '図形の一覧を開いています…';
+  try {
+    shapeCatalog = await loadShapeCatalog();
+    if (!$('shape-prefecture').options.length) {
+      const all = new Option('全国から選ぶ', ''); $('shape-prefecture').add(all);
+      for (const pref of shapeCatalog.prefectures) $('shape-prefecture').add(new Option(pref.name, pref.prefCode));
+    }
+    renderShapeResults();
+  } catch (_) { $('shape-message').textContent = '一覧を開けませんでした。閉じて、もう一度お試しください。'; }
+}
+async function addShape(target) {
+  if (state.shapeLoading || characters.length >= MAX_CHARACTERS) return;
+  const sequence = ++state.shapeSequence; state.shapeLoading = true;
+  $('add-nauru-shape').disabled = true; $('shape-results').querySelectorAll('button').forEach(button => button.disabled = true);
+  $('shape-message').textContent = `${target.name}の図形を準備しています…`; renderPlacements();
+  try {
+    const { image, url } = await createShapeImage(target);
+    if (sequence !== state.shapeSequence || characters.length >= MAX_CHARACTERS || !$('shape-dialog').open) { URL.revokeObjectURL(url); return; }
+    addCharacter({ name: target.name }, image, url); $('shape-dialog').close();
+    status(`${target.name}を追加しました。指で移動・2本で拡大／回転できます。`);
+  } catch (_) {
+    if (sequence === state.shapeSequence) $('shape-message').textContent = '図形を取得できませんでした。通信を確認して、もう一度選んでください。';
+  } finally {
+    if (sequence === state.shapeSequence) { state.shapeLoading = false; renderPlacements(); $('add-nauru-shape').disabled = false; $('shape-results').querySelectorAll('button').forEach(button => button.disabled = false); }
+  }
+}
+$('add-shape').addEventListener('click', openShapePicker);
+$('close-shapes').addEventListener('click', () => $('shape-dialog').close());
+$('shape-dialog').addEventListener('close', () => { ++state.shapeSequence; state.shapeLoading = false; $('add-nauru-shape').disabled = false; renderPlacements(); renderShapeResults(); });
+$('add-nauru-shape').addEventListener('click', () => addShape({ id: 'nauru-boundary', kind: 'nauru', name: 'ナウル共和国' }));
+$('shape-search').addEventListener('input', renderShapeResults);
+$('shape-prefecture').addEventListener('change', renderShapeResults);
 
 $('start-camera').addEventListener('click', () => openCamera());
 $('use-camera').addEventListener('click', () => openCamera());
