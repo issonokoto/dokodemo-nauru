@@ -47,14 +47,16 @@
     </section>
     <aside class="control-panel" aria-label="写真の設定">
       <section class="control-section">
-        <div class="section-heading"><h2>貼る画像</h2><span id="character-count">1 / 3枚</span><button id="add-shape" type="button">＋ 図形</button><button id="add-overlay-image" type="button">＋ 画像</button></div>
+        <div class="section-heading"><h2>貼る素材</h2><span id="character-count">1 / 3枚</span><button id="add-shape" type="button">＋図形</button><button id="add-overlay-image" type="button">＋画像</button><button id="add-text" type="button" aria-label="文字を追加（最大3つ）">＋文字</button></div>
         <div id="character-list" class="character-list" role="group" aria-label="キャラクターを追加（最大3体）"></div>
       </section>
       <section class="control-section">
-        <div class="section-heading"><h2>配置した画像</h2><span>タップで編集</span></div>
+        <div class="section-heading"><h2>配置した素材</h2><span>タップで編集</span></div>
         <div id="placed-characters" class="placed-characters" role="group" aria-label="編集する画像"></div>
+        <div id="placed-texts" class="placed-texts" role="group" aria-label="編集する文字" hidden></div>
         <div class="edit-actions">
           <span id="selected-name" class="selected-name">ナウルくん</span>
+          <button id="edit-text" class="secondary-button" type="button" hidden>文字を編集</button>
           <button id="flip-layer" class="secondary-button" type="button">左右反転</button>
           <button id="remove-character" class="secondary-button" type="button">削除</button>
         </div>
@@ -66,6 +68,21 @@
       </section>
     </aside>
   </main>
+  <dialog id="text-dialog" class="text-dialog" aria-labelledby="text-title">
+    <div class="dialog-heading"><h2 id="text-title">文字を追加</h2><button id="close-text" type="button" class="secondary-button">閉じる</button></div>
+    <div class="text-preview-box"><canvas id="text-preview" role="img" aria-label="文字の仕上がりプレビュー"></canvas></div>
+    <label class="text-content-label">文字<textarea id="text-content" rows="2" maxlength="120" placeholder="文字を入力（改行できます）"></textarea></label>
+    <div class="text-options">
+      <label>書き方向<select id="text-direction"><option value="horizontal">横書き</option><option value="vertical">縦書き</option></select></label>
+      <label>フォント<select id="text-font"><option value="gothic">ゴシック</option><option value="mincho">明朝</option><option value="rounded">丸ゴシック</option><option value="hand">手書き風</option></select></label>
+      <label>見せ方<select id="text-effect"><option value="plain">標準</option><option value="shadow">影</option><option value="lift">浮き出し</option><option value="neon">ネオン</option><option value="label">ラベル</option><option value="gradient">グラデーション</option></select></label>
+      <label class="text-color-option">文字色<input id="text-color" type="color" value="#ffffff"></label>
+      <label class="check-row text-outline-option"><input id="text-outline" type="checkbox" checked>縁取りをつける</label>
+      <label class="text-color-option">縁取りの色<input id="text-outline-color" type="color" value="#000000"></label>
+    </div>
+    <p id="text-message" class="status" role="status" aria-live="polite"></p>
+    <div class="text-editor-actions"><span>文字は画像3枚と別に最大3つ</span><button id="apply-text" type="button" class="primary-button">追加する</button></div>
+  </dialog>
   <dialog id="shape-dialog" class="shape-dialog" aria-labelledby="shape-title">
     <div class="dialog-heading"><h2 id="shape-title">図形を追加</h2><button id="close-shapes" type="button" class="secondary-button">閉じる</button></div>
     <button id="add-nauru-shape" type="button" class="nauru-shape-choice">ナウル共和国</button>

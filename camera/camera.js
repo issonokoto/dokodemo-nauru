@@ -1,3 +1,4 @@
+import { renderTextCanvas } from './text.js';
 import { loadShapeCatalog, normalizeShapeSearch, createShapeImage } from './shapes.js';
 const CHARACTERS = [
   { id: 'nauru', name: 'ナウルくん', src: '../nauru_kun_outline.png' },
@@ -17,6 +18,9 @@ const creditCanvas = $('credit-layer');
 const CREDIT_TEXT = '© ナウル共和国政府観光局';
 const MAX_CHARACTERS = 3;
 const characters = [];
+const texts = [];
+const MAX_TEXTS = 3;
+let nextTextId = 1;
 let nextCharacterId = 1;
 const state = { selected: null, mode: 'camera', backgroundUrl: null, backgroundType: 'image/jpeg', backgroundSequence: 0, overlaySequence: 0, overlayLoading: false, facing: 'environment', stream: null, opening: false, captureBusy: false, captureSequence: 0, shapeSequence: 0, shapeLoading: false, sequence: 0, blob: null, photoUrl: null, fileName: '' };
 const pointers = new Map();
@@ -51,9 +55,10 @@ function syncControls() {
   $('select-logo').setAttribute('aria-pressed', String(state.selected === 'logo'));
   $('select-logo').disabled = !$('show-logo').checked;
   $('flip-layer').disabled = !state.selected;
-  $('remove-character').disabled = !characters.includes(state.selected);
-  $('selected-name').textContent = state.selected === 'logo' ? 'ロゴ' : layers[state.selected]?.element.alt || 'キャラクターを追加しよう';
-  for (const button of $('placed-characters').querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.layerId === state.selected));
+  $('remove-character').disabled = !characters.includes(state.selected) && !texts.includes(state.selected);
+  $('edit-text').hidden = !texts.includes(state.selected);
+  $('selected-name').textContent = state.selected === 'logo' ? 'ロゴ' : layers[state.selected]?.element.alt || '素材を追加しよう';
+  for (const button of document.querySelectorAll('#placed-characters button, #placed-texts button')) button.setAttribute('aria-pressed', String(button.dataset.layerId === state.selected));
 }
 function renderCharacters() {
   const list = $('character-list');
@@ -105,6 +110,13 @@ function renderPlacements() {
   $('character-list').querySelectorAll('button').forEach(button => { button.disabled = full; });
   $('add-overlay-image').disabled = full || state.overlayLoading;
   $('add-shape').disabled = full || state.shapeLoading;
+  $('add-text').disabled = texts.length >= MAX_TEXTS;
+  const textList = $('placed-texts'); textList.replaceChildren(); textList.hidden = !texts.length;
+  for (const [index, id] of texts.entries()) {
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'placed-text-choice'; button.dataset.layerId = id;
+    const name = `${index + 1} ${layers[id].text.content.replace(/\n/g, ' ')}`; button.textContent = `T ${name}`; button.title = name; button.setAttribute('aria-label', `文字${name}を選択`);
+    button.addEventListener('click', () => selectLayer(id)); textList.append(button);
+  }
   syncControls();
 }
 function addCharacter(character, preparedImage = null, objectUrl = null) {
@@ -120,7 +132,7 @@ function addCharacter(character, preparedImage = null, objectUrl = null) {
   image.tabIndex = 0;
   image.title = 'ドラッグで移動・ホイールで拡大縮小・Shift＋ホイールで回転';
   // DOM order and export order stay identical, with the logo above every character.
-  stage.insertBefore(image, layers.logo.element);
+  stage.insertBefore(image, texts.length ? layers[texts[0]].element : layers.logo.element);
   layers[id] = { element: image, objectUrl, requiresCredit: !preparedImage && CHARACTERS.includes(character), x: [.5, .22, .78][characters.length], y: .62, size: characters.length ? .3 : .38, rotation: 0, flip: false };
   characters.push(id);
   selectLayer(id);
@@ -129,14 +141,15 @@ function addCharacter(character, preparedImage = null, objectUrl = null) {
 }
 function removeCharacter() {
   const id = state.selected;
-  if (!characters.includes(id)) return;
+  const items = characters.includes(id) ? characters : texts;
+  if (!items.includes(id)) return;
   clearGesture();
-  const index = characters.indexOf(id);
-  characters.splice(index, 1);
+  const index = items.indexOf(id);
+  items.splice(index, 1);
   layers[id].element.remove();
   if (layers[id].objectUrl) URL.revokeObjectURL(layers[id].objectUrl);
   delete layers[id];
-  selectLayer(characters[Math.min(index, characters.length - 1)] || ($('show-logo').checked ? 'logo' : null));
+  selectLayer(items[Math.min(index, items.length - 1)] || characters[0] || texts[0] || ($('show-logo').checked ? 'logo' : null));
   renderPlacements();
 }
 function fitStage() {
@@ -351,7 +364,7 @@ async function capturePhoto() {
     if (!fromImage && state.facing === 'user' && $('mirror-selfie').checked) { context.translate(canvas.width, 0); context.scale(-1, 1); }
     context.drawImage(source, (fullWidth - sourceWidth) / 2, (fullHeight - sourceHeight) / 2, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
     context.restore();
-    for (const id of characters) drawLayer(context, layers[id], canvas.width, canvas.height);
+    for (const id of [...characters, ...texts]) drawLayer(context, layers[id], canvas.width, canvas.height);
     drawLayer(context, layers.logo, canvas.width, canvas.height);
     drawCredit(context, canvas.width, canvas.height);
     // Paint the frozen, fully composed frame before any JPEG encoding. Keep
@@ -426,7 +439,7 @@ stage.addEventListener('keydown', event => {
       layer.y = clamp(layer.y + movement[1], 0, 1);
     } else if (event.key === '[' || event.key === ']') {
       layer.rotation += event.key === '[' ? -5 : 5;
-    } else layer.size = clamp(layer.size * (event.key === '-' ? .95 : 1.05), .08, 1.1);
+    } else layer.size = clamp(layer.size * (event.key === '-' ? .95 : 1.05), texts.includes(id) ? .001 : .08, 1.1);
     renderLayers();
 });
 stage.addEventListener('pointermove', event => {
@@ -439,7 +452,7 @@ stage.addEventListener('pointermove', event => {
   layer.x = clamp(gesture.x + ((a.x + b.x) / 2 - gesture.cx) / bounds.width, 0, 1);
   layer.y = clamp(gesture.y + ((a.y + b.y) / 2 - gesture.cy) / bounds.height, 0, 1);
   if (points.length > 1 && gesture.distance > 0) {
-    layer.size = clamp(gesture.size * Math.hypot(b.x - a.x, b.y - a.y) / gesture.distance, .08, 1.1);
+    layer.size = clamp(gesture.size * Math.hypot(b.x - a.x, b.y - a.y) / gesture.distance, texts.includes(gesture.id) ? .001 : .08, 1.1);
     const degrees = gesture.rotation + (Math.atan2(b.y - a.y, b.x - a.x) - gesture.angle) * 180 / Math.PI;
     layer.rotation = ((degrees + 180) % 360 + 360) % 360 - 180;
   }
@@ -456,9 +469,80 @@ stage.addEventListener('wheel', event => {
   event.preventDefault();
   selectLayer(id);
   if (event.shiftKey) layers[id].rotation += event.deltaY > 0 ? 5 : -5;
-  else layers[id].size = clamp(layers[id].size * (event.deltaY > 0 ? .95 : 1.05), .08, 1.1);
+  else layers[id].size = clamp(layers[id].size * (event.deltaY > 0 ? .95 : 1.05), texts.includes(id) ? .001 : .08, 1.1);
   renderLayers();
 }, { passive: false });
+
+const textEditor = { target: null, sequence: 0, bitmap: null, draft: null };
+let lastTextStyle = { content: 'ナウルで記念写真', font: 'gothic', direction: 'horizontal', color: '#ffffff', effect: 'plain', outline: true, outlineColor: '#000000' };
+function textDraft() {
+  return { content: $('text-content').value, font: $('text-font').value, direction: $('text-direction').value, color: $('text-color').value, effect: $('text-effect').value, outline: $('text-outline').checked, outlineColor: $('text-outline-color').value };
+}
+async function previewText() {
+  const sequence = ++textEditor.sequence;
+  textEditor.bitmap = null; $('apply-text').disabled = true; $('text-outline-color').disabled = !$('text-outline').checked;
+  $('text-message').textContent = '文字の仕上がりを準備しています…';
+  const draft = textDraft();
+  document.querySelector('.text-preview-box').dataset.direction = draft.direction;
+  try {
+    const bitmap = await renderTextCanvas(draft);
+    if (sequence !== textEditor.sequence || !$('text-dialog').open) return;
+    const canvas = $('text-preview'); canvas.width = bitmap.width; canvas.height = bitmap.height;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0); textEditor.bitmap = bitmap; textEditor.draft = draft;
+    $('apply-text').disabled = false; $('text-message').textContent = '文字を置いたあと、指で移動・2本で拡大／回転できます。';
+  } catch (_) {
+    if (sequence !== textEditor.sequence || !$('text-dialog').open) return;
+    $('text-preview').getContext('2d').clearRect(0, 0, $('text-preview').width, $('text-preview').height);
+    $('text-message').textContent = !draft.content.trim() ? '文字を入力してください。' : draft.content.split('\n').length > 6 ? '改行は6行（縦書きは6列）までにしてください。' : draft.content.length > 120 ? '文字は120文字以内で入力してください。' : '文字を準備できませんでした。フォントを選び直して再度お試しください。';
+  }
+}
+function openTextEditor(id = null) {
+  if (!id && texts.length >= MAX_TEXTS) return;
+  textEditor.target = id;
+  const draft = id ? layers[id].text : lastTextStyle;
+  $('text-direction').value = draft.direction || 'horizontal'; $('text-content').value = draft.content; $('text-font').value = draft.font; $('text-color').value = draft.color;
+  $('text-effect').value = draft.effect; $('text-outline').checked = draft.outline; $('text-outline-color').value = draft.outlineColor;
+  $('text-title').textContent = id ? '文字を編集' : '文字を追加'; $('apply-text').textContent = id ? '変更する' : '追加する';
+  $('text-dialog').showModal(); previewText();
+}
+function fitTextSize(bitmap, maxWidth = .64, maxHeight = .4) {
+  const rect = stage.getBoundingClientRect();
+  const heightPerWidth = (rect.width / (rect.height || rect.width)) * bitmap.height / bitmap.width;
+  return Math.min(maxWidth, maxHeight / heightPerWidth);
+}
+function applyText() {
+  if (!textEditor.bitmap || $('apply-text').disabled) return;
+  const draft = { ...textEditor.draft }, bitmap = textEditor.bitmap;
+  let id = textEditor.target;
+  if (id && !texts.includes(id)) return;
+  if (!id) {
+    if (texts.length >= MAX_TEXTS) return;
+    id = `text-${nextTextId++}`;
+    const canvas = document.createElement('canvas'); canvas.id = id; canvas.className = 'photo-layer text-layer'; canvas.dataset.layerId = id;
+    canvas.setAttribute('role', 'img'); canvas.tabIndex = 0;
+    layers[id] = { element: canvas, x: .5, y: [.22, .38, .54][texts.length], size: fitTextSize(bitmap), rotation: 0, flip: false };
+    texts.push(id); stage.insertBefore(canvas, layers.logo.element);
+  }
+  const layer = layers[id];
+  if (layer.text && layer.text.direction !== draft.direction) {
+    // Keep the longest visible dimension when the writing direction changes.
+    const oldAspect = layer.element.height / layer.element.width, newAspect = bitmap.height / bitmap.width;
+    layer.size *= Math.max(1, oldAspect) / Math.max(1, newAspect);
+    if (layer.x > 0 && layer.x < 1 && layer.y > 0 && layer.y < 1) {
+      layer.size = Math.min(layer.size, fitTextSize(bitmap, 1.9 * Math.min(layer.x, 1 - layer.x), 1.9 * Math.min(layer.y, 1 - layer.y)));
+    }
+  }
+  layer.text = draft;
+  const canvas = layer.element; canvas.width = bitmap.width; canvas.height = bitmap.height; canvas.getContext('2d').drawImage(bitmap, 0, 0);
+  canvas.alt = draft.content; canvas.setAttribute('aria-label', draft.content); canvas.title = '指で移動・拡大／回転。「文字を編集」で内容と見せ方を変更';
+  lastTextStyle = draft; selectLayer(id); renderPlacements(); $('text-dialog').close();
+}
+$('add-text').addEventListener('click', () => openTextEditor());
+$('edit-text').addEventListener('click', () => openTextEditor(state.selected));
+$('close-text').addEventListener('click', () => $('text-dialog').close());
+$('text-dialog').addEventListener('close', () => { ++textEditor.sequence; textEditor.bitmap = null; });
+for (const id of ['text-content', 'text-font', 'text-direction', 'text-color', 'text-effect', 'text-outline', 'text-outline-color']) $(id).addEventListener('input', previewText);
+$('apply-text').addEventListener('click', applyText);
 
 let shapeCatalog;
 function renderShapeResults() {
@@ -526,7 +610,7 @@ $('select-logo').addEventListener('click', () => selectLayer('logo'));
 $('remove-character').addEventListener('click', removeCharacter);
 $('flip-layer').addEventListener('click', () => { if (state.selected) { layers[state.selected].flip = !layers[state.selected].flip; renderLayers(); } });
 $('show-logo').addEventListener('change', () => {
-  if (!$('show-logo').checked && state.selected === 'logo') selectLayer(characters[0] || null);
+  if (!$('show-logo').checked && state.selected === 'logo') selectLayer(characters[0] || texts[0] || null);
   if ($('show-logo').checked && !state.selected) selectLayer('logo');
   syncControls();
   renderLayers();
@@ -535,6 +619,7 @@ $('mirror-selfie').addEventListener('change', renderLayers);
 $('reset-placement').addEventListener('click', () => {
   clearGesture();
   characters.forEach((id, index) => Object.assign(layers[id], { x: (index + 1) / (characters.length + 1), y: .62, size: characters.length === 1 ? .38 : .3, rotation: 0, flip: false }));
+  texts.forEach((id, index) => Object.assign(layers[id], { x: .5, y: [.22, .38, .54][index], size: fitTextSize(layers[id].element), rotation: 0, flip: false }));
   Object.assign(layers.logo, { x: .79, y: .87, size: .3, rotation: 0, flip: false });
   syncControls(); fitStage();
 });
