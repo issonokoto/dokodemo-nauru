@@ -534,7 +534,7 @@ function applyText() {
   }
   layer.text = draft;
   const canvas = layer.element; canvas.width = bitmap.width; canvas.height = bitmap.height; canvas.getContext('2d').drawImage(bitmap, 0, 0);
-  canvas.alt = draft.content; canvas.setAttribute('aria-label', draft.content); canvas.title = '指で移動・拡大／回転。「文字を編集」で内容と見せ方を変更';
+  canvas.alt = draft.content; canvas.setAttribute('aria-label', draft.content); canvas.title = '指で移動・拡大／回転。「文字を編集」で内容と文字効果を変更';
   lastTextStyle = draft; selectLayer(id); renderPlacements(); $('text-dialog').close();
 }
 $('add-text').addEventListener('click', () => openTextEditor());
