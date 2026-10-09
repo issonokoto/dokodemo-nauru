@@ -26,6 +26,56 @@ const state = { selected: null, mode: 'camera', backgroundUrl: null, backgroundT
 const pointers = new Map();
 let gesture = null;
 const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
+const compactTools = matchMedia('(max-width: 1100px), (pointer: coarse)');
+let openTool = null;
+const toolTitles = { materials: '素材', text: '文字', placement: '配置・ロゴ' };
+function renderToolPanel() {
+  const compact = compactTools.matches;
+  if (!compact) openTool = null;
+  if (compact && openTool) document.body.dataset.toolOpen = openTool;
+  else delete document.body.dataset.toolOpen;
+  const panel = $('controls-panel');
+  panel.inert = compact && !openTool;
+  if (compact) panel.setAttribute('aria-hidden', String(!openTool));
+  else panel.removeAttribute('aria-hidden');
+  for (const section of panel.querySelectorAll('[data-tool-page]')) section.hidden = compact && section.dataset.toolPage !== openTool;
+  for (const button of $('tool-launcher').querySelectorAll('button')) button.setAttribute('aria-expanded', String(compact && button.dataset.openTool === openTool));
+  $('tool-sheet-title').textContent = toolTitles[openTool] || '写真の設定';
+}
+function closeTools(focusTarget = null) {
+  const previous = openTool;
+  openTool = null; renderToolPanel();
+  if (compactTools.matches && focusTarget) focusTarget.focus({ preventScroll: true });
+  else if (compactTools.matches && $('controls-panel').contains(document.activeElement)) {
+    $('tool-launcher').querySelector(`[data-open-tool="${previous}"]`)?.focus({ preventScroll: true });
+  }
+}
+for (const button of $('tool-launcher').querySelectorAll('button')) button.addEventListener('click', () => {
+  if (openTool === button.dataset.openTool) { closeTools(button); return; }
+  openTool = button.dataset.openTool; renderToolPanel(); $('close-tools').focus({ preventScroll: true });
+});
+$('close-tools').addEventListener('click', () => closeTools());
+document.addEventListener('pointerdown', event => {
+  if (openTool && !event.target.closest('#controls-panel, #tool-launcher, dialog')) closeTools();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && openTool && !document.querySelector('dialog[open]')) { event.preventDefault(); closeTools(); }
+});
+let sheetSwipe = null;
+$('tool-sheet-head').addEventListener('pointerdown', event => {
+  if (event.target.closest('button')) return;
+  sheetSwipe = { id: event.pointerId, y: event.clientY };
+  $('tool-sheet-head').setPointerCapture(event.pointerId);
+});
+$('tool-sheet-head').addEventListener('pointerup', event => {
+  if (sheetSwipe?.id === event.pointerId && event.clientY - sheetSwipe.y > 40) closeTools();
+  sheetSwipe = null;
+});
+$('tool-sheet-head').addEventListener('pointercancel', () => { sheetSwipe = null; });
+compactTools.addEventListener('change', renderToolPanel);
+new ResizeObserver(() => document.body.style.setProperty('--tool-dock-height', `${$('tool-launcher').getBoundingClientRect().height}px`)).observe($('tool-launcher'));
+renderToolPanel();
+
 
 function status(message, error = false) {
   $('camera-status').textContent = message;
@@ -115,7 +165,7 @@ function renderPlacements() {
   for (const [index, id] of texts.entries()) {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'placed-text-choice'; button.dataset.layerId = id;
     const name = `${index + 1} ${layers[id].text.content.replace(/\n/g, ' ')}`; button.textContent = `T ${name}`; button.title = name; button.setAttribute('aria-label', `文字${name}を選択`);
-    button.addEventListener('click', () => selectLayer(id)); textList.append(button);
+    button.addEventListener('click', () => { selectLayer(id); openTextEditor(id); }); textList.append(button);
   }
   syncControls();
 }
@@ -137,6 +187,7 @@ function addCharacter(character, preparedImage = null, objectUrl = null) {
   characters.push(id);
   selectLayer(id);
   renderPlacements();
+  if (openTool) closeTools(image);
   image.decode().catch(() => { if (layers[id]) status('画像を読み込めませんでした。削除して、もう一度追加してください。', true); });
 }
 function removeCharacter() {
@@ -535,7 +586,7 @@ function applyText() {
   layer.text = draft;
   const canvas = layer.element; canvas.width = bitmap.width; canvas.height = bitmap.height; canvas.getContext('2d').drawImage(bitmap, 0, 0);
   canvas.alt = draft.content; canvas.setAttribute('aria-label', draft.content); canvas.title = '指で移動・拡大／回転。「文字を編集」で内容と文字効果を変更';
-  lastTextStyle = draft; selectLayer(id); renderPlacements(); $('text-dialog').close();
+  lastTextStyle = draft; selectLayer(id); renderPlacements(); $('text-dialog').close(); closeTools(canvas);
 }
 $('add-text').addEventListener('click', () => openTextEditor());
 $('edit-text').addEventListener('click', () => openTextEditor(state.selected));
@@ -584,7 +635,7 @@ async function addShape(target) {
   try {
     const { image, url } = await createShapeImage(target);
     if (sequence !== state.shapeSequence || characters.length >= MAX_CHARACTERS || !$('shape-dialog').open) { URL.revokeObjectURL(url); return; }
-    addCharacter({ name: target.name }, image, url); $('shape-dialog').close();
+    addCharacter({ name: target.name }, image, url); $('shape-dialog').close(); closeTools(image);
     status(`${target.name}を追加しました。指で移動・2本で拡大／回転できます。`);
   } catch (_) {
     if (sequence === state.shapeSequence) $('shape-message').textContent = '図形を取得できませんでした。通信を確認して、もう一度選んでください。';
@@ -606,7 +657,7 @@ $('add-overlay-image').addEventListener('click', () => $('overlay-file').click()
 for (const [id, open] of [['background-file', openBackground], ['overlay-file', openOverlay]]) $(id).addEventListener('change', event => { const file = event.target.files[0]; event.target.value = ''; open(file); });
 $('switch-camera').addEventListener('click', () => state.mode === 'image' ? $('background-file').click() : openCamera(state.facing === 'user' ? 'environment' : 'user', true));
 $('capture-photo').addEventListener('click', capturePhoto);
-$('select-logo').addEventListener('click', () => selectLayer('logo'));
+$('select-logo').addEventListener('click', () => { selectLayer('logo'); closeTools(layers.logo.element); });
 $('remove-character').addEventListener('click', removeCharacter);
 $('flip-layer').addEventListener('click', () => { if (state.selected) { layers[state.selected].flip = !layers[state.selected].flip; renderLayers(); } });
 $('show-logo').addEventListener('change', () => {
