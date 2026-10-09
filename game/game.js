@@ -2,11 +2,12 @@
   'use strict';
 
   const DATA_URL = '../data/game-places.json';
-  const QUESTION_COUNT = 10;
-  const QUESTION_TIME_MS = 12000;
-  const FEEDBACK_TIME_MS = 1450;
+  const Rules = window.NauruQuizRules;
+  const MAX_MISTAKES = Rules.MAX_MISTAKES;
+  const QUESTION_TIME_MS = Rules.QUESTION_TIME_MS;
+  const FEEDBACK_TIME_MS = 1000;
   const NAURU_AREA_KM2 = 21;
-  const BEST_SCORE_KEY = 'nauru_area_game_best_v1';
+  const BEST_SCORE_KEY = 'nauru_area_game_best_survival_v2';
   const SOUND_KEY = 'nauru_area_game_sound';
   const PLAYER_NAME_KEY = 'nauru_area_game_player_name_v1';
   const CLIENT_ID_KEY = 'nauru_area_game_client_id_v1';
@@ -33,25 +34,16 @@
     'ちんこ', 'ちんぽ', 'まんこ', 'せっくす', 'おまんこ',
     'fuck', 'shit', 'cunt', 'nigger', 'nigga', 'retard', 'kike', 'chink', 'spic'
   ];
-  const QUESTION_BLUEPRINT = [
-    ['municipality', 'larger'],
-    ['municipality', 'larger'],
-    ['municipality', 'smaller'],
-    ['municipality', 'same'],
-    ['island', 'larger'],
-    ['island', 'smaller'],
-    ['island', 'same'],
-    ['water', 'larger'],
-    ['water', 'smaller'],
-    ['water', 'smaller']
-  ];
-
   const state = {
     data: null,
     questions: [],
     results: [],
     currentIndex: 0,
     score: 0,
+    correctCount: 0,
+    mistakes: 0,
+    usedQuestionIds: new Set(),
+    placesById: new Map(),
     questionStartedAt: 0,
     timerFrame: 0,
     locked: false,
@@ -77,7 +69,8 @@
     [
       'loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'ranking-screen', 'error-screen',
       'start-button', 'retry-button', 'share-button', 'reload-button', 'sound-toggle',
-      'best-score-start', 'question-count', 'progress-bar', 'score-display', 'timer',
+      'best-score-start', 'question-count', 'life-indicator', 'correct-count-live',
+      'difficulty-label', 'milestone-feedback', 'score-display', 'timer',
       'timer-ring', 'timer-number', 'category-label', 'location-label', 'place-name', 'answer-grid',
       'answer-feedback', 'feedback-mark', 'feedback-title', 'feedback-detail', 'earned-score',
       'final-score', 'result-rank', 'correct-summary', 'average-summary', 'best-summary',
@@ -98,34 +91,6 @@
       elements[screenId].hidden = screenId !== id;
     });
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-
-  function shuffle(items) {
-    const result = items.slice();
-    for (let i = result.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
-
-  function pickQuestions() {
-    const buckets = new Map();
-    state.data.places.forEach(place => {
-      const key = `${place.category}:${place.outcome}`;
-      if (!buckets.has(key)) buckets.set(key, []);
-      buckets.get(key).push(place);
-    });
-
-    const selected = QUESTION_BLUEPRINT.map(([category, outcome]) => {
-      const key = `${category}:${outcome}`;
-      const candidates = buckets.get(key) || [];
-      if (!candidates.length) throw new Error(`出題候補が不足しています: ${key}`);
-      const index = Math.floor(Math.random() * candidates.length);
-      return candidates.splice(index, 1)[0];
-    });
-
-    return shuffle(selected);
   }
 
   function getBestScore() {
@@ -237,7 +202,7 @@
         <span class="ranking-position">${position <= 3 ? ['🥇', '🥈', '🥉'][position - 1] : position}</span>
         <strong class="ranking-player">${escapeHtml(entry.player_name)}</strong>
         <span class="ranking-entry-score">${escapeHtml(formatScore(entry.score))}点</span>
-        <span class="ranking-entry-detail">${escapeHtml(`${entry.correct_count}/10正解・平均${(entry.average_ms / 1000).toFixed(1)}秒`)}</span>
+        <span class="ranking-entry-detail">${escapeHtml(`${formatScore(entry.correct_count)}問正解`)}</span>
       `;
       fragment.appendChild(item);
     });
@@ -264,7 +229,7 @@
       button.setAttribute('aria-selected', String(isActive));
     });
     try {
-      const entries = await rankingRpc('get_quiz_leaderboard', { p_period: period });
+      const entries = await rankingRpc('get_quiz_survival_leaderboard', { p_period: period });
       if (requestId !== state.rankingRequestId) return;
       elements['ranking-loading'].hidden = true;
       renderLeaderboard(Array.isArray(entries) ? entries : []);
@@ -283,7 +248,7 @@
     elements['ranking-submit-button'].disabled = false;
     elements['ranking-submit-button'].textContent = '登録する';
     if (allowSubmit && state.finishedRound) {
-      elements['ranking-score-value'].textContent = `${formatScore(state.finishedRound.score)}点`;
+      elements['ranking-score-value'].textContent = `${formatScore(state.finishedRound.score)}点 · ${formatScore(state.finishedRound.correctCount)}問正解`;
       elements['ranking-name'].value = getStoredPlayerName();
       updateRankingNameCount();
     }
@@ -322,7 +287,7 @@
     elements['ranking-submit-button'].disabled = true;
     elements['ranking-form-message'].textContent = '登録しています…';
     try {
-      const result = await rankingRpc('register_quiz_session_score', {
+      const result = await rankingRpc('register_quiz_survival_score', {
         p_session_id: state.finishedRound.sessionId,
         p_client_id: state.finishedRound.clientId,
         p_player_name: playerName,
@@ -397,7 +362,7 @@
     } else if (kind === 'wrong') {
       tone(context, 220, now, 0.22, 0.055, 'triangle');
       tone(context, 174.61, now + 0.13, 0.3, 0.05, 'triangle');
-    } else if (kind === 'finish') {
+    } else if (kind === 'finish' || kind === 'milestone') {
       [523.25, 659.25, 783.99, 1046.5].forEach((frequency, index) => {
         tone(context, frequency, now + index * 0.1, 0.28, 0.065);
       });
@@ -446,22 +411,16 @@
     state.serverCompleted = false;
     try {
       const clientId = getClientId();
-      const result = await rankingRpc('start_quiz_game', { p_client_id: clientId });
+      const result = await rankingRpc('start_quiz_survival_game', { p_client_id: clientId });
       const session = firstRpcRow(result);
-      if (!session?.session_id || !Array.isArray(session.question_ids) || session.question_ids.length !== QUESTION_COUNT) {
+      if (!session?.session_id || session.rules_version !== Rules.VERSION) {
         throw new Error('ゲームセッションを開始できませんでした');
-      }
-      const placesById = new Map(state.data.places.map(place => [place.id, place]));
-      state.questions = session.question_ids.map(id => placesById.get(id));
-      if (state.questions.some(question => !question)) {
-        throw new Error('出題データを確認できませんでした');
       }
       state.serverSessionId = session.session_id;
       state.serverClientId = clientId;
     } catch (error) {
       console.warn('ランキング対象セッションを開始できませんでした', error);
       try {
-        state.questions = pickQuestions();
         showToast('通信できないため、ランキング対象外で開始します');
       } catch (questionError) {
         console.error(questionError);
@@ -475,15 +434,30 @@
       elements['retry-button'].textContent = 'もう一度あそぶ';
     }
     state.results = [];
+    state.questions = [];
     state.currentIndex = 0;
     state.score = 0;
+    state.correctCount = 0;
+    state.mistakes = 0;
+    state.usedQuestionIds.clear();
     state.locked = false;
     state.finishedRound = null;
     resetShareImage();
     elements['score-display'].textContent = '0';
     playTone('start');
     showScreen('quiz-screen');
-    renderQuestion();
+    await renderQuestion();
+  }
+
+  function updateSurvivalHud() {
+    const remaining = MAX_MISTAKES - state.mistakes;
+    elements['question-count'].textContent = `第${formatScore(state.currentIndex + 1)}問`;
+    elements['correct-count-live'].textContent = `${formatScore(state.correctCount)}問正解`;
+    elements['life-indicator'].innerHTML = Array.from({ length: MAX_MISTAKES }, (_, index) =>
+      `<span class="life-heart${index >= remaining ? ' is-lost' : ''}" aria-hidden="true">♥</span>`).join('');
+    elements['life-indicator'].setAttribute('aria-label', `あと${remaining}回間違えるまで続けられます`);
+    elements['quiz-screen'].classList.toggle('last-life', remaining === 1);
+    elements['difficulty-label'].textContent = ['ウォーミングアップ', 'チャレンジ', 'エキスパート'][Rules.stage(state.correctCount)];
   }
 
   async function renderQuestion() {
@@ -491,17 +465,16 @@
     state.locked = true;
     elements['answer-feedback'].hidden = true;
     elements['answer-feedback'].classList.remove('wrong-feedback');
+    elements['milestone-feedback'].hidden = true;
+    elements['quiz-screen'].classList.remove('answer-hit', 'answer-miss');
     elements.answerButtons.forEach(button => {
       button.disabled = true;
       button.classList.remove('correct', 'wrong', 'dimmed');
     });
 
-    const question = state.questions[state.currentIndex];
-    elements['question-count'].textContent = `${state.currentIndex + 1} / ${QUESTION_COUNT}`;
-    elements['progress-bar'].style.width = `${((state.currentIndex + 1) / QUESTION_COUNT) * 100}%`;
-    elements['category-label'].textContent = CATEGORY_LABELS[question.category];
-    elements['location-label'].textContent = question.location || '所在地不明';
-    elements['place-name'].textContent = question.shortName || question.name;
+    let question;
+    updateSurvivalHud();
+    elements['place-name'].textContent = '問題を準備中…';
     elements['timer'].classList.remove('warning');
     elements['timer-ring'].style.strokeDashoffset = '0';
     elements['timer-number'].textContent = '12';
@@ -510,15 +483,18 @@
     let questionStartedAt = performance.now();
     if (state.serverSessionId) {
       try {
-        const result = await rankingRpc('open_quiz_question', {
+        const result = await rankingRpc('open_quiz_survival_question', {
           p_session_id: state.serverSessionId,
           p_client_id: state.serverClientId,
           p_question_index: state.currentIndex
         });
         const opened = firstRpcRow(result);
-        if (!opened?.opened || opened.question_id !== question.id) {
+        question = state.placesById.get(opened?.question_id);
+        if (!opened?.opened || !question) {
           throw new Error('問題を開始できませんでした');
         }
+        if (state.usedQuestionIds.size >= state.data.places.length) state.usedQuestionIds.clear();
+        state.usedQuestionIds.add(question.id);
       } catch (error) {
         console.warn('サーバー計測を継続できませんでした', error);
         state.serverSessionId = null;
@@ -529,6 +505,11 @@
       }
     }
 
+    if (!question) question = Rules.pickNext(state.data.places, state.usedQuestionIds, state.correctCount);
+    state.questions[state.currentIndex] = question;
+    elements['category-label'].textContent = CATEGORY_LABELS[question.category];
+    elements['location-label'].textContent = question.location || '所在地不明';
+    elements['place-name'].textContent = question.shortName || question.name;
     state.locked = false;
     elements.answerButtons.forEach(button => {
       button.disabled = false;
@@ -566,14 +547,12 @@
     const clientElapsedMs = Math.min(QUESTION_TIME_MS, Math.max(0, performance.now() - state.questionStartedAt));
     let correctOutcome = question.outcome;
     let elapsedMs = clientElapsedMs;
-    let isCorrect = answer === correctOutcome;
-    let earned = isCorrect
-      ? 1000 + Math.floor(500 * Math.max(0, QUESTION_TIME_MS - elapsedMs) / QUESTION_TIME_MS)
-      : 0;
+    let isCorrect = !timedOut && elapsedMs < QUESTION_TIME_MS && answer === correctOutcome;
+    let earned = Rules.earnedPoints(isCorrect, elapsedMs);
 
     if (state.serverSessionId) {
       try {
-        const result = await rankingRpc('answer_quiz_question', {
+        const result = await rankingRpc('answer_quiz_survival_question', {
           p_session_id: state.serverSessionId,
           p_client_id: state.serverClientId,
           p_question_index: state.currentIndex,
@@ -586,9 +565,13 @@
         const serverElapsedMs = Number(authoritative.elapsed_ms);
         const serverEarned = Number(authoritative.earned);
         const serverTotalScore = Number(authoritative.total_score);
+        const nextCorrect = state.correctCount + (authoritative.is_correct === true ? 1 : 0);
+        const nextMistakes = state.mistakes + (authoritative.is_correct === true ? 0 : 1);
         if (!Number.isInteger(serverElapsedMs) || serverElapsedMs < 0 || serverElapsedMs > QUESTION_TIME_MS
-          || !Number.isInteger(serverEarned) || serverEarned < 0 || serverEarned > 1500
-          || !Number.isInteger(serverTotalScore) || serverTotalScore < 0 || serverTotalScore > 15000) {
+          || !Number.isInteger(serverEarned) || serverEarned !== Rules.earnedPoints(authoritative.is_correct === true, serverElapsedMs)
+          || !Number.isSafeInteger(serverTotalScore) || serverTotalScore !== state.score + serverEarned
+          || Number(authoritative.correct_total) !== nextCorrect || Number(authoritative.mistakes) !== nextMistakes
+          || authoritative.completed !== (nextMistakes === MAX_MISTAKES)) {
           throw new Error('回答結果の値を確認できませんでした');
         }
         correctOutcome = authoritative.correct_outcome;
@@ -610,8 +593,12 @@
       state.score += earned;
     }
 
+    state.correctCount += isCorrect ? 1 : 0;
+    state.mistakes += isCorrect ? 0 : 1;
     state.results.push({ question, answer, correctOutcome, isCorrect, elapsedMs, earned, timedOut });
     elements['score-display'].textContent = formatScore(state.score);
+    updateSurvivalHud();
+    elements['quiz-screen'].classList.add(isCorrect ? 'answer-hit' : 'answer-miss');
 
     elements.answerButtons.forEach(button => {
       button.disabled = true;
@@ -629,20 +616,25 @@
     elements['feedback-detail'].textContent =
       `${question.shortName || question.name}は${formatArea(question.areaKm2)} km²。正解は「${answerLabel}」です。`;
     elements['earned-score'].textContent = earned > 0 ? `+${formatScore(earned)}` : '+0';
-    playTone(isCorrect ? 'correct' : 'wrong');
+    const milestone = isCorrect && state.correctCount % 10 === 0;
+    if (milestone) {
+      elements['milestone-feedback'].textContent = `${formatScore(state.correctCount)}問正解！ 記録を伸ばそう`;
+      elements['milestone-feedback'].hidden = false;
+    }
+    playTone(milestone ? 'milestone' : isCorrect ? 'correct' : 'wrong');
 
     window.setTimeout(() => {
       state.currentIndex += 1;
-      if (state.currentIndex >= QUESTION_COUNT) finishGame();
+      if (state.mistakes >= MAX_MISTAKES) finishGame();
       else renderQuestion();
-    }, FEEDBACK_TIME_MS);
+    }, isCorrect ? FEEDBACK_TIME_MS : 1450);
   }
 
   function getRank(score, correctCount) {
-    if (score >= 13500 && correctCount === 10) return 'ナウル大使';
-    if (score >= 11000 && correctCount >= 8) return 'ナウル博士';
-    if (score >= 7500 && correctCount >= 6) return 'ナウル研究員';
-    if (score >= 4000) return 'ナウル探検家';
+    if (correctCount >= 50) return 'ナウル大使';
+    if (correctCount >= 30) return 'ナウル博士';
+    if (correctCount >= 20) return 'ナウル研究員';
+    if (correctCount >= 10) return 'ナウル探検家';
     return 'ナウル見習い';
   }
 
@@ -658,7 +650,7 @@
 
     elements['final-score'].textContent = formatScore(state.score);
     elements['result-rank'].textContent = getRank(state.score, correctCount);
-    elements['correct-summary'].textContent = `${correctCount} / ${QUESTION_COUNT}`;
+    elements['correct-summary'].textContent = `${formatScore(correctCount)}問`;
     elements['average-summary'].textContent = `${averageSeconds.toFixed(1)}秒`;
     elements['best-summary'].classList.toggle('is-new', isNewBest);
     elements['best-summary'].querySelector('strong').textContent = isNewBest ? '自己ベスト更新！' : '自己ベスト';
@@ -713,11 +705,12 @@
 
   function getResultShareData() {
     const correctCount = state.results.filter(result => result.isCorrect).length;
-    const accuracy = Math.round(correctCount / QUESTION_COUNT * 100);
+    const accuracy = Math.round(correctCount / state.results.length * 100);
     const rank = getRank(state.score, correctCount);
     const text = [
       'ナウルより大きい？小さい？',
-      `${formatScore(state.score)}点・正答率${accuracy}%（${correctCount}/${QUESTION_COUNT}問正解）`,
+      `${formatScore(state.score)}点・${formatScore(correctCount)}問正解`,
+      '3回ミスするまで挑戦！',
       `称号：${rank}`,
       '#どこでもナウル'
     ].join('\n');
@@ -791,7 +784,7 @@
     context.textBaseline = 'alphabetic';
     context.fillStyle = 'rgba(255, 255, 255, 0.84)';
     context.font = `800 19px ${family}`;
-    context.fillText('全10問の結果', 96, 111);
+    context.fillText('3回ミスするまで挑戦！', 96, 111);
     context.fillStyle = '#061525';
     context.font = `900 40px ${family}`;
     context.fillText('ナウルより大きい？小さい？', 96, 163);
@@ -803,7 +796,11 @@
     context.font = `800 18px ${family}`;
     context.fillText('SCORE', 99, 244);
     context.fillStyle = '#061525';
-    context.font = `900 112px ${family}`;
+    let scoreFontSize = 112;
+    context.font = `900 ${scoreFontSize}px ${family}`;
+    while (context.measureText(formatScore(state.score)).width > 560 && scoreFontSize > 30) {
+      context.font = `900 ${--scoreFontSize}px ${family}`;
+    }
     context.fillText(formatScore(state.score), 92, 358);
     const scoreWidth = context.measureText(formatScore(state.score)).width;
     context.fillStyle = '#061525';
@@ -813,13 +810,14 @@
     fillRoundedRect(context, 91, 395, 600, 116, 18, 'rgba(6, 21, 37, 0.82)');
     context.fillStyle = 'rgba(255, 255, 255, 0.76)';
     context.font = `800 18px ${family}`;
-    context.fillText('正答率', 122, 434);
+    context.fillText('正解数', 122, 434);
     context.fillStyle = '#f5c542';
     context.font = `900 54px ${family}`;
-    context.fillText(`${share.accuracy}%`, 119, 491);
+    context.font = `900 ${share.correctCount >= 10000 ? 34 : 54}px ${family}`;
+    context.fillText(`${formatScore(share.correctCount)}問`, 119, 491);
     context.fillStyle = '#ffffff';
     context.font = `800 24px ${family}`;
-    context.fillText(`${share.correctCount} / ${QUESTION_COUNT}問正解`, 309, 484);
+    context.fillText(`正答率 ${share.accuracy}%`, 309, 484);
     context.fillStyle = 'rgba(255, 255, 255, 0.68)';
     context.font = `800 16px ${family}`;
     context.fillText('称号', 512, 430);
@@ -875,7 +873,7 @@
     const preview = elements['share-preview'];
     const caption = elements['share-preview-caption'];
     figure.hidden = false;
-    caption.textContent = '得点と正答率入りのシェア画像を作成中…';
+    caption.textContent = '得点と正解数入りのシェア画像を作成中…';
     const previewPromise = ensureShareImageBlob();
     previewPromise
       .then(blob => {
@@ -883,7 +881,7 @@
         if (shareImageUrl) URL.revokeObjectURL(shareImageUrl);
         shareImageUrl = URL.createObjectURL(blob);
         preview.src = shareImageUrl;
-        caption.textContent = '得点と正答率入り・Xではコピーした画像を貼り付け';
+        caption.textContent = '得点と正解数入り・Xではコピーした画像を貼り付け';
       })
       .catch(error => {
         console.warn(error);
@@ -1080,6 +1078,7 @@
 
   async function init() {
     cacheElements();
+    try { localStorage.removeItem('nauru_area_game_best_v1'); } catch (_) {}
     state.soundEnabled = readSoundSetting();
     updateSoundButton();
     bindEvents();
@@ -1091,6 +1090,7 @@
         throw new Error('出題データの形式が正しくありません');
       }
       state.data = data;
+      state.placesById = new Map(data.places.map(place => [place.id, place]));
       renderStartScreen();
     } catch (error) {
       console.error('ゲームデータの読み込みに失敗しました', error);

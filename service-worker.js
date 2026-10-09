@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v91';
+const CACHE_NAME = 'dokodemo-nauru-v92';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './camera/index.html',
@@ -16,6 +16,7 @@ const STATIC_SHELL = [
   './game/index.html',
   './game/game.css',
   './game/game.js',
+  './game/rules.js',
   './game/ranking-config.js',
   './privacy.html',
   './manifest.webmanifest',
@@ -43,6 +44,7 @@ const NETWORK_FIRST_PATHS = new Set([
   './game/index.html',
   './game/game.css',
   './game/game.js',
+  './game/rules.js',
   './game/ranking-config.js',
   './privacy.html',
   './manifest.webmanifest',

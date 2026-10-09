@@ -5,3 +5,5 @@ Thumbs.db
 build_html.py
 .large-place-cache-*.json
 .world-heritage-nominatim-cache.json
+.playwright-cli/
+output/playwright/
