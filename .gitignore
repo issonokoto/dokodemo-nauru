@@ -7,3 +7,4 @@ build_html.py
 .world-heritage-nominatim-cache.json
 .playwright-cli/
 output/playwright/
+/supabase/.temp/

@@ -70,7 +70,7 @@
       'loading-screen', 'start-screen', 'quiz-screen', 'result-screen', 'ranking-screen', 'error-screen',
       'start-button', 'retry-button', 'share-button', 'reload-button', 'sound-toggle',
       'best-score-start', 'question-count', 'life-indicator', 'correct-count-live',
-      'difficulty-label', 'milestone-feedback', 'score-display', 'timer',
+      'milestone-feedback', 'score-display', 'timer',
       'timer-ring', 'timer-number', 'category-label', 'location-label', 'place-name', 'answer-grid',
       'answer-feedback', 'feedback-mark', 'feedback-title', 'feedback-detail', 'earned-score',
       'final-score', 'result-rank', 'correct-summary', 'average-summary', 'best-summary',
@@ -457,7 +457,6 @@
       `<span class="life-heart${index >= remaining ? ' is-lost' : ''}" aria-hidden="true">♥</span>`).join('');
     elements['life-indicator'].setAttribute('aria-label', `あと${remaining}回間違えるまで続けられます`);
     elements['quiz-screen'].classList.toggle('last-life', remaining === 1);
-    elements['difficulty-label'].textContent = ['ウォーミングアップ', 'チャレンジ', 'エキスパート'][Rules.stage(state.correctCount)];
   }
 
   async function renderQuestion() {
@@ -505,7 +504,7 @@
       }
     }
 
-    if (!question) question = Rules.pickNext(state.data.places, state.usedQuestionIds, state.correctCount);
+    if (!question) question = Rules.pickNext(state.data.places, state.usedQuestionIds);
     state.questions[state.currentIndex] = question;
     elements['category-label'].textContent = CATEGORY_LABELS[question.category];
     elements['location-label'].textContent = question.location || '所在地不明';

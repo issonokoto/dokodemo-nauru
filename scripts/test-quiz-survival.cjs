@@ -15,32 +15,37 @@ function testRules() {
   assert.equal(rules.earnedPoints(true, 11999), 1000);
   assert.equal(rules.earnedPoints(true, 12000), 0);
   assert.equal(rules.earnedPoints(false, 0), 0);
-  assert.equal(rules.stage(9), 0);
-  assert.equal(rules.stage(10), 1);
-  assert.equal(rules.stage(20), 2);
   const used = new Set();
   for (let i = 0; i < places.length; i++) {
     const oldSize = used.size;
-    rules.pickNext(places, used, i, random);
+    rules.pickNext(places, used, random);
     assert.equal(used.size, oldSize + 1, `Repeated question before exhausting catalog at ${i}`);
   }
-  rules.pickNext(places, used, places.length, random);
+  rules.pickNext(places, used, random);
   assert.equal(used.size, 1, 'Continues after exhausting all questions');
-  const sample = level => {
+  const sample = () => {
     const outcomes = { larger: 0, smaller: 0, same: 0 };
-    let easy = 0;
     for (let i = 0; i < 6000; i++) {
-      const q = rules.pickNext(places, new Set(), level, random);
+      const q = rules.pickNext(places, new Set(), random);
       outcomes[q.outcome]++;
-      easy += rules.difficulty(q) === 0;
     }
     assert(outcomes.larger > 2400 && outcomes.larger < 3000);
     assert(outcomes.smaller > 2400 && outcomes.smaller < 3000);
     assert(outcomes.same > 450 && outcomes.same < 750);
-    return easy;
   };
-  assert(sample(0) > sample(25) * 3, 'Difficulty increases while outcome balance remains stable');
-  console.log('PASS: scoring/timeouts, answer balance, staged difficulty, 2340 unique questions and endless recycling');
+  sample();
+  // Within an answer group, rare categories and difficult places keep the same
+  // per-place chance as common, easy candidates.
+  const mixed = Array.from({ length: 100 }, (_, index) => ({
+    id: `mixed-${index}`, outcome: 'larger',
+    category: index < 90 ? 'municipality' : 'island', areaKm2: index < 90 ? 100 : 22.2
+  }));
+  let rare = 0;
+  for (let i = 0; i < 6000; i++) {
+    rare += rules.pickNext(mixed, new Set(), random).category === 'island';
+  }
+  assert(rare > 480 && rare < 720, 'Candidate probability depends on difficulty or category');
+  console.log('PASS: scoring/timeouts, answer balance, uniform candidates, 2340 unique questions and endless recycling');
 }
 
 async function testDatabase() {
@@ -57,11 +62,19 @@ async function testDatabase() {
     await one('select * from public.start_quiz_game($1)', [client]);
     await db.query("insert into public.quiz_scores (player_name,score,correct_count,average_ms,client_id) values ('旧記録',1000,1,12000,$1)", [client]);
     const migration = read('supabase/quiz-survival-v2.sql');
+    const randomMigration = read('supabase/migrations/20261009164056_quiz_survival_random_questions.sql');
     await db.exec(migration);
     assert.equal((await one('select count(*)::integer n from public.quiz_scores')).n, 0);
     assert.equal((await one('select count(*)::integer n from public.quiz_game_sessions')).n, 0);
     assert.equal((await one('select count(*)::integer n from public.quiz_survival_catalog')).n, places.length);
     assert.equal((await one("select has_function_privilege('anon','public.start_quiz_game(uuid)','EXECUTE') allowed")).allowed, false);
+    const drawAt = async correctCount => {
+      await db.query('select setseed(0.25)');
+      return (await db.query("select public.pick_quiz_survival_question('{}',$1) id from generate_series(1,200)", [correctCount])).rows.map(row => row.id);
+    };
+    const initialDraw = await drawAt(0);
+    assert.deepEqual(await drawAt(10), initialDraw, 'Server selection changes at 10 correct answers');
+    assert.deepEqual(await drawAt(20), initialDraw, 'Server selection changes at 20 correct answers');
     const session = await one('select * from public.start_quiz_survival_game($1)', [client]);
     assert.equal(session.rules_version, rules.VERSION);
     const sessionId = session.session_id;
@@ -107,6 +120,11 @@ async function testDatabase() {
     assert.equal(accepted.accepted, true);
     const duplicate = await one('select * from public.register_quiz_survival_score($1,$2,$3)', [...calls, 'テスト']);
     assert.equal(duplicate.accepted, false);
+    const existingRecords = await one('select (select count(*) from public.quiz_survival_sessions) sessions, (select count(*) from public.quiz_survival_answers) answers, (select count(*) from public.quiz_survival_scores) scores');
+    await db.exec(randomMigration);
+    await db.exec(randomMigration);
+    assert.deepEqual(await one('select (select count(*) from public.quiz_survival_sessions) sessions, (select count(*) from public.quiz_survival_answers) answers, (select count(*) from public.quiz_survival_scores) scores'), existingRecords, 'Random picker update changed existing records');
+    assert.deepEqual(await drawAt(20), initialDraw, 'Incremental picker differs from the initial installation');
     await db.exec(migration);
     assert.equal((await one('select count(*)::integer n from public.quiz_survival_scores')).n, 1, 'Migration retry preserves v2 records');
     // Equal scores are ordered by correct answers, and each client has one best.
@@ -126,7 +144,7 @@ async function testDatabase() {
     await assert.rejects(() => db.query("select public.pick_quiz_survival_question('{}',0)"), /permission denied/);
     assert.equal((await db.query("select * from public.get_quiz_survival_leaderboard('all')")).rows.length, 3);
     await db.exec('reset role');
-    console.log('PASS: real PostgreSQL migration/reset/retry, >10-question sessions, 3 mistakes, timeout, replay rejection, score registration, ranking ties/periods and access boundaries');
+    console.log('PASS: real PostgreSQL random selection independent of progress, record-preserving update, >10-question sessions, 3 mistakes, timeouts, ranking and access boundaries');
   } finally { await db.close(); }
 }
 testRules();

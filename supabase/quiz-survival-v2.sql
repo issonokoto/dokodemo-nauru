@@ -2426,10 +2426,7 @@ returns text language plpgsql security definer set search_path = '' as $$
 declare
   used_ids text[] := coalesce(p_used_ids, '{}');
   outcome_roll double precision := random();
-  difficulty_roll double precision := random();
   target_outcome text;
-  target_difficulty smallint;
-  selected_category text;
   selected_id text;
 begin
   if not exists (select 1 from public.quiz_survival_catalog c where not (c.id = any(used_ids))) then
@@ -2439,25 +2436,9 @@ begin
   if not exists (select 1 from public.quiz_survival_catalog c where not (c.id = any(used_ids)) and c.outcome = target_outcome) then
     target_outcome := null;
   end if;
-  target_difficulty := case
-    when p_correct_count < 10 then case when difficulty_roll < 0.8 then 0 when difficulty_roll < 0.95 then 1 else 2 end
-    when p_correct_count < 20 then case when difficulty_roll < 0.3 then 0 when difficulty_roll < 0.8 then 1 else 2 end
-    else case when difficulty_roll < 0.1 then 0 when difficulty_roll < 0.4 then 1 else 2 end
-  end;
-  if not exists (select 1 from public.quiz_survival_catalog c
-    where not (c.id = any(used_ids)) and (target_outcome is null or c.outcome = target_outcome)
-      and c.difficulty = target_difficulty) then
-    target_difficulty := null;
-  end if;
-  select pool.category into selected_category from (
-    select distinct c.category from public.quiz_survival_catalog c
-    where not (c.id = any(used_ids)) and (target_outcome is null or c.outcome = target_outcome)
-      and (target_difficulty is null or c.difficulty = target_difficulty)
-  ) pool order by random() limit 1;
   select c.id into selected_id from public.quiz_survival_catalog c
-  where not (c.id = any(used_ids)) and c.category = selected_category
+  where not (c.id = any(used_ids))
     and (target_outcome is null or c.outcome = target_outcome)
-    and (target_difficulty is null or c.difficulty = target_difficulty)
   order by random() limit 1;
   if selected_id is null then raise exception '出題候補が不足しています'; end if;
   return selected_id;
