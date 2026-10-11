@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v93';
+const CACHE_NAME = 'dokodemo-nauru-v94';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './camera/index.html',

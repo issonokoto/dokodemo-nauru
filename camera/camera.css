@@ -202,3 +202,6 @@ button[aria-pressed="true"] { border-color: var(--gold); background: #f5c54215; 
   .tool-help { font-size: 10px; margin-top: 6px; }
 }
 @media (prefers-reduced-motion: reduce) { .control-panel { transition: none; } }
+
+/* Keep photo editing surfaces in SDR; source HDR gain maps stay out of the DOM. */
+#background-image, .photo-layer, .credit-layer, #captured-photo, #text-preview { dynamic-range-limit: standard; }

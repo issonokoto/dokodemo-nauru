@@ -229,7 +229,7 @@ function drawCredit(context, width, height) {
 }
 function prepareCredit() {
   const canvas = creditCanvas;
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', { colorSpace: 'srgb', colorType: 'unorm8' });
   const font = '600 96px system-ui, -apple-system, "Segoe UI", sans-serif';
   context.font = font;
   canvas.width = Math.ceil(context.measureText(CREDIT_TEXT).width) + 40;
@@ -265,16 +265,38 @@ function setSourceMode(mode) {
   fitStage();
 }
 async function readLocalImage(file) {
-  const url = URL.createObjectURL(file);
-  const image = new Image();
-  image.src = url;
+  const sourceUrl = URL.createObjectURL(file);
+  const source = new Image();
+  source.src = sourceUrl;
+  let normalizedUrl = null;
+  let canvas = null;
   try {
+    await source.decode();
+    if (!source.naturalWidth || !source.naturalHeight) throw new Error();
+    // Never put the uploaded HDR source in the DOM. Freeze its decoded colours
+    // in an SDR bitmap before display so HDR gain maps cannot dim other layers.
+    const scale = Math.min(1, 4096 / Math.max(source.naturalWidth, source.naturalHeight));
+    canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(source.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(source.naturalHeight * scale));
+    const context = canvas.getContext('2d', { colorSpace: 'srgb', colorType: 'unorm8' });
+    if (!context) throw new Error();
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
+    // PNG retains transparency and pixel values without carrying the source's
+    // HDR gain map. Final JPEG/PNG output still follows the background file type.
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) throw new Error();
+    normalizedUrl = URL.createObjectURL(blob);
+    const image = new Image();
+    image.src = normalizedUrl;
     await image.decode();
-    if (!image.naturalWidth || !image.naturalHeight) throw new Error();
-    return { image, url };
+    return { image, url: normalizedUrl };
   } catch (_) {
-    URL.revokeObjectURL(url);
+    if (normalizedUrl) URL.revokeObjectURL(normalizedUrl);
     throw new Error('この画像を開けませんでした。JPEG・PNGなどの画像でお試しください。');
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+    if (canvas) { canvas.width = 0; canvas.height = 0; }
   }
 }
 async function openBackground(file) {
@@ -410,7 +432,7 @@ async function capturePhoto() {
     const canvas = $('captured-photo');
     canvas.width = Math.max(1, Math.round(sourceWidth * scale));
     canvas.height = Math.max(1, Math.round(sourceHeight * scale));
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { colorSpace: 'srgb', colorType: 'unorm8' });
     context.save();
     if (!fromImage && state.facing === 'user' && $('mirror-selfie').checked) { context.translate(canvas.width, 0); context.scale(-1, 1); }
     context.drawImage(source, (fullWidth - sourceWidth) / 2, (fullHeight - sourceHeight) / 2, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
@@ -539,11 +561,11 @@ async function previewText() {
     const bitmap = await renderTextCanvas(draft);
     if (sequence !== textEditor.sequence || !$('text-dialog').open) return;
     const canvas = $('text-preview'); canvas.width = bitmap.width; canvas.height = bitmap.height;
-    canvas.getContext('2d').drawImage(bitmap, 0, 0); textEditor.bitmap = bitmap; textEditor.draft = draft;
+    canvas.getContext('2d', { colorSpace: 'srgb', colorType: 'unorm8' }).drawImage(bitmap, 0, 0); textEditor.bitmap = bitmap; textEditor.draft = draft;
     $('apply-text').disabled = false; $('text-message').textContent = '文字を置いたあと、指で移動・2本で拡大／回転できます。';
   } catch (_) {
     if (sequence !== textEditor.sequence || !$('text-dialog').open) return;
-    $('text-preview').getContext('2d').clearRect(0, 0, $('text-preview').width, $('text-preview').height);
+    $('text-preview').getContext('2d', { colorSpace: 'srgb', colorType: 'unorm8' }).clearRect(0, 0, $('text-preview').width, $('text-preview').height);
     $('text-message').textContent = !draft.content.trim() ? '文字を入力してください。' : draft.content.split('\n').length > 6 ? '改行は6行（縦書きは6列）までにしてください。' : draft.content.length > 120 ? '文字は120文字以内で入力してください。' : '文字を準備できませんでした。フォントを選び直して再度お試しください。';
   }
 }
@@ -584,7 +606,7 @@ function applyText() {
     }
   }
   layer.text = draft;
-  const canvas = layer.element; canvas.width = bitmap.width; canvas.height = bitmap.height; canvas.getContext('2d').drawImage(bitmap, 0, 0);
+  const canvas = layer.element; canvas.width = bitmap.width; canvas.height = bitmap.height; canvas.getContext('2d', { colorSpace: 'srgb', colorType: 'unorm8' }).drawImage(bitmap, 0, 0);
   canvas.alt = draft.content; canvas.setAttribute('aria-label', draft.content); canvas.title = '指で移動・拡大／回転。「文字を編集」で内容と文字効果を変更';
   lastTextStyle = draft; selectLayer(id); renderPlacements(); $('text-dialog').close(); closeTools(canvas);
 }
