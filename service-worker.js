@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v95';
+const CACHE_NAME = 'dokodemo-nauru-v96';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './assets/historical-maps.js',
@@ -37,6 +37,7 @@ const NETWORK_FIRST_PATHS = new Set([
   './assets/historical-maps.js',
   './data/showa-map-regions.json',
   './data/prewar-map-regions.json',
+  './data/meiji-map-regions.json',
   './data/postwar-map-regions.json',
   './camera/index.html',
   './camera/camera.css',

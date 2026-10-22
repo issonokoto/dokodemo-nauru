@@ -4,6 +4,10 @@
   const transparentTile = 'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%221%22%20height=%221%22/%3E';
   const configs = {
     showa: { label: '昭和の地図', catalog: './data/showa-map-regions.json' },
+    meiji: {
+      label: '明治期の地図', catalog: './data/meiji-map-regions.json',
+      note: '明治期の測量図を中心に表示します。大正期の情報が一部加わった図幅もあります。'
+    },
     prewar: { label: '戦前の地図', catalog: './data/prewar-map-regions.json' },
     postwarMap: {
       label: '終戦前後の地図', catalog: './data/postwar-map-regions.json',

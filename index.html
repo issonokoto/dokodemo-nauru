@@ -2614,6 +2614,7 @@
         <option value="osm">標準（明るい）</option>
         <option value="gsiPale">地理院・淡色（日本）</option>
         <option value="showa">昭和の地図（一部地域）</option>
+        <option value="meiji">明治期の地図（一部地域）</option>
         <option value="prewar">戦前の地図（一部地域）</option>
         <option value="postwarPhoto">終戦直後の航空写真（1945～1950年・一部）</option>
         <option value="postwarMap">終戦前後の地図（道路・地名、一部地域）</option>
@@ -2764,6 +2765,7 @@
         <option value="osm">標準（明るい）</option>
         <option value="gsiPale">地理院・淡色（日本）</option>
         <option value="showa">昭和の地図（一部地域）</option>
+        <option value="meiji">明治期の地図（一部地域）</option>
         <option value="prewar">戦前の地図（一部地域）</option>
         <option value="postwarPhoto">終戦直後の航空写真（1945～1950年・一部）</option>
         <option value="postwarMap">終戦前後の地図（道路・地名、一部地域）</option>
@@ -3208,6 +3210,11 @@
       },
       showa: {
         historical: 'showa',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
+      },
+      meiji: {
+        historical: 'meiji',
         minSourceZoom: 8,
         options: { maxNativeZoom: 16, maxZoom: 19 }
       },
