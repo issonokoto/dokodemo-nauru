@@ -44,6 +44,7 @@
   </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./assets/historical-maps.js"></script>
   <style>
     :root { --map-credit-height: 1.7rem; }
     html, body { width: 100%; max-width: 100%; height: 100%; margin: 0; overflow: hidden; }
@@ -2612,12 +2613,14 @@
       <select id="basemap-select" class="basemap-select" aria-label="地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="gsiPale">地理院・淡色（日本）</option>
-        <option value="voyager">カラー地図</option>
-        <option value="voyagerHd">高精細（英字・文字くっきり）</option>
+        <option value="showa">昭和の地図（一部地域）</option>
+        <option value="prewar">戦前の地図（一部地域）</option>
+        <option value="postwarPhoto">終戦直後の航空写真（1945～1950年・一部）</option>
+        <option value="postwarMap">終戦前後の地図（道路・地名、一部地域）</option>
         <option value="topo">地形図</option>
         <option value="satellite">衛星写真</option>
-        <option value="dark">ダーク</option>
       </select>
+      <p id="basemap-note" class="text-[11px] text-ocean-300 mt-2 leading-relaxed" role="status" hidden></p>
       <label for="map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
       <select id="map-text-scale-select" class="basemap-select" aria-label="地図の文字サイズ">
         <option value="normal">標準</option>
@@ -2760,12 +2763,14 @@
       <select id="mobile-basemap-select" class="basemap-select" aria-label="スマホ用の地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="gsiPale">地理院・淡色（日本）</option>
-        <option value="voyager">カラー地図</option>
-        <option value="voyagerHd">高精細（英字・文字くっきり）</option>
+        <option value="showa">昭和の地図（一部地域）</option>
+        <option value="prewar">戦前の地図（一部地域）</option>
+        <option value="postwarPhoto">終戦直後の航空写真（1945～1950年・一部）</option>
+        <option value="postwarMap">終戦前後の地図（道路・地名、一部地域）</option>
         <option value="topo">地形図</option>
         <option value="satellite">衛星写真</option>
-        <option value="dark">ダーク</option>
       </select>
+      <p id="mobile-basemap-note" class="mobile-tool-copy mt-2" role="status" hidden></p>
       <label for="mobile-map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
       <select id="mobile-map-text-scale-select" class="basemap-select" aria-label="スマホ用の地図の文字サイズ">
         <option value="normal">標準</option>
@@ -2773,7 +2778,7 @@
         <option value="large">大きい（2倍）</option>
         <option value="xlarge">特大（4倍）</option>
       </select>
-      <p class="mobile-tool-copy mt-2">衛星写真には文字サイズ設定は反映されません。</p>
+      <p class="mobile-tool-copy mt-2">衛星写真・航空写真には文字サイズ設定は反映されません。</p>
     </div>
 
     <div class="mobile-tool-panel" data-mobile-panel="style">
@@ -3201,21 +3206,25 @@
           maxZoom: 19
         }
       },
-      voyager: {
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        options: {
-          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }
+      showa: {
+        historical: 'showa',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
       },
-      voyagerHd: {
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-        options: {
-          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }
+      prewar: {
+        historical: 'prewar',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
+      },
+      postwarPhoto: {
+        historical: 'postwarPhoto', noTextScale: true,
+        minSourceZoom: 10,
+        options: { maxNativeZoom: 17, maxZoom: 19 }
+      },
+      postwarMap: {
+        historical: 'postwarMap',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
       },
       topo: {
         url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
@@ -3231,14 +3240,6 @@
           maxZoom: 19
         }
       },
-      dark: {
-        url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        options: {
-          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }
-      }
     };
     const MAP_TEXT_SCALES = {
       normal: { level: 0, label: '標準' },
@@ -3641,7 +3642,7 @@
     }
 
     function getBasemapTextLevel(key) {
-      if (!map || !BASEMAPS[key] || key === 'satellite') return 0;
+      if (!map || !BASEMAPS[key] || key === 'satellite' || BASEMAPS[key].noTextScale) return 0;
       const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
       const mapZoom = Math.max(0, Math.floor(map.getZoom()));
       const minSourceZoom = BASEMAPS[key].minSourceZoom || 0;
@@ -3663,6 +3664,11 @@
         ...overrides
       });
       if (!cfg.cacheTiles || !('caches' in window) || typeof window.fetch !== 'function') return layer;
+      layer.on('tileunload', ({ tile }) => {
+        tile._nauruReleased = true;
+        if (tile._nauruObjectUrl) URL.revokeObjectURL(tile._nauruObjectUrl);
+        tile._nauruObjectUrl = '';
+      });
       layer.createTile = function createCachedTile(coords, done) {
         const tile = document.createElement('img');
         tile.alt = '';
@@ -3677,16 +3683,18 @@
         const finish = error => {
           if (finished) return;
           finished = true;
-          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          // 保存用の画面複製も同じURLを読むため、表示中は保持する。
           done(error || null, tile);
         };
         tile.onload = () => finish(null);
         tile.onerror = () => {
+          if (tile._nauruReleased) return;
           if (!fallbackStarted) {
             fallbackStarted = true;
             if (objectUrl) {
               URL.revokeObjectURL(objectUrl);
               objectUrl = '';
+              tile._nauruObjectUrl = '';
             }
             tile.src = url;
             return;
@@ -3698,11 +3706,12 @@
           return tile;
         }
         getMapTileBlob(url).then(blob => {
-          if (finished) return;
+          if (finished || tile._nauruReleased) return;
           objectUrl = URL.createObjectURL(blob);
+          tile._nauruObjectUrl = objectUrl;
           tile.src = objectUrl;
         }).catch(() => {
-          if (finished) return;
+          if (finished || tile._nauruReleased) return;
           fallbackStarted = true;
           tile.src = url;
         });
@@ -3840,6 +3849,13 @@
         if (option) mapSummary.textContent = `${option.textContent}・文字 ${sizeLabel}`;
       }
       try { localStorage.setItem('nauru_basemap', key); } catch (_) {}
+    }
+
+    function setBasemapNote(message) {
+      for (const id of ['basemap-note', 'mobile-basemap-note']) {
+        const note = document.getElementById(id);
+        if (note) { note.hidden = !message; note.textContent = message; }
+      }
     }
 
     function removeBasemapBootstrapLayer(immediate = false, requestId = null) {
@@ -4006,6 +4022,25 @@
       const detailLayerOverrides = usesMobileLayout()
         ? { keepBuffer: 0, updateWhenIdle: true, updateWhenZooming: false }
         : {};
+      setBasemapNote('');
+      if (cfg.historical) {
+        const fallbackLayer = createBasemapTileLayer(BASEMAPS.osm, textLevel, detailLayerOverrides);
+        fallbackLayer.once('load', () => {
+          if (requestId !== basemapRequestId) return;
+          hideBootMapShell();
+          ensureBasemapBootstrapQualityLayer();
+          scheduleBasemapBootstrapPrefetch();
+        });
+        baseLayer = window.NauruHistoricalMaps.createLayer({
+          key: cfg.historical, fallbackLayer, textLevel,
+          onStatus: message => { if (requestId === basemapRequestId) setBasemapNote(message); }
+        }).addTo(map);
+        activeBasemapTextLevel = textLevel;
+        if (polygonLayer) polygonLayer.bringToFront();
+        if (imageLayer) imageLayer.bringToFront();
+        syncBasemapControls(key);
+        return;
+      }
       if (fadeFromBootstrap) detailLayerOverrides.className = 'nauru-map-detail-layer';
       const primaryLayer = createBasemapTileLayer(cfg, textLevel, detailLayerOverrides);
       const detailLayers = [primaryLayer];
