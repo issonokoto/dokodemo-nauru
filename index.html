@@ -22,6 +22,28 @@
     html {
       background: #b8d8e7 url('./assets/nauru-boot-map.svg') center / 100% 100% no-repeat;
     }
+
+/* 比較画像の仕上がり。表示と書き出しで共通にする。 */
+.comparison-card[data-look] { color:#193b50; background:var(--comparison-paper); border-color:#c8d7df; }
+.comparison-card[data-look="simple"] { --comparison-paper:#f8fafb; --comparison-accent:#e7eff4; }
+.comparison-card[data-look="postcard"] { --comparison-paper:#fff6e5; --comparison-accent:#f0dfbf; border:8px solid #fffdf7; border-radius:8px; }
+.comparison-card[data-look="postcard"] .comparison-kicker { color:#966036; letter-spacing:.18em; }
+.comparison-card[data-look="postcard"] .comparison-title { font-family:Georgia,"Yu Mincho",serif; }
+.comparison-card[data-look="postcard"] .comparison-figures { border-top:2px dashed #c4a779; border-bottom:2px dashed #c4a779; padding:12px 0; }
+.comparison-card[data-look="notebook"] { --comparison-paper:#fffef5; --comparison-accent:#fff0b8; border-radius:6px; background-image:linear-gradient(#93b7ce26 1px,transparent 1px),linear-gradient(90deg,#93b7ce26 1px,transparent 1px); background-size:20px 20px; }
+.comparison-card[data-look="notebook"] .comparison-title { text-decoration:underline; text-decoration-color:#efba4b; text-underline-offset:6px; }
+.comparison-card[data-look="notebook"] .comparison-summary { border:2px solid #49687a; border-radius:5px 16px 7px 12px; }
+.comparison-card[data-look] .comparison-kicker,.comparison-card[data-look] .comparison-area,.comparison-card[data-look] .comparison-note { color:#496374; }
+.comparison-card[data-look] .comparison-summary { color:#193b50; background:var(--comparison-accent); }
+.comparison-look-picker { margin:16px 0 0; padding:12px 0 0; border:0; border-top:1px solid #acbdc7; }
+.comparison-look-picker legend { padding:0 8px 0 0; font-size:12px; font-weight:700; }
+.comparison-look-options { display:flex; gap:6px; flex-wrap:wrap; }
+.comparison-look-options button { flex:1; min-width:90px; padding:10px 6px; border:1px solid #8ea6b4; border-radius:8px; background:#ffffffb3; color:#193b50; cursor:pointer; font:inherit; font-size:12px; }
+.comparison-look-options button[aria-pressed="true"] { background:#193b50; color:white; border-color:#193b50; }
+.comparison-look-options button:focus-visible { outline:3px solid #d58e19; outline-offset:2px; }
+.comparison-card.comparison-export-card[data-look] { background:var(--comparison-paper) !important; }
+.comparison-card.comparison-export-card[data-look="notebook"] { background-size:20px 20px !important; background-image:linear-gradient(#93b7ce26 1px,transparent 1px),linear-gradient(90deg,#93b7ce26 1px,transparent 1px) !important; }
+.comparison-export-card .comparison-look-picker { display:none !important; }
   </style>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -3028,7 +3050,7 @@
 
   <!-- 市区町村・都道府県との面積比較 -->
   <div id="comparison-modal" role="dialog" aria-modal="true" aria-labelledby="comparison-title">
-    <article id="comparison-card" class="comparison-card">
+    <article id="comparison-card" class="comparison-card" data-look="simple">
       <button type="button" id="comparison-close" class="comparison-close" aria-label="比較を閉じる">×</button>
       <img class="app-logo comparison-brand-logo" src="assets/dokodemo-nauru-logo-transparent-v3.png" alt="どこでもナウル">
       <p class="comparison-kicker">同じ縮尺でくらべる</p>
@@ -3048,6 +3070,14 @@
       </div>
       <p id="comparison-summary" class="comparison-summary"></p>
       <p id="comparison-note" class="comparison-note">面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。</p>
+      <fieldset class="comparison-look-picker">
+        <legend>画像の仕上がり</legend>
+        <div class="comparison-look-options">
+          <button type="button" data-comparison-look="simple" aria-pressed="true">シンプル</button>
+          <button type="button" data-comparison-look="postcard" aria-pressed="false">ポストカード</button>
+          <button type="button" data-comparison-look="notebook" aria-pressed="false">地理ノート</button>
+        </div>
+      </fieldset>
       <div class="comparison-share-actions">
         <button type="button" id="btn-comparison-save">📷 比較画像を保存</button>
         <button type="button" id="btn-comparison-post" class="comparison-post">𝕏 に投稿</button>
@@ -8261,6 +8291,15 @@
       document.getElementById('comparison-modal').classList.remove('open');
     }
 
+    function setComparisonLook(look) {
+      if (!['simple', 'postcard', 'notebook'].includes(look)) return;
+      document.getElementById('comparison-card').dataset.look = look;
+      document.querySelectorAll('[data-comparison-look]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.comparisonLook === look));
+      });
+      try { localStorage.setItem('nauru_comparison_look', look); } catch (_) {}
+    }
+
     async function captureComparisonCanvas() {
       if (typeof html2canvas !== 'function') throw new Error('html2canvas が読み込めていません');
       const card = document.getElementById('comparison-card');
@@ -8273,13 +8312,14 @@
       exportCard.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
       exportCard.querySelector('.comparison-close')?.remove();
       exportCard.querySelector('.comparison-share-actions')?.remove();
+      exportCard.querySelector('.comparison-look-picker')?.remove();
       exportCard.style.width = `${Math.ceil(card.getBoundingClientRect().width)}px`;
       exportCard.style.height = 'auto';
       document.body.appendChild(exportCard);
       try {
         await new Promise(resolve => requestAnimationFrame(resolve));
         return await html2canvas(exportCard, {
-          backgroundColor: '#7ea6cf',
+          backgroundColor: null,
           scale: Math.min(2, window.devicePixelRatio || 1.5),
           logging: false
         });
@@ -8620,6 +8660,10 @@
       document.getElementById('comparison-modal').addEventListener('click', event => {
         if (event.target === event.currentTarget) closeComparison();
       });
+      document.querySelectorAll('[data-comparison-look]').forEach(button => {
+        button.addEventListener('click', () => setComparisonLook(button.dataset.comparisonLook));
+      });
+      try { setComparisonLook(localStorage.getItem('nauru_comparison_look') || 'simple'); } catch (_) {}
       document.getElementById('btn-comparison-save').addEventListener('click', saveComparisonImage);
       document.getElementById('btn-comparison-post').addEventListener('click', postComparisonToX);
       if (requestedComparison) {
