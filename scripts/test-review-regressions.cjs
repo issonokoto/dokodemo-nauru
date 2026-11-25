@@ -8,13 +8,14 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 async function main() {
   const cacheName = read('service-worker.js').match(/const CACHE_NAME = '([^']+)'/)[1];
   const previousCacheName = cacheName.replace(/\d+$/, value => String(Number(value) - 1));
-  const handlers = {}, deleted = [], stored = new Map();
+  const handlers = {}, deleted = [], stored = new Map(), seenCaches = [];
   const context = {
     URL, Request, Response,
     self: {
       registration: { scope: 'https://example.com/dokodemo-nauru/' },
       location: { origin: 'https://example.com' },
       addEventListener: (name, callback) => { handlers[name] = callback; },
+      skipWaiting: async () => {},
       clients: { claim: async () => {} }
     },
     caches: {
@@ -23,32 +24,43 @@ async function main() {
       open: async () => ({ put: async (key, value) => stored.set(key.url || key, await value.text()) }),
       match: async key => stored.has(key.url) ? new Response(stored.get(key.url)) : undefined
     },
-    fetch: async request => new Response(request.url.endsWith('privacy.html') ? 'privacy' : request.url.includes('/camera/') ? 'photo-editor' : 'home')
+    fetch: async request => {
+      seenCaches.push(request.cache);
+      return new Response(request.url.endsWith('privacy.html') ? 'privacy' : request.url.includes('/camera/') ? 'photo-editor' : request.url.endsWith('attractions.geojson') ? 'attractions' : 'home');
+    }
   };
   vm.createContext(context);
   vm.runInContext(read('service-worker.js'), context);
   let pending;
+  handlers.install({ waitUntil: promise => { pending = promise; } });
+  await pending;
+  assert(seenCaches.length > 0 && seenCaches.every(mode => mode === 'no-cache'));
+  seenCaches.length = 0;
+  stored.clear();
   handlers.activate({ waitUntil: promise => { pending = promise; } });
   await pending;
   assert.deepEqual(deleted, [previousCacheName]);
   // Use a Request-compatible stub to model browser navigation requests.
-  context.Request = class { constructor(value) { this.url = value.url || String(value); } };
-  async function navigate(url) {
+  context.Request = class { constructor(value, init) { this.url = value.url || String(value); this.cache = init && init.cache; } };
+  async function requestPath(url, mode = 'navigate') {
     const writes = [];
-    handlers.fetch({ request: { method: 'GET', mode: 'navigate', url },
+    handlers.fetch({ request: { method: 'GET', mode, url },
       respondWith: promise => { pending = promise; }, waitUntil: promise => writes.push(promise) });
     const response = await pending;
     await Promise.all(writes);
     return response.text();
   }
-  await navigate('https://example.com/dokodemo-nauru/');
-  await navigate('https://example.com/dokodemo-nauru/privacy.html');
-  await navigate('https://example.com/dokodemo-nauru/camera/');
+  await requestPath('https://example.com/dokodemo-nauru/');
+  await requestPath('https://example.com/dokodemo-nauru/privacy.html');
+  await requestPath('https://example.com/dokodemo-nauru/camera/');
+  await requestPath('https://example.com/dokodemo-nauru/data/attractions.geojson', 'cors');
+  assert.deepEqual(seenCaches, ['no-cache', 'no-cache', 'no-cache', 'no-cache']);
   context.fetch = async () => { throw new Error('offline'); };
-  assert.equal(await navigate('https://example.com/dokodemo-nauru/'), 'home');
-  assert.equal(await navigate('https://example.com/dokodemo-nauru/privacy.html'), 'privacy');
-  assert.equal(await navigate('https://example.com/dokodemo-nauru/camera/'), 'photo-editor');
-  assert.equal(await navigate('https://example.com/dokodemo-nauru/camera/index.html'), 'photo-editor');
+  assert.equal(await requestPath('https://example.com/dokodemo-nauru/'), 'home');
+  assert.equal(await requestPath('https://example.com/dokodemo-nauru/privacy.html'), 'privacy');
+  assert.equal(await requestPath('https://example.com/dokodemo-nauru/camera/'), 'photo-editor');
+  assert.equal(await requestPath('https://example.com/dokodemo-nauru/camera/index.html'), 'photo-editor');
+  assert.equal(await requestPath('https://example.com/dokodemo-nauru/data/attractions.geojson', 'cors'), 'attractions');
 
   const game = read('game/game.js');
   const rpc = game.slice(game.indexOf('  async function rankingRpc('), game.indexOf('  function firstRpcRow('));
@@ -86,23 +98,42 @@ async function main() {
     if (!/src=|application\/ld\+json/.test(match[1])) new vm.Script(match[2]);
   }
   new vm.Script(game);
-  const renderCode = game.slice(game.indexOf('  async function renderQuestion('), game.indexOf('  function tickTimer('));
+  const Rules = require('../game/rules.js');
+  const renderCode = game.slice(game.indexOf('  function updateSurvivalHud('), game.indexOf('  function tickTimer('));
   let now = 1000, tick;
-  const element = () => ({classList: {remove() {}}, style: {}, setAttribute() {}, focus() {}});
+  const element = () => ({classList: {remove() {}, toggle() {}}, style: {}, setAttribute() {}, focus() {}});
   const elements = new Proxy({answerButtons: [element()]}, {get: (target, key) => target[key] ||= element()});
+  const places = [
+    {id: 'q', category: 'island', outcome: 'larger', name: 'テスト島', location: '東京都'},
+    {id: 'q2', category: 'island', outcome: 'smaller', name: '予備島', location: '沖縄県'}
+  ];
   const renderContext = {elements, performance: {now: () => now}, cancelAnimationFrame() {},
-    state: {questions: [{id: 'q', category: 'island'}], currentIndex: 0, serverSessionId: 'session'},
-    QUESTION_COUNT: 10, CATEGORY_LABELS: {island: '島'},
-    rankingRpc: async () => {now += 2000; return [{opened: true, question_id: 'q'}];},
+    Rules, MAX_MISTAKES: Rules.MAX_MISTAKES, CATEGORY_LABELS: {island: '島'}, formatScore: String,
+    state: {
+      data: {places}, placesById: new Map(places.map(place => [place.id, place])),
+      usedQuestionIds: new Set(), questions: [], currentIndex: 0, correctCount: 0, mistakes: 0,
+      serverSessionId: 'session', serverClientId: 'client', serverCompleted: false
+    },
+    rankingRpc: async (name, body) => {
+      assert.equal(name, 'open_quiz_survival_question');
+      assert.equal(body.p_session_id, 'session');
+      assert.equal(body.p_client_id, 'client');
+      now += 2000;
+      return [{opened: true, question_id: 'q'}];
+    },
     firstRpcRow: rows => rows[0], tickTimer: value => {tick = value;}, console, showToast() {}};
   vm.createContext(renderContext);
   vm.runInContext(renderCode, renderContext);
   await renderContext.renderQuestion();
+  assert.equal(renderContext.state.questions[0].id, 'q');
   assert.equal(tick - renderContext.state.questionStartedAt, 2000);
+  renderContext.state.currentIndex = 1;
   renderContext.rankingRpc = async () => {now += 8000; throw new Error('test timeout');};
   renderContext.console = {warn() {}};
   await renderContext.renderQuestion();
   assert.equal(renderContext.state.serverSessionId, null);
+  assert.equal(renderContext.state.serverClientId, null);
+  assert.equal(renderContext.state.questions[1].id, 'q2');
   assert.equal(tick - renderContext.state.questionStartedAt, 0);
 
   const geometryCode = html.slice(html.indexOf('    async function getComparisonGeometry('), html.indexOf('    function comparisonBoundsToLeaflet('));

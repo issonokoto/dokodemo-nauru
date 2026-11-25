@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dokodemo-nauru-v97';
+const CACHE_NAME = 'dokodemo-nauru-v98';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
   './assets/historical-maps.js',
@@ -87,7 +87,7 @@ self.addEventListener('install', event => {
     const cache = await caches.open(CACHE_NAME);
     await Promise.allSettled(STATIC_SHELL.map(async path => {
       const url = new URL(path, self.registration.scope);
-      const response = await fetch(new Request(url, { cache: 'reload' }));
+      const response = await fetch(new Request(url, { cache: 'no-cache' }));
       if (response.ok) await cache.put(url.toString(), response);
     }));
     await self.skipWaiting();
@@ -117,7 +117,7 @@ self.addEventListener('fetch', event => {
   if (networkFirst) {
     event.respondWith((async () => {
       try {
-        const response = await fetch(new Request(event.request, { cache: 'no-store' }));
+        const response = await fetch(new Request(event.request, { cache: 'no-cache' }));
         if (response && response.ok) {
           const cache = await caches.open(CACHE_NAME);
           event.waitUntil(cache.put(cacheKey, response.clone()));
