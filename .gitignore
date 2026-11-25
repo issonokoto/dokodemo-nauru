@@ -9,3 +9,4 @@ build_html.py
 output/playwright/
 /supabase/.temp/
 node_modules/
+*.preview.svg
