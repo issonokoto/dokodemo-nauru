@@ -6303,7 +6303,7 @@
 
     async function loadSearchAreaIndex() {
       if (searchAreaIndexPromise) return searchAreaIndexPromise;
-      searchAreaIndexPromise = fetch(SEARCH_AREA_INDEX_URL, { cache: 'no-store' })
+      searchAreaIndexPromise = fetch(SEARCH_AREA_INDEX_URL, { cache: 'no-cache' })
         .then(response => {
           if (!response.ok) throw new Error('検索用の面積データを取得できませんでした');
           return response.json();
@@ -6360,7 +6360,7 @@
 
     async function loadNaturalFeatures() {
       if (naturalFeaturesPromise) return naturalFeaturesPromise;
-      naturalFeaturesPromise = fetch(NATURAL_FEATURES_URL, { cache: 'no-store' })
+      naturalFeaturesPromise = fetch(NATURAL_FEATURES_URL, { cache: 'no-cache' })
         .then(response => {
           if (!response.ok) throw new Error('島・湖のデータを取得できませんでした');
           return response.json();
@@ -6388,7 +6388,7 @@
 
     async function loadAttractions() {
       if (attractionsPromise) return attractionsPromise;
-      attractionsPromise = fetch(ATTRACTIONS_URL, { cache: 'no-store' })
+      attractionsPromise = fetch(ATTRACTIONS_URL, { cache: 'no-cache' })
         .then(response => {
           if (!response.ok) throw new Error('観光地・施設のデータを取得できませんでした');
           return response.json();
@@ -6402,7 +6402,7 @@
 
     async function loadFacilityRelations() {
       if (facilityRelationsPromise) return facilityRelationsPromise;
-      facilityRelationsPromise = fetch(FACILITY_RELATIONS_URL, { cache: 'no-store' })
+      facilityRelationsPromise = fetch(FACILITY_RELATIONS_URL, { cache: 'no-cache' })
         .then(response => {
           if (!response.ok) throw new Error('施設間の関係データを取得できませんでした');
           return response.json();
@@ -6416,7 +6416,7 @@
 
     async function loadPlaceAdministrativeAreas() {
       if (placeAdministrativeAreasPromise) return placeAdministrativeAreasPromise;
-      placeAdministrativeAreasPromise = fetch(PLACE_ADMINISTRATIVE_AREAS_URL, { cache: 'no-store' })
+      placeAdministrativeAreasPromise = fetch(PLACE_ADMINISTRATIVE_AREAS_URL, { cache: 'no-cache' })
         .then(response => {
           if (!response.ok) throw new Error('行政所属データを取得できませんでした');
           return response.json();
@@ -8021,7 +8021,7 @@
       if (comparisonOverlayGeometryCache.has(id)) return comparisonOverlayGeometryCache.get(id);
       const url = properties.geometryFile ? `./data/${properties.geometryFile}` : '';
       if (!url) return [];
-      const promise = fetch(url, { cache: 'no-store' })
+      const promise = fetch(url, { cache: 'no-cache' })
         .then(response => {
           if (!response.ok) throw new Error(`${properties.name || id}の輪郭を取得できませんでした`);
           return response.json();
