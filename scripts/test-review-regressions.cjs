@@ -84,7 +84,8 @@ async function main() {
   assert.equal(cleared, 2);
 
   const html = read('index.html');
-  const noteCode = html.slice(html.indexOf('        const officialArea ='), html.indexOf('        comparisonNote.append(\'輪郭：\');', html.indexOf('        const officialArea =')));
+  const app = read('app.js');
+  const noteCode = app.slice(app.indexOf('        const officialArea ='), app.indexOf('        comparisonNote.append(\'輪郭：\');', app.indexOf('        const officialArea =')));
   function noteFor(properties, areaKm2) {
     const parts = [];
     const ctx = {result: {target: {feature: {properties}, areaKm2}}, attraction: false,
@@ -94,8 +95,10 @@ async function main() {
   }
   assert.equal(noteFor({officialAreaKm2: null}, 12), '');
   assert.match(noteFor({officialAreaKm2: 12}, 12), /国土地理院/);
-  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-    if (!/src=|application\/ld\+json/.test(match[1])) new vm.Script(match[2]);
+  for (const file of ['app-start.css', 'app.css', 'tailwind.css', 'app.js']) {
+    assert.ok(html.includes('="./' + file + '"'), file);
+    const source = read(file);
+    if (file.endsWith('.js')) new vm.Script(source, {filename: file});
   }
   new vm.Script(game);
   const Rules = require('../game/rules.js');
@@ -136,7 +139,7 @@ async function main() {
   assert.equal(renderContext.state.questions[1].id, 'q2');
   assert.equal(tick - renderContext.state.questionStartedAt, 0);
 
-  const geometryCode = html.slice(html.indexOf('    async function getComparisonGeometry('), html.indexOf('    function comparisonBoundsToLeaflet('));
+  const geometryCode = app.slice(app.indexOf('    async function getComparisonGeometry('), app.indexOf('    function comparisonBoundsToLeaflet('));
   let attempts = 0;
   const geometryContext = {comparisonGeometryCache: new Map(), prefecturesGeojsonPromise: null,
     isHistoricalComparisonTarget: () => false, isFileGeometryComparisonTarget: () => false,

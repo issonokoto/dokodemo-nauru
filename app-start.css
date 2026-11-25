@@ -1,0 +1,25 @@
+    html {
+      background: #b8d8e7 url('./assets/nauru-boot-map.svg') center / 100% 100% no-repeat;
+    }
+
+/* 比較画像の仕上がり。表示と書き出しで共通にする。 */
+.comparison-card[data-look] { color:#193b50; background:var(--comparison-paper); border-color:#c8d7df; }
+.comparison-card[data-look="simple"] { --comparison-paper:#f8fafb; --comparison-accent:#e7eff4; }
+.comparison-card[data-look="postcard"] { --comparison-paper:#fff6e5; --comparison-accent:#f0dfbf; border:8px solid #fffdf7; border-radius:8px; }
+.comparison-card[data-look="postcard"] .comparison-kicker { color:#966036; letter-spacing:.18em; }
+.comparison-card[data-look="postcard"] .comparison-title { font-family:Georgia,"Yu Mincho",serif; }
+.comparison-card[data-look="postcard"] .comparison-figures { border-top:2px dashed #c4a779; border-bottom:2px dashed #c4a779; padding:12px 0; }
+.comparison-card[data-look="notebook"] { --comparison-paper:#fffef5; --comparison-accent:#fff0b8; border-radius:6px; background-image:linear-gradient(#93b7ce26 1px,transparent 1px),linear-gradient(90deg,#93b7ce26 1px,transparent 1px); background-size:20px 20px; }
+.comparison-card[data-look="notebook"] .comparison-title { text-decoration:underline; text-decoration-color:#efba4b; text-underline-offset:6px; }
+.comparison-card[data-look="notebook"] .comparison-summary { border:2px solid #49687a; border-radius:5px 16px 7px 12px; }
+.comparison-card[data-look] .comparison-kicker,.comparison-card[data-look] .comparison-area,.comparison-card[data-look] .comparison-note { color:#496374; }
+.comparison-card[data-look] .comparison-summary { color:#193b50; background:var(--comparison-accent); }
+.comparison-look-picker { margin:16px 0 0; padding:12px 0 0; border:0; border-top:1px solid #acbdc7; }
+.comparison-look-picker legend { padding:0 8px 0 0; font-size:12px; font-weight:700; }
+.comparison-look-options { display:flex; gap:6px; flex-wrap:wrap; }
+.comparison-look-options button { flex:1; min-width:90px; padding:10px 6px; border:1px solid #8ea6b4; border-radius:8px; background:#ffffffb3; color:#193b50; cursor:pointer; font:inherit; font-size:12px; }
+.comparison-look-options button[aria-pressed="true"] { background:#193b50; color:white; border-color:#193b50; }
+.comparison-look-options button:focus-visible { outline:3px solid #d58e19; outline-offset:2px; }
+.comparison-card.comparison-export-card[data-look] { background:var(--comparison-paper) !important; }
+.comparison-card.comparison-export-card[data-look="notebook"] { background-size:20px 20px !important; background-image:linear-gradient(#93b7ce26 1px,transparent 1px),linear-gradient(90deg,#93b7ce26 1px,transparent 1px) !important; }
+.comparison-export-card .comparison-look-picker { display:none !important; }

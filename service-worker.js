@@ -1,6 +1,10 @@
-const CACHE_NAME = 'dokodemo-nauru-v98';
+const CACHE_NAME = 'dokodemo-nauru-v100';
 const PRESERVED_CACHE_PREFIXES = ['dokodemo-nauru-map-tiles-'];
 const STATIC_SHELL = [
+  './app-start.css',
+  './app.css',
+  './tailwind.css',
+  './app.js',
   './assets/historical-maps.js',
   './camera/index.html',
   './camera/camera.css',
@@ -34,6 +38,10 @@ const STATIC_SHELL = [
 ];
 
 const NETWORK_FIRST_PATHS = new Set([
+  './app-start.css',
+  './app.css',
+  './tailwind.css',
+  './app.js',
   './assets/historical-maps.js',
   './data/showa-map-regions.json',
   './data/prewar-map-regions.json',
