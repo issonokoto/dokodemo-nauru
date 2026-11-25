@@ -33,6 +33,7 @@
   </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./assets/historical-maps.js"></script>
   <style>
     :root { --map-credit-height: 1.7rem; }
     html, body { width: 100%; max-width: 100%; height: 100%; margin: 0; overflow: hidden; }
@@ -1584,7 +1585,8 @@
       .game-entry {
         display: none;
       }
-      .mobile-launcher.game-launcher {
+      .mobile-launcher.game-launcher,
+      .mobile-launcher.photo-launcher {
         grid-column: 1 / -1;
         border-color: rgba(245, 197, 66, 0.58);
         background:
@@ -1999,6 +2001,28 @@
         padding: 0 0.6rem;
       }
     }
+
+/* 比較画像の仕上がり。表示と書き出しで共通にする。 */
+.comparison-card[data-look] { color:#193b50; background:var(--comparison-paper); border-color:#c8d7df; }
+.comparison-card[data-look="simple"] { --comparison-paper:#f8fafb; --comparison-accent:#e7eff4; }
+.comparison-card[data-look="postcard"] { --comparison-paper:#fff6e5; --comparison-accent:#f0dfbf; border:8px solid #fffdf7; border-radius:8px; }
+.comparison-card[data-look="postcard"] .comparison-kicker { color:#966036; letter-spacing:.18em; }
+.comparison-card[data-look="postcard"] .comparison-title { font-family:Georgia,"Yu Mincho",serif; }
+.comparison-card[data-look="postcard"] .comparison-figures { border-top:2px dashed #c4a779; border-bottom:2px dashed #c4a779; padding:12px 0; }
+.comparison-card[data-look="notebook"] { --comparison-paper:#fffef5; --comparison-accent:#fff0b8; border-radius:6px; background-image:linear-gradient(#93b7ce26 1px,transparent 1px),linear-gradient(90deg,#93b7ce26 1px,transparent 1px); background-size:20px 20px; }
+.comparison-card[data-look="notebook"] .comparison-title { text-decoration:underline; text-decoration-color:#efba4b; text-underline-offset:6px; }
+.comparison-card[data-look="notebook"] .comparison-summary { border:2px solid #49687a; border-radius:5px 16px 7px 12px; }
+.comparison-card[data-look] .comparison-kicker,.comparison-card[data-look] .comparison-area,.comparison-card[data-look] .comparison-note { color:#496374; }
+.comparison-card[data-look] .comparison-summary { color:#193b50; background:var(--comparison-accent); }
+.comparison-look-picker { margin:16px 0 0; padding:12px 0 0; border:0; border-top:1px solid #acbdc7; }
+.comparison-look-picker legend { padding:0 8px 0 0; font-size:12px; font-weight:700; }
+.comparison-look-options { display:flex; gap:6px; flex-wrap:wrap; }
+.comparison-look-options button { flex:1; min-width:90px; padding:10px 6px; border:1px solid #8ea6b4; border-radius:8px; background:#ffffffb3; color:#193b50; cursor:pointer; font:inherit; font-size:12px; }
+.comparison-look-options button[aria-pressed="true"] { background:#193b50; color:white; border-color:#193b50; }
+.comparison-look-options button:focus-visible { outline:3px solid #d58e19; outline-offset:2px; }
+.comparison-card.comparison-export-card[data-look] { background:var(--comparison-paper) !important; }
+.comparison-card.comparison-export-card[data-look="notebook"] { background-size:20px 20px !important; background-image:linear-gradient(#93b7ce26 1px,transparent 1px),linear-gradient(90deg,#93b7ce26 1px,transparent 1px) !important; }
+.comparison-export-card .comparison-look-picker { display:none !important; }
   </style>
 </head>
 <body>
@@ -2087,18 +2111,29 @@
       <p class="text-[9px] text-ocean-300/80 mt-1 leading-snug">実寸は一定 · 高緯度ほど地図上では大きく見える</p>
     </div>
 
+    <a class="game-entry photo-entry" href="./camera/" aria-label="写真で遊ぶ、撮影・画像にキャラクターを貼る">
+      <span class="game-entry-copy">
+        <strong>📸 写真で遊ぶ</strong>
+        <small>撮影・画像にキャラクターを貼る</small>
+      </span>
+      <span class="game-entry-icon" aria-hidden="true">＋</span>
+    </a>
+
     <a class="game-entry" href="./game/" aria-label="面積クイズ、ナウルより大きいか小さいかを当てるゲームを開く">
       <span class="game-entry-copy">
         <strong>面積クイズに挑戦</strong>
-        <small>大きい？ 小さい？ 全10問</small>
+        <small>大きい？ 小さい？ 3回ミスで終了</small>
       </span>
       <span class="game-entry-icon" aria-hidden="true">?</span>
     </a>
 
     <!-- スマホ: 操作カテゴリだけを表示 -->
     <div id="mobile-launchers" aria-label="操作を選択">
+      <a class="mobile-launcher photo-launcher" href="./camera/" aria-label="写真で遊ぶ、撮影・画像にキャラクターを貼る">
+        <strong>📸 写真で遊ぶ</strong><small>撮影・画像にキャラクターを貼る</small>
+      </a>
       <a class="mobile-launcher game-launcher" href="./game/">
-        <strong>面積クイズ</strong><small>大きい？ 小さい？ 全10問</small>
+        <strong>面積クイズ</strong><small>大きい？ 小さい？ 3回ミスで終了</small>
       </a>
       <button type="button" class="mobile-launcher" data-mobile-tool="map">
         <strong>地図</strong><small id="mobile-map-summary">標準（明るい）</small>
@@ -2128,12 +2163,15 @@
       <select id="basemap-select" class="basemap-select" aria-label="地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="gsiPale">地理院・淡色（日本）</option>
-        <option value="voyager">カラー地図</option>
-        <option value="voyagerHd">高精細（英字・文字くっきり）</option>
+        <option value="showa">昭和の地図（一部地域）</option>
+        <option value="meiji">明治期の地図（一部地域）</option>
+        <option value="prewar">戦前の地図（一部地域）</option>
+        <option value="postwarPhoto">終戦直後の航空写真（1945～1950年・一部）</option>
+        <option value="postwarMap">終戦前後の地図（道路・地名、一部地域）</option>
         <option value="topo">地形図</option>
         <option value="satellite">衛星写真</option>
-        <option value="dark">ダーク</option>
       </select>
+      <p id="basemap-note" class="text-[11px] text-ocean-300 mt-2 leading-relaxed" role="status" hidden></p>
       <label for="map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
       <select id="map-text-scale-select" class="basemap-select" aria-label="地図の文字サイズ">
         <option value="normal">標準</option>
@@ -2256,12 +2294,15 @@
       <select id="mobile-basemap-select" class="basemap-select" aria-label="スマホ用の地図の種類">
         <option value="osm">標準（明るい）</option>
         <option value="gsiPale">地理院・淡色（日本）</option>
-        <option value="voyager">カラー地図</option>
-        <option value="voyagerHd">高精細（英字・文字くっきり）</option>
+        <option value="showa">昭和の地図（一部地域）</option>
+        <option value="meiji">明治期の地図（一部地域）</option>
+        <option value="prewar">戦前の地図（一部地域）</option>
+        <option value="postwarPhoto">終戦直後の航空写真（1945～1950年・一部）</option>
+        <option value="postwarMap">終戦前後の地図（道路・地名、一部地域）</option>
         <option value="topo">地形図</option>
         <option value="satellite">衛星写真</option>
-        <option value="dark">ダーク</option>
       </select>
+      <p id="mobile-basemap-note" class="mobile-tool-copy mt-2" role="status" hidden></p>
       <label for="mobile-map-text-scale-select" class="block text-[10px] text-ocean-300 mt-2 mb-1 tracking-wide">地図の文字サイズ</label>
       <select id="mobile-map-text-scale-select" class="basemap-select" aria-label="スマホ用の地図の文字サイズ">
         <option value="normal">標準</option>
@@ -2269,7 +2310,7 @@
         <option value="large">大きい（2倍）</option>
         <option value="xlarge">特大（4倍）</option>
       </select>
-      <p class="mobile-tool-copy mt-2">衛星写真には文字サイズ設定は反映されません。</p>
+      <p class="mobile-tool-copy mt-2">衛星写真・航空写真には文字サイズ設定は反映されません。</p>
     </div>
 
     <div class="mobile-tool-panel" data-mobile-panel="style">
@@ -2501,7 +2542,7 @@
 
   <!-- 市区町村・都道府県との面積比較 -->
   <div id="comparison-modal" role="dialog" aria-modal="true" aria-labelledby="comparison-title">
-    <article id="comparison-card" class="comparison-card">
+    <article id="comparison-card" class="comparison-card" data-look="simple">
       <button type="button" id="comparison-close" class="comparison-close" aria-label="比較を閉じる">×</button>
       <img class="app-logo comparison-brand-logo" src="assets/dokodemo-nauru-logo-transparent-v3.png" alt="どこでもナウル">
       <p class="comparison-kicker">同じ縮尺でくらべる</p>
@@ -2521,6 +2562,14 @@
       </div>
       <p id="comparison-summary" class="comparison-summary"></p>
       <p id="comparison-note" class="comparison-note">面積は国土地理院「全国都道府県市区町村別面積調」（令和8年4月1日）を使用しています。海域は含みません。</p>
+      <fieldset class="comparison-look-picker">
+        <legend>画像の仕上がり</legend>
+        <div class="comparison-look-options">
+          <button type="button" data-comparison-look="simple" aria-pressed="true">シンプル</button>
+          <button type="button" data-comparison-look="postcard" aria-pressed="false">ポストカード</button>
+          <button type="button" data-comparison-look="notebook" aria-pressed="false">地理ノート</button>
+        </div>
+      </fieldset>
       <div class="comparison-share-actions">
         <button type="button" id="btn-comparison-save">📷 比較画像を保存</button>
         <button type="button" id="btn-comparison-post" class="comparison-post">𝕏 に投稿</button>
@@ -2638,21 +2687,30 @@
           maxZoom: 19
         }
       },
-      voyager: {
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        options: {
-          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }
+      showa: {
+        historical: 'showa',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
       },
-      voyagerHd: {
-        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-        options: {
-          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }
+      meiji: {
+        historical: 'meiji',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
+      },
+      prewar: {
+        historical: 'prewar',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
+      },
+      postwarPhoto: {
+        historical: 'postwarPhoto', noTextScale: true,
+        minSourceZoom: 10,
+        options: { maxNativeZoom: 17, maxZoom: 19 }
+      },
+      postwarMap: {
+        historical: 'postwarMap',
+        minSourceZoom: 8,
+        options: { maxNativeZoom: 16, maxZoom: 19 }
       },
       topo: {
         url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
@@ -2665,14 +2723,6 @@
         url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         options: {
           attribution: 'Tiles &copy; Esri · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          maxZoom: 19
-        }
-      },
-      dark: {
-        url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        options: {
-          attribution: '&copy; OSM &copy; CARTO · 行政区域 国土数値情報 · ナウルくん © ナウル共和国政府観光局',
-          subdomains: 'abcd',
           maxZoom: 19
         }
       }
@@ -2975,7 +3025,7 @@
     }
 
     function getBasemapTextLevel(key) {
-      if (!map || !BASEMAPS[key] || key === 'satellite') return 0;
+      if (!map || !BASEMAPS[key] || key === 'satellite' || BASEMAPS[key].noTextScale) return 0;
       const selectedLevel = MAP_TEXT_SCALES[mapTextScale]?.level || 0;
       const mapZoom = Math.max(0, Math.floor(map.getZoom()));
       const minSourceZoom = BASEMAPS[key].minSourceZoom || 0;
@@ -3002,12 +3052,24 @@
       const cfg = BASEMAPS[key];
       const textLevel = getBasemapTextLevel(key);
       if (baseLayer) map.removeLayer(baseLayer);
-      const primaryLayer = createBasemapTileLayer(cfg, textLevel);
-      if (cfg.fallback && BASEMAPS[cfg.fallback]) {
-        const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel);
-        baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
+      const setNote = message => {
+        for (const id of ['basemap-note', 'mobile-basemap-note']) {
+          const note = document.getElementById(id);
+          if (note) { note.hidden = !message; note.textContent = message; }
+        }
+      };
+      setNote(key === 'showa' ? '一部地域のみ。収録地域・年代を読み込み中です。' : '');
+      if (cfg.historical) {
+        const fallbackLayer = createBasemapTileLayer(BASEMAPS.osm, textLevel);
+        baseLayer = window.NauruHistoricalMaps.createLayer({ key: cfg.historical, fallbackLayer, textLevel, onStatus: setNote }).addTo(map);
       } else {
-        baseLayer = primaryLayer.addTo(map);
+        const primaryLayer = createBasemapTileLayer(cfg, textLevel);
+        if (cfg.fallback && BASEMAPS[cfg.fallback]) {
+          const fallbackLayer = createBasemapTileLayer(BASEMAPS[cfg.fallback], textLevel);
+          baseLayer = L.layerGroup([fallbackLayer, primaryLayer]).addTo(map);
+        } else {
+          baseLayer = primaryLayer.addTo(map);
+        }
       }
       activeBasemapTextLevel = textLevel;
       if (polygonLayer) polygonLayer.bringToFront();
@@ -5628,6 +5690,38 @@
       return polygons.filter(polygon => polygon.some(ring => Array.isArray(ring) && ring.length >= 3));
     }
 
+    function polygonGroupsByLayerFromGeojson(value) {
+      const layers = { default: [], land: [], water: [] };
+      const visit = (item, inheritedLayer = 'default') => {
+        if (!item) return;
+        if (item.type === 'FeatureCollection') {
+          (item.features || []).forEach(feature => visit(feature, inheritedLayer));
+        } else if (item.type === 'Feature') {
+          const layer = ['land', 'water'].includes(item.properties && item.properties.layer)
+            ? item.properties.layer
+            : inheritedLayer;
+          visit(item.geometry, layer);
+        } else if (item.type === 'GeometryCollection') {
+          (item.geometries || []).forEach(geometry => visit(geometry, inheritedLayer));
+        } else if (item.type === 'Polygon') {
+          layers[inheritedLayer].push(item.coordinates || []);
+        } else if (item.type === 'MultiPolygon') {
+          (item.coordinates || []).forEach(polygon => layers[inheritedLayer].push(polygon));
+        }
+      };
+      visit(value);
+      Object.keys(layers).forEach(layer => {
+        layers[layer] = layers[layer]
+          .filter(polygon => polygon.some(ring => Array.isArray(ring) && ring.length >= 3));
+      });
+      const polygons = layers.land.length ? layers.land : layers.default;
+      return {
+        polygons,
+        waterPolygons: layers.water,
+        allPolygons: [...polygons, ...layers.water]
+      };
+    }
+
     function allCoordinatesFromPolygons(polygons) {
       return polygons.flatMap(polygon => polygon.flatMap(ring => ring))
         .filter(point => Array.isArray(point) && Number.isFinite(Number(point[0])) && Number.isFinite(Number(point[1])));
@@ -5795,6 +5889,9 @@
             .then(response => {
               if (!response.ok) throw new Error('都道府県境界を取得できませんでした');
               return response.json();
+            }).catch(error => {
+              prefecturesGeojsonPromise = null;
+              throw error;
             });
         }
         const collection = await prefecturesGeojsonPromise;
@@ -5802,9 +5899,15 @@
       } else {
         source = await loadCurrentMunicipalityGeometry(target);
       }
-      const polygons = polygonGroupsFromGeojson(source);
-      if (!polygons.length) throw new Error('境界データが見つかりませんでした');
-      const result = { target, polygons, bounds: getGeometryBounds(polygons) };
+      const layered = polygonGroupsByLayerFromGeojson(source);
+      if (!layered.allPolygons.length) throw new Error('境界データが見つかりませんでした');
+      const result = {
+        target,
+        polygons: layered.polygons,
+        waterPolygons: layered.waterPolygons,
+        allPolygons: layered.allPolygons,
+        bounds: getGeometryBounds(layered.allPolygons)
+      };
       comparisonGeometryCache.set(cacheKey, result);
       return result;
     }
@@ -5814,13 +5917,16 @@
     }
 
     async function renderComparison(result) {
-      const targetMetrics = geometryMetrics(result.polygons);
+      const targetPolygons = result.allPolygons || result.polygons;
+      const waterPolygons = result.waterPolygons || [];
+      const targetMetrics = geometryMetrics(targetPolygons);
       const nauruPolygons = [NAURU_RINGS];
       const nauruMetrics = geometryMetrics(nauruPolygons);
       if (!targetMetrics || !nauruMetrics) throw new Error('比較図を作れませんでした');
       const commonExtent = Math.max(targetMetrics.width, targetMetrics.height, nauruMetrics.width, nauruMetrics.height, 1);
       const pixelsPerMeter = 226 / commonExtent;
       const targetPath = makeComparisonPath(result.polygons, targetMetrics, pixelsPerMeter);
+      const waterPath = makeComparisonPath(waterPolygons, targetMetrics, pixelsPerMeter);
       const nauruPath = makeComparisonPath(nauruPolygons, nauruMetrics, pixelsPerMeter);
       const historical = isHistoricalComparisonTarget(result.target);
       const natural = isNaturalComparisonTarget(result.target);
@@ -5850,7 +5956,10 @@
       }
       const targetFill = result.target.kind === 'water' ? '#52b8dc' : attraction ? '#f5a623' : '#8ec31f';
       const targetStroke = result.target.kind === 'water' ? '#155a78' : attraction ? '#8a4b08' : '#365c16';
-      targetSvg.innerHTML = `<path d="${targetPath}" fill="${targetFill}" stroke="${targetStroke}" stroke-width="2.2" fill-rule="evenodd" />`;
+      const waterOverlay = waterPath
+        ? `<path d="${waterPath}" fill="#52b8dc" stroke="#155a78" stroke-width="2.2" fill-rule="evenodd" />`
+        : '';
+      targetSvg.innerHTML = `<path d="${targetPath}" fill="${targetFill}" stroke="${targetStroke}" stroke-width="2.2" fill-rule="evenodd" />${waterOverlay}`;
       document.getElementById('comparison-title').textContent = `ナウル共和国と${targetLabel}${targetPeriodLabel}の大きさ比較`;
       document.getElementById('comparison-nauru-area').textContent = `面積 ${NAURU_AREA_KM2} km²`;
       document.getElementById('comparison-target-name').textContent = targetLabel;
@@ -5892,7 +6001,8 @@
         comparisonNote.append(countryBoundaryLink, ' の高精細データを表示。');
       } else if (natural || attraction) {
         comparisonNote.replaceChildren();
-        const hasOfficialArea = Number.isFinite(result.target.areaKm2) && result.target.areaKm2 > 0;
+        const officialArea = Number(result.target.feature?.properties?.officialAreaKm2);
+        const hasOfficialArea = Number.isFinite(officialArea) && officialArea > 0;
         if (hasOfficialArea) {
           comparisonNote.append('面積：');
           if (result.target.areaSourceUrl && result.target.areaSourceLabel) {
@@ -5949,6 +6059,15 @@
       document.getElementById('comparison-modal').classList.remove('open');
     }
 
+    function setComparisonLook(look) {
+      if (!['simple', 'postcard', 'notebook'].includes(look)) return;
+      document.getElementById('comparison-card').dataset.look = look;
+      document.querySelectorAll('[data-comparison-look]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.comparisonLook === look));
+      });
+      try { localStorage.setItem('nauru_comparison_look', look); } catch (_) {}
+    }
+
     async function captureComparisonCanvas() {
       if (typeof html2canvas !== 'function') throw new Error('html2canvas が読み込めていません');
       const card = document.getElementById('comparison-card');
@@ -5961,13 +6080,14 @@
       exportCard.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
       exportCard.querySelector('.comparison-close')?.remove();
       exportCard.querySelector('.comparison-share-actions')?.remove();
+      exportCard.querySelector('.comparison-look-picker')?.remove();
       exportCard.style.width = `${Math.ceil(card.getBoundingClientRect().width)}px`;
       exportCard.style.height = 'auto';
       document.body.appendChild(exportCard);
       try {
         await new Promise(resolve => requestAnimationFrame(resolve));
         return await html2canvas(exportCard, {
-          backgroundColor: '#7ea6cf',
+          backgroundColor: null,
           scale: Math.min(2, window.devicePixelRatio || 1.5),
           logging: false
         });
@@ -6282,6 +6402,10 @@
       document.getElementById('comparison-modal').addEventListener('click', event => {
         if (event.target === event.currentTarget) closeComparison();
       });
+      document.querySelectorAll('[data-comparison-look]').forEach(button => {
+        button.addEventListener('click', () => setComparisonLook(button.dataset.comparisonLook));
+      });
+      try { setComparisonLook(localStorage.getItem('nauru_comparison_look') || 'simple'); } catch (_) {}
       document.getElementById('btn-comparison-save').addEventListener('click', saveComparisonImage);
       document.getElementById('btn-comparison-post').addEventListener('click', postComparisonToX);
       if (requestedComparison) {

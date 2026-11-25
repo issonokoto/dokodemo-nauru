@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-08-16T01:49:42.939Z",
+  "name": "大仙古墳内濠",
+  "kind": "water",
+  "context": "大阪府 堺市 大仙古墳",
+  "boundaryDefinition": "OSMに記録された閉じた水域境界。周囲の陸地は含めない。",
+  "source": {
+    "osmType": "relation",
+    "osmId": 13135846,
+    "objectUrl": "https://www.openstreetmap.org/relation/13135846",
+    "responseSha256": "e492faf19dc877147a75259bf14504dd2156ec75ce7c6030f926104177e3e197",
+    "discovery": null,
+    "discoveryCacheFile": null,
+    "fromCache": false,
+    "cacheDirectory": "../cache",
+    "rawResponseFile": "../cache/R13135846.osm-full.json",
+    "rawResponseSourceFile": "../cache/R13135846.osm-full.source.json",
+    "retrieval": {
+      "service": "Overpass API",
+      "url": "https://overpass-api.de/api/interpreter",
+      "query": "[out:json][timeout:35];relation(13135846)->.root;way(r.root)->.ways;.root out body;.ways out body geom;",
+      "querySha256": "9973c75e1631927367950883631804486f1b54b79c5ad85c2e67017a0ef6d713",
+      "queries": [
+        {
+          "scope": "parent-boundary",
+          "query": "[out:json][timeout:35];relation(13135846)->.root;way(r.root)->.ways;.root out body;.ways out body geom;",
+          "querySha256": "9973c75e1631927367950883631804486f1b54b79c5ad85c2e67017a0ef6d713"
+        }
+      ],
+      "attempts": [
+        {
+          "url": "https://overpass-api.de/api/interpreter",
+          "status": "succeeded",
+          "durationMs": 1859
+        },
+        {
+          "url": "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+          "status": "cancelled",
+          "httpStatus": null,
+          "code": "ECANCELLED",
+          "durationMs": 1860,
+          "message": "Request cancelled: https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+        },
+        {
+          "url": "https://overpass.private.coffee/api/interpreter",
+          "status": "cancelled",
+          "httpStatus": null,
+          "code": "ECANCELLED",
+          "durationMs": 1859,
+          "message": "Request cancelled before start: https://overpass.private.coffee/api/interpreter"
+        }
+      ],
+      "sourceFile": "../cache/R13135846.osm-full.source.json",
+      "fromCache": false
+    },
+    "coastline": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "bbox": [
+      135.4836675,
+      34.5606155,
+      135.4901471,
+      34.5666498
+    ],
+    "sha256": "eb97522012fa109f7fa92aa80fe223490fc67f0c77cf96a418c9f722afc95f5e",
+    "areaKm2": 0.12555624,
+    "lineLengthKm": null,
+    "vertexCount": 102,
+    "ringCount": 2,
+    "componentCount": 1,
+    "closed": true,
+    "boundaryStatus": "closed-area-boundary",
+    "coordinateBboxAspectRatio": 1.07379481,
+    "projectedAspectRatio": 0.8842664,
+    "integrity": {
+      "ringCount": 2,
+      "holeCount": 1,
+      "duplicateRingCount": 0,
+      "outerOrientation": "counterclockwise",
+      "innerOrientation": "clockwise"
+    },
+    "subareaAudit": {
+      "directRelationCount": 0,
+      "resolvedRelationCount": 0,
+      "geometryRelationCount": 0,
+      "directGeometryRelationCount": 0,
+      "directComponentCount": 0,
+      "candidateComponentCount": 0,
+      "addedComponentCount": 0,
+      "addedComponents": [],
+      "directComponents": [],
+      "duplicateComponentCount": 0,
+      "overlapConflictCount": 0,
+      "overlapConflicts": [],
+      "sourceMode": "parent-boundary",
+      "directAuditComplete": true,
+      "unresolvedDirectRelationIds": [],
+      "missingRelationIds": [],
+      "cycleCount": 0,
+      "unsupportedRelationRoles": []
+    }
+  },
+  "referenceComparison": {
+    "referenceAreaKm2": null,
+    "areaRatio": null,
+    "areaDifferencePercent": null
+  },
+  "export": {
+    "svg": {
+      "file": "R13135846.preview.svg",
+      "width": 1811,
+      "height": 2048,
+      "viewBox": [
+        0,
+        0,
+        1811,
+        2048
+      ],
+      "coordinateUnits": "pixels",
+      "aspectRatio": 0.88427734,
+      "contentAspectRatio": 0.8842664,
+      "aspectRatioDifferencePercent": 0.0012371,
+      "maxAspectRatioDifferencePercent": 0.1,
+      "paddingRatio": 0.04,
+      "coordinatePrecision": 3,
+      "quantizationErrorPx": 0.0005,
+      "maxQuantizationErrorPx": 0.25,
+      "simplificationTolerance": 0,
+      "projection": "local equirectangular, one x/y scale",
+      "yAxisInverted": true,
+      "mode": "area"
+    },
+    "pngMask": {
+      "supported": true,
+      "recommendedWidth": 1811,
+      "recommendedHeight": 2048,
+      "aspectRatio": 0.8842664,
+      "rendered": false
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "GeoJSON structure",
+      "closed rings",
+      "coordinate range",
+      "outer/inner assignment",
+      "no self-intersections",
+      "disconnected land components preserved",
+      "aspect-preserving dimensions",
+      "pixel-space SVG serialization, quantization bound, and canvas ratio bound"
+    ],
+    "selfIntersectionChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "deepChecksRequested": true,
+    "deepChecks": {
+      "performed": true,
+      "selfIntersectionCount": 0,
+      "selfIntersections": []
+    },
+    "subareaAudit": {
+      "directRelationCount": 0,
+      "resolvedRelationCount": 0,
+      "geometryRelationCount": 0,
+      "directGeometryRelationCount": 0,
+      "directComponentCount": 0,
+      "candidateComponentCount": 0,
+      "addedComponentCount": 0,
+      "addedComponents": [],
+      "directComponents": [],
+      "duplicateComponentCount": 0,
+      "overlapConflictCount": 0,
+      "overlapConflicts": [],
+      "sourceMode": "parent-boundary",
+      "directAuditComplete": true,
+      "unresolvedDirectRelationIds": [],
+      "missingRelationIds": [],
+      "cycleCount": 0,
+      "unsupportedRelationRoles": []
+    }
+  },
+  "files": {
+    "geojson": "R13135846.geojson",
+    "geojsonSha256": "8894c96a34a6661d2fdd497d552f7835074e3c8255bdf38396fb7da5e2a51922",
+    "metadata": "R13135846.metadata.json",
+    "previewSvg": "R13135846.preview.svg",
+    "discoveryCache": null,
+    "rawResponse": "../cache/R13135846.osm-full.json",
+    "rawResponseSource": "../cache/R13135846.osm-full.source.json",
+    "coastlineResponse": null,
+    "coastlineResponseSource": null
+  }
+}

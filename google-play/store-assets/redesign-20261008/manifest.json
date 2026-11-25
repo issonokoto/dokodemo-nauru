@@ -1,0 +1,66 @@
+{
+  "created": "2026-10-08",
+  "app": "どこでもナウル",
+  "source": "https://issonokoto.github.io/dokodemo-nauru/",
+  "phone": [
+    {
+      "order": 1,
+      "file": "phone/01-tokyo-1080x1920.png",
+      "headline": "ナウル、あなたの街に置いてみた。",
+      "subtitle": "たった21km²の国を、街に重ねてみよう。",
+      "alt": "地図で遊ぶ。ナウル、あなたの街に置いてみた。"
+    },
+    {
+      "order": 2,
+      "file": "phone/02-chiyoda-1080x1920.png",
+      "headline": "えっ、ナウルって千代田区より大きいの？",
+      "subtitle": "輪郭も面積も、同じ縮尺で見くらべる。",
+      "alt": "面積でびっくり。えっ、ナウルって千代田区より大きいの？"
+    },
+    {
+      "order": 3,
+      "file": "phone/03-expo-1080x1920.png",
+      "headline": "万博会場はナウル何個ぶん？",
+      "subtitle": "島も、湖も、気になる場所も検索して比較。",
+      "alt": "気になる場所と比較。万博会場はナウル何個ぶん？"
+    },
+    {
+      "order": 4,
+      "file": "phone/04-quiz-1080x1920.png",
+      "headline": "大きい？ 小さい？地理の勘、試してみよう。",
+      "subtitle": "ナウルをものさしに、10問の面積クイズ。",
+      "alt": "面積クイズ。大きい？ 小さい？地理の勘、試してみよう。"
+    },
+    {
+      "order": 5,
+      "file": "phone/05-photo-editor-1080x1920.png",
+      "headline": "いつもの写真に、ナウルのみんなを連れていこう。",
+      "subtitle": "キャラクターを貼って、保存して楽しもう。",
+      "alt": "写真で遊ぶ。いつもの写真に、ナウルのみんなを連れていこう。"
+    }
+  ],
+  "tablet": [
+    {
+      "order": 1,
+      "file": "tablet/01-tokyo-1920x1080.png"
+    },
+    {
+      "order": 2,
+      "file": "tablet/02-chiyoda-1920x1080.png"
+    },
+    {
+      "order": 3,
+      "file": "tablet/03-expo-1920x1080.png"
+    },
+    {
+      "order": 4,
+      "file": "tablet/04-quiz-1920x1080.png"
+    }
+  ],
+  "feature": "feature-graphic-1024x500.png",
+  "demoPhoto": {
+    "file": "source/beach-demo.png",
+    "generator": "built-in image_gen",
+    "note": "写真遊びのデモ背景として生成した架空の海岸風景。ナウル共和国の実景写真ではありません。"
+  }
+}

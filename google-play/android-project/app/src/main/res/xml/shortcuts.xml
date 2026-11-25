@@ -1,0 +1,10 @@
+<shortcuts xmlns:android='http://schemas.android.com/apk/res/android'>
+    <shortcut android:shortcutId='shortcut0' android:enabled='true' android:icon='@drawable/shortcut_quiz' android:shortcutShortLabel='@string/shortcut_short_name_0' android:shortcutLongLabel='@string/shortcut_name_0'>
+        <intent android:action='android.intent.action.VIEW' android:targetPackage='jp.osakanihonnagata.dokodemonauru' android:targetClass='jp.osakanihonnagata.dokodemonauru.LauncherActivity' android:data='https://issonokoto.github.io/dokodemo-nauru/game/' />
+        <categories android:name='android.intent.category.LAUNCHER' />
+    </shortcut>
+    <shortcut android:shortcutId='shortcut1' android:enabled='true' android:icon='@drawable/shortcut_camera' android:shortcutShortLabel='@string/shortcut_short_name_1' android:shortcutLongLabel='@string/shortcut_name_1'>
+        <intent android:action='android.intent.action.VIEW' android:targetPackage='jp.osakanihonnagata.dokodemonauru' android:targetClass='jp.osakanihonnagata.dokodemonauru.LauncherActivity' android:data='https://issonokoto.github.io/dokodemo-nauru/camera/' />
+        <categories android:name='android.intent.category.LAUNCHER' />
+    </shortcut>
+</shortcuts>

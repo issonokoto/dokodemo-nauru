@@ -1,9 +1,22 @@
-const CACHE_NAME = 'dokodemo-nauru-v63';
+const CACHE_NAME = 'dokodemo-nauru-v96';
 const STATIC_SHELL = [
+  './assets/historical-maps.js',
+  './camera/index.html',
+  './camera/camera.css',
+  './camera/camera.js',
+  './camera/shapes.js',
+  './camera/text.js',
+  './camera/assets/shape-catalog.json',
+  './camera/assets/nauru-boundary.json',
+  './camera/assets/onlion.png',
+  './camera/assets/nauruchan.png',
+  './camera/assets/fake-phosphate.png',
+  './camera/assets/phosphate.png',
   './index.html',
   './game/index.html',
   './game/game.css',
   './game/game.js',
+  './game/rules.js',
   './game/ranking-config.js',
   './privacy.html',
   './manifest.webmanifest',
@@ -18,10 +31,23 @@ const STATIC_SHELL = [
 ];
 
 const NETWORK_FIRST_PATHS = new Set([
+  './assets/historical-maps.js',
+  './data/showa-map-regions.json',
+  './data/prewar-map-regions.json',
+  './data/meiji-map-regions.json',
+  './data/postwar-map-regions.json',
+  './camera/index.html',
+  './camera/camera.css',
+  './camera/camera.js',
+  './camera/shapes.js',
+  './camera/text.js',
+  './camera/assets/shape-catalog.json',
+  './camera/assets/nauru-boundary.json',
   './index.html',
   './game/index.html',
   './game/game.css',
   './game/game.js',
+  './game/rules.js',
   './game/ranking-config.js',
   './privacy.html',
   './manifest.webmanifest',
@@ -41,7 +67,11 @@ function stableCacheRequest(requestUrl, navigation) {
     const scopePath = new URL(self.registration.scope).pathname;
     const relativePath = requestUrl.pathname.slice(scopePath.length);
     const gameNavigation = relativePath === 'game' || relativePath === 'game/' || relativePath === 'game/index.html';
-    url = new URL(gameNavigation ? './game/index.html' : './index.html', self.registration.scope);
+    const cameraNavigation = relativePath === 'camera' || relativePath === 'camera/' || relativePath === 'camera/index.html';
+    const homeNavigation = relativePath === '' || relativePath === 'index.html';
+    url = gameNavigation || cameraNavigation || homeNavigation
+      ? new URL(gameNavigation ? './game/index.html' : cameraNavigation ? './camera/index.html' : './index.html', self.registration.scope)
+      : new URL(requestUrl.pathname, requestUrl.origin);
   } else {
     url = new URL(requestUrl.pathname, requestUrl.origin);
   }
@@ -63,7 +93,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key => key.startsWith('dokodemo-nauru-') && key !== CACHE_NAME).map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });

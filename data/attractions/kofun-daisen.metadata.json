@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "target": {
+    "name": "大仙古墳",
+    "kind": "attraction",
+    "subtype": "kofun",
+    "context": "大阪府堺市"
+  },
+  "boundaryDefinition": "OSMに記録された墳丘と内濠・外濠を、比較画像用のレイヤーとして重ねて表示する。",
+  "sourceObjects": [
+    {
+      "osmType": "relation",
+      "osmId": 13135846,
+      "role": "inner moat"
+    },
+    {
+      "osmType": "way",
+      "osmId": 41374179,
+      "role": "outer moat"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "file": "attractions/daisen-inner-moat-R13135846.geojson",
+      "sha256": "8894c96a34a6661d2fdd497d552f7835074e3c8255bdf38396fb7da5e2a51922"
+    },
+    {
+      "file": "attractions/daisen-outer-moat-W41374179.geojson",
+      "sha256": "6311554713322cbb0d8f9f78b015702b137a58a54c3a144374670fab1dbe0966"
+    }
+  ],
+  "geometry": {
+    "type": "FeatureCollection",
+    "layerCount": 3,
+    "landLayers": 1,
+    "waterLayers": 2,
+    "areaKm2": 0.28069932,
+    "sha256": "fe461e5c9253f6024d2aebf1487b25cb39620f9a4152e5cceccedcadf6ddd8df"
+  },
+  "validation": {
+    "status": "passed",
+    "checks": [
+      "inner moat and outer moat are converter-validated closed Polygon geometries",
+      "mound is preserved from the inner moat hole",
+      "all coordinates remain WGS84 longitude/latitude pairs",
+      "layered preview uses one projected scale and preserves the keyhole outline"
+    ]
+  },
+  "export": {
+    "projection": "local equirectangular with cosine(latitude) correction",
+    "yAxis": "inverted for SVG",
+    "previewSvg": "attractions/kofun-daisen.preview.svg",
+    "previewSvgSha256": "456402a8ddd6fdea0a9e40a3091eb426485bb23c4881880b4fed85938a0d3fa1"
+  }
+}

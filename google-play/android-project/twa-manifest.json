@@ -1,0 +1,65 @@
+{
+  "packageId": "jp.osakanihonnagata.dokodemonauru",
+  "host": "issonokoto.github.io",
+  "name": "どこでもナウル",
+  "launcherName": "どこでもナウル",
+  "display": "fullscreen",
+  "themeColor": "#0A2744",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#061525",
+  "enableNotifications": true,
+  "startUrl": "/dokodemo-nauru/",
+  "iconUrl": "https://issonokoto.github.io/dokodemo-nauru/icons/icon-512.png",
+  "maskableIconUrl": "https://issonokoto.github.io/dokodemo-nauru/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 0,
+  "signingKey": {
+    "path": "..\\..\\google-play-private\\dokodemo-nauru-upload.keystore",
+    "alias": "upload"
+  },
+  "appVersionName": "1.0.14",
+  "appVersionCode": 15,
+  "shortcuts": [
+    {
+      "name": "面積クイズに挑戦",
+      "short_name": "面積クイズ",
+      "url": "https://issonokoto.github.io/dokodemo-nauru/game/",
+      "icon": "shortcut_quiz"
+    },
+    {
+      "name": "写真で遊ぶ",
+      "short_name": "写真で遊ぶ",
+      "url": "https://issonokoto.github.io/dokodemo-nauru/camera/",
+      "icon": "shortcut_camera"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://issonokoto.github.io/dokodemo-nauru/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://issonokoto.github.io/dokodemo-nauru/",
+  "minSdkVersion": 24,
+  "fingerprints": [
+    "E8:29:FD:45:E7:FA:47:44:5A:C4:FA:19:7C:D4:5C:A6:A8:E6:CE:4D:D4:17:33:91:38:8C:E3:30:01:F8:7B:5F"
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.0.14"
+}

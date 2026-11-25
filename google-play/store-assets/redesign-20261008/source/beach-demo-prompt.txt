@@ -1,0 +1,5 @@
+Use case: photorealistic-natural
+Asset type: demo background photo opened inside an existing Japanese app's photo editor, portrait 3:4.
+Primary request: A bright cheerful casual travel photo of a tranquil tropical coastline, pale sand in the lower half, vivid turquoise shallow water in the middle, deep blue ocean horizon and clear sky in the upper half. A palm frond frames only the far top left. The sand foreground should be spacious and unobstructed so app characters can later be overlaid.
+Style: convincing natural smartphone photography, crisp detail, sunny morning, welcoming colors.
+Constraints: No people, characters, text, logos, watermark, buildings, recognizable geographic landmarks or flags. This is an illustrative sample photo, not a claim to depict a specific real place. Do not include an island silhouette. Vertical portrait composition.

@@ -5,3 +5,22 @@ Thumbs.db
 build_html.py
 .large-place-cache-*.json
 .world-heritage-nominatim-cache.json
+.playwright-cli/
+output/playwright/
+
+# Local build environments, signing material and generated packages
+/google-play-private/
+/google-play/android-project/.*/
+/google-play/android-project/build/
+/google-play/android-project/app/build/
+/google-play/android-project/local.properties
+*.keystore
+*.jks
+*.aab
+*.apk
+*.idsig
+.env
+.env.local
+/tmp/
+/outputs/
+/tools/osm-boundary-conversion/outputs/

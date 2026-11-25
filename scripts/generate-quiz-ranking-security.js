@@ -271,7 +271,7 @@ begin
     raise exception '出題データを確認できませんでした';
   end if;
 
-  was_correct := server_elapsed < 12000 and p_answer = expected_outcome;
+  was_correct := server_elapsed < 12000 and coalesce(p_answer = expected_outcome, false);
   earned_points := case
     when was_correct then
       1000 + floor(500.0 * (12000 - scored_elapsed) / 12000)::integer
